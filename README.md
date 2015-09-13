@@ -24,13 +24,13 @@ anyButApostrophe = ANY - '\'
 
 Cocol = "COMPILER" ident
 
-ScannerSpecification
+#####ScannerSpecification
 
-ParserSpecification
+#####ParserSpecification
 
 "END" ident '.'.
 
-ScannerSpecification =
+#####ScannerSpecification =
 
 [ "CHARACTERS" { SetDecl } ]
 
@@ -65,7 +65,7 @@ Symbol = ident | string | char.
 
 WhiteSpaceDecl = "IGNORE" Set '.'.
 
-ParserSpecification = "PRODUCTIONS" { Production }.
+#####ParserSpecification = "PRODUCTIONS" { Production }.
 
 Production = ident [ Attributes ] [ SemAction ] '=' Expression '.'.
 
