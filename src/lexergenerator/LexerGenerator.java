@@ -22,6 +22,7 @@ public class LexerGenerator {
         HashMap input = read.leerArchivo();
         LexerAnalyzer lexer = new LexerAnalyzer(input);
         lexer.check(input);
+        lexer.getOutput();
         
     }
 

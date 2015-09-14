@@ -145,15 +145,18 @@ public class LexerAnalyzer {
      */
     public ArrayList<String> scannerSpecification(int lineaActual)
     {
+        int returnIndex=0;
+        String returnString= "";
         String param ="";
         //characters
         lineaActual++;
         //["Characters" = {SetDecl}
         ArrayList res = checkExpression(this.espacio+"CHARACTERS"+this.espacio,lineaActual,0);
-        if (!res.isEmpty()){
-            lineaActual++;
+        if (res.isEmpty()){
+            return new ArrayList();
+        }
+         lineaActual++;
             param = (String)res.get(1);
-        } 
         while (true&&!param.equals("")){
             ArrayList res2 = setDeclaration(lineaActual);
             if (res2.isEmpty()){
@@ -161,14 +164,19 @@ public class LexerAnalyzer {
                 break;
                 
             }
+            returnIndex += (int)res2.get(0);
+            returnString += (String)res2.get(1);
             lineaActual++;
         }
         //keywords
         lineaActual++;
         //whitespaceDecl
         lineaActual++;
-                
-       return new ArrayList();
+              
+        ArrayList outputScan = new ArrayList();
+        outputScan.add(returnIndex);
+        outputScan.add(returnString);
+       return outputScan;
     }
     
     /**
@@ -328,6 +336,16 @@ public class LexerAnalyzer {
         }
         return new ArrayList();
     }
+    
+    public void getOutput(){
+        if (output){
+            System.out.println("Archivo Aceptado");
+        }
+        else{
+            System.out.println("Archivo no aceptado");
+        }
+    }
+    
     
     /**
      * Método para obtener el index guardado en un array
