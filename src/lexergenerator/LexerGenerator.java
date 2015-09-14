@@ -21,8 +21,7 @@ public class LexerGenerator {
         ReadFile read = new ReadFile();
         HashMap input = read.leerArchivo();
         LexerAnalyzer lexer = new LexerAnalyzer(input);
-        lexer.revisarSintaxisCocoL(input);
-        //lexer.check(input);
+        lexer.check(input);
         
     }
 

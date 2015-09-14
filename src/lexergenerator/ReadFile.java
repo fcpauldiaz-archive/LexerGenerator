@@ -41,30 +41,23 @@ public class ReadFile {
                 String sCurrentLine;
                
                int cantidadLineas=1;
-               boolean line = false;
-               boolean lineS = false;
+             
                HashMap<Integer,String> detailString = new HashMap();
                while ((sCurrentLine = br.readLine()) != null) {
                    
                     
                     detailString.put(cantidadLineas, sCurrentLine);
-                    if (sCurrentLine.equals("")){
-                        if (line)
-                            lineS=true;
-                       line=true;
-                    }
-                    if (!sCurrentLine.equals(""))
-                        line=false;
-                    if (!lineS)
+                    
+                    if (!sCurrentLine.equals("")){
                         input+=sCurrentLine+"\r\n";
-                    cantidadLineas++;
-                    lineS=false;
+                        cantidadLineas++;
+                    }
                 
                 }
              
                 
-            System.out.println("antes input");
-            System.out.println(input);
+           // System.out.println("antes input");
+            //System.out.println(input);
         
         //System.out.println(detailString);
         //return input;

@@ -7,8 +7,14 @@
 package lexergenerator;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -27,7 +33,10 @@ public class LexerAnalyzer {
     private final String digit="\\d";
     private final String number=digit+"("+digit+")*";
     private final String ident= letter + "("+letter+"|"+digit+")*"; //identificador
+    private final String string="\""+"("+number+"|"+letter+"|[^\\\"])*"+"\"";
+    private final String character="\'"+"("+number+"|"+letter+"|[^\\\'])"+"\'";
     private final String espacio = "(\\s)*";
+    private boolean strict =false;
     
     
  
@@ -37,122 +46,7 @@ public class LexerAnalyzer {
         
     }
     
-    
-
-    public void revisarSintaxisCocoL(String inputCocoL){
-       
-        
-       
-       
-        System.out.println("");
-        //System.out.println(Cocol);
-        //System.out.println(inputCocoL);
-        try{
-             Pattern pattern = Pattern.compile(Cocol);
-            Matcher matcher = pattern.matcher(inputCocoL);
-            while(matcher.find()){
-                System.out.println(matcher.group());
-                System.out.println(matcher.start());
-               
-            }
-               
-           
-        }
-        catch(PatternSyntaxException  e){
-            System.out.println("Error en la linea número: "+ e.getIndex());
-            System.out.println("Descripción: "+ e.getDescription());
-            String r = this.Cocol.substring(0, 72);
-            System.out.println(this.Cocol.length());
-            r += "]";
-            r += this.Cocol.substring(73);
-            System.out.println(r);
-            
-           
-            
-            
-        }
-       
-        System.out.println(this.Cocol);
-        //System.out.println(inputCocoL);
-        //System.out.println(inputCocoL.contains("Cocol = \"COMPILER\""));
-        //System.out.println(inputCocoL.contains("END" ));
-    }
-    
-    
-    public void revisarSintaxisCocoL(HashMap<Integer,String> inputCocoL){
-        String checkIdent = "";
-        int dif = 0;
-        for (Map.Entry<Integer, String> entry : inputCocoL.entrySet()) {
-        
-        Integer key = entry.getKey();
-        String value = entry.getValue();
-        
-        if (key==1){
-            if (value.contains("Cocol")){
-                if (value.contains("=")){
-                    if (value.contains("\"COMPILER\"")){
-                       
-                        checkIdent =value.substring(value.lastIndexOf(" "));
-                        checkIdent = checkIdent.trim();
-                       
-                       
-                        if (checkIdent.equals("")){
-                        System.out.println("Error línea 1: no contiene identificador");
-                    
-                        }
-                    }else{
-                        System.out.println("Error línea 1: no contiene palabra \"COMPILER\"");
-                    }
-                    
-                }else{
-                    System.out.println("Error línea 1: no contiene símbolo =");
-                }
-            }else{
-                System.out.println("Error línea 1: no contiene palabra Cocol");
-            }
-        }
-    
-        if (key!=inputCocoL.size()&&key!=1){
-            
-            if (value.equals("CHARACTERS")){
-                dif = key;
-            }
-            if (value.equals("KEYWORDS")){
-                dif = key-dif;
-                for (int i = 0;i<dif;i++){
-                    
-                
-                }
-            }
-            
-        }
-        
-        if (key==inputCocoL.size()){
-             if (value.contains("\"END\"")){
-                 if (value.contains(checkIdent)){
-                     if (value.contains("\'.\'")){
-                        if (value.contains(".")){
-                             
-                        }else{
-                              System.out.println("Error Línea " + key + " no contiene . ");
-                         }
-                     }else{
-                          System.out.println("Error Línea " + key + " no contiene \'.\' ");
-                     }
-                     
-                 }else{
-                     System.out.println("Error Línea " + key + " el identificador " + checkIdent +" no coincide");
-                 }
-             }else{
-                 System.out.println("Error Línea " + key + " no contiene \"END\" ");
-             }
-         }   
-    }
-    
-    
-    }
-    
-   
+ 
     
    
     /**
@@ -165,9 +59,11 @@ public class LexerAnalyzer {
      */
     public ArrayList checkExpression (String regex,int lineaActual,int index){
         String cadena_encontrada="";
-        ArrayList res = new ArrayList();
-        Pattern pattern = Pattern.compile(regex);
         String cadena_revisar = this.cadena.get(lineaActual).substring(index);
+        ArrayList res = new ArrayList();
+        try{
+        Pattern pattern = Pattern.compile(regex);
+        
        
         Matcher matcher = pattern.matcher(cadena_revisar);
        
@@ -178,15 +74,19 @@ public class LexerAnalyzer {
             
             res.add(matcher.end());   //último índice de la cadena encontrada
             res.add(cadena_encontrada);
-
             return res;
             
         }
         else{//si no lo encuentra es porque hay un error
-            System.out.println("Error en la linea " + lineaActual+ ": la cadena " + cadena_revisar + " es inválida");
+            if (strict==false)
+                System.out.println("Error en la linea " + lineaActual+ ": la cadena " + cadena_revisar + " es inválida");
            // System.out.println("Se buscaba " + regex);
-            
+           //System.out.println("Advertencia en la linea " + lineaActual+ ": la cadena " + cadena_revisar + " es inválida"); 
         }
+         } catch(Exception e){
+           System.out.println("Error en la linea " + lineaActual+ ": la cadena " + cadena_revisar + " es inválida");
+        }
+        
        
         return res;
     }
@@ -205,10 +105,13 @@ public class LexerAnalyzer {
         
         int index3 = 0;
         
-        lineaActual++;
+       
+        //ScannerSpecification
+        ArrayList scan = scannerSpecification(lineaActual);
         
         
      
+        lineaActual = cadena.size();
         ArrayList res3 = checkExpression("\"END\""+this.espacio,lineaActual,index3);
         int index4 = returnArray(res3);
         
@@ -227,23 +130,181 @@ public class LexerAnalyzer {
         
         
     }
+    /**
+     * Método para revisar el ScannerSpecification
+     * @param lineaActual línea actual del archivo leído
+     * @return ArrayList [0] = index, [1] = cadena.
+     *   ["CHARACTERS" {SetDecl}]
+     *   ["KEYWORDS"   {KeyWordDecl}]
+     *   ["TOKENS"     {TokenDecl}]
+     *   {WhiteSpaceDecl}.
+     */
+    public ArrayList<String> scannerSpecification(int lineaActual)
+    {
+        String param ="";
+        //characters
+        lineaActual++;
+        //["Characters" = {SetDecl}
+        ArrayList res = checkExpression(this.espacio+"CHARACTERS"+this.espacio,lineaActual,0);
+        if (!res.isEmpty()){
+            lineaActual++;
+            param = (String)res.get(1);
+        } 
+        while (true&&!param.equals("")){
+            ArrayList res2 = setDeclaration(lineaActual);
+            if (res2.isEmpty())
+                break;
+            lineaActual++;
+        }
+        //keywords
+        lineaActual++;
+        //whitespaceDecl
+        lineaActual++;
+                
+       return new ArrayList();
+    }
     
-    public void setDeclaration(HashMap cadena,int lineaActual,int index){
+    /**
+     * Método para revisar SetDeclaration
+     * @param lineaActual
+     * @return ArrayList con la cadena revisada
+     * SetDecl = ident '=' Set '.'.
+     * 
+     */
+    public ArrayList<String> setDeclaration(int lineaActual){
         
-        //ident
-        ArrayList res1 = checkExpression(this.ident,lineaActual,index);
+        //revisar identificador
+        ArrayList res1 = checkExpression(this.ident,lineaActual,0);
         int index1  = returnArray(res1);
+        if (res1.isEmpty()){
+            return new ArrayList();
+        }
         
-        //'='
-        
+        //revisar '='
         ArrayList res2 = checkExpression(this.espacio+'='+this.espacio,lineaActual,index1);
         int index2 = returnArray(res2);
+        if (res2.isEmpty())
+            return new ArrayList();
         
-        //
+        //revisar Set
+        ArrayList res3 = set(lineaActual,index2+index1);
+      
+        if (res3.isEmpty())
+            return new ArrayList();
+        int index3 = returnArray(res3);
+        
+        //revisar '.'
+        ArrayList res4 = checkExpression(this.espacio+"."+this.espacio,lineaActual,index3);
+        if (res4.isEmpty())
+            return new ArrayList();
         
         
+        return res3;
+    }
+    /**
+     * Método para revisar el Set
+     * @param lineaActual 
+     * @return ArrayList
+     * Set = BasicSet (('+'|'-') BasicSet)*.
+     */
+    public ArrayList set(int lineaActual,int lastIndex){
+        int index = 0;
+        String ret ="";
+        //Set = BasicSet
+        ArrayList basic = basicSet(lineaActual,lastIndex);
+        
+        if (basic.isEmpty())
+            return new ArrayList();
+        lastIndex = (int)basic.get(0);
+        ret += (String)basic.get(1);
+        while(true){
+            ArrayList bl = checkExpression(this.espacio+"(\\+|\\-)"+this.espacio,lineaActual,lastIndex);
+            if (bl.isEmpty())
+                break;
+            lastIndex = (int)bl.get(0);
+            ArrayList b = basicSet(lineaActual,lastIndex);
+            if (b.isEmpty())
+                break;
+            lastIndex += (int)b.get(0);
+           
+            index = index + (int)bl.get(0)+(int)b.get(0);
+            ret = ret + (String)bl.get(1)+ (String)b.get(1);
+            
+            
+        }
+        
+        ArrayList fin = new ArrayList();
+        fin.add(index);
+        fin.add(ret);
+        if (ret.equals(""))
+            fin=basic;
+        return fin;
+    }
+    /**
+     * 
+     * @param lineaActual 
+     * @return ArrayList
+     * BasicSet = string | ident | Char [ "..." Char].
+     */
+    public ArrayList<String> basicSet(int lineaActual,int lastIndex){
+        ArrayList<String> cadenas = new ArrayList();
+        Queue<String> cadenas_sort = new LinkedList();
+        //BasicSet = string
+         ArrayList res2 = checkExpression(this.ident,lineaActual,lastIndex);
+        if (!res2.isEmpty()){
+            cadenas.add((String)res2.get(1));
+            
+        }
+        ArrayList res = checkExpression(this.string,lineaActual,lastIndex);
+        if (!res.isEmpty()){
+            cadenas.add((String)res.get(1));
+        }
+      
+        ArrayList res3 = Char(lineaActual);
+        if (!res3.isEmpty())
+            cadenas.add((String)res3.get(1));
+        
+        String preParts = this.cadena.get(lineaActual);
+        String[] parts = preParts.substring(0, preParts.length()-1).split(" ");
+      
+        for (int i =0;i<parts.length;i++){
+            for (int j = 0;j<cadenas.size();j++){
+                
+                if (parts[i].equals(cadenas.get(j))){
+                    cadenas_sort.add(cadenas.get(j));
+
+                }
+            }
+            
+        }
+      
+        
+        ArrayList fin = new ArrayList();
+        String last = cadenas_sort.poll();
+        if (!cadenas.isEmpty()){
+            fin.add(last.length());
+            fin.add(last);
+        }
+        
+        return fin;
         
     }
+    
+    public ArrayList<String> Char(int lineaActual){
+        this.strict=true;
+        ArrayList res = checkExpression(this.character,lineaActual,0);
+        if (!res.isEmpty()){
+            this.strict=false;
+            return res;
+        }
+        ArrayList res2 = checkExpression("CHR\\("+this.number+"\\)",lineaActual,0);   
+        if (!res2.isEmpty()){
+            this.strict=false;
+            return res2;
+        }
+        return new ArrayList();
+    }
+    
     /**
      * Método para obtener el index guardado en un array
      * que sirve para hacer un substring
@@ -252,7 +313,7 @@ public class LexerAnalyzer {
      */
     public int returnArray(ArrayList param){
         if (!param.isEmpty()){
-            //System.out.println(param.get(1));
+            System.out.println(param.get(1));
             return (int)param.get(0);
         }
         //el cero representa que no se corta la cadena
