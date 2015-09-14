@@ -1,10 +1,7 @@
-Cocol = "COMPILER" 
-
+Cocol = "COMPILER" Ejemplo
 CHARACTERS
-
 letter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
 digit = "0123456789".
 hexdigit = digit + "ABCDEF".
 
-
-"END" E2 '.'.
+"END" Ejemplo '.'.
