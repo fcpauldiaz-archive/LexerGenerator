@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
+ * Clase para revisar la estructura de un archivo de CocoL
  * @author Pablo
  */
 public class LexerAnalyzer {
@@ -102,18 +102,21 @@ public class LexerAnalyzer {
        
         return res;
     }
-    
+    /**
+     * Revisar formato de la primera línea
+     * ScannerSpecification
+     * ParserSpecification
+     * @param cadena HashMap de la cadena y sus números de línea
+     */
     public void check(HashMap<Integer,String> cadena){
         int lineaActual = 1;
         int index = 0;
         ArrayList res = checkExpression("Cocol = \"COMPILER\""+this.espacio,lineaActual,index);
         
-      
         int index2  = returnArray(res);
        
         ArrayList res2 = checkExpression(this.ident,lineaActual,index2);
         //System.out.println(res2.get(1));
-       
         
         //ScannerSpecification
         
@@ -136,13 +139,11 @@ public class LexerAnalyzer {
                 System.out.println("Error Linea " + lineaActual + ": los identificadores no coinciden");
             }
            
-        
-            
+         
         }
         
         ArrayList res5 = checkExpression("\'.\'"+this.espacio,lineaActual,index5);
        // System.out.println(res5.get(1));
-        
         
         
         
@@ -340,7 +341,11 @@ public class LexerAnalyzer {
                     
     }
     
-    
+    /**
+     * Método para revisar si un character
+     * @param lineaActual
+     * @return 
+     */
     public ArrayList<String> Char(int lineaActual){
         
         ArrayList res = checkExpression(this.character,lineaActual,0);
@@ -355,7 +360,9 @@ public class LexerAnalyzer {
         }
         return new ArrayList();
     }
-    
+    /**
+     * Revisasr si el archivo no tiene errores
+     */
     public void getOutput(){
         if (output){
             System.out.println("Archivo Aceptado");
@@ -381,6 +388,14 @@ public class LexerAnalyzer {
         return 0;
     }
     
+    /**
+     * Revisar si la expresión regular cumple el autómata especificado
+     * @param param Automata comparador
+     * @param lineaActual lineaActual del archivo
+     * @param index índice para recortar el string
+     * @return un arreglo: en la posicion cero el último indíce analizado y
+     * en la posicion 1 el último string analizado
+     */
     public ArrayList checkAutomata(Automata param,int lineaActual, int index){
         String cadena_encontrada="";
         String cadena_revisar = this.cadena.get(lineaActual).substring(index);
@@ -404,15 +419,17 @@ public class LexerAnalyzer {
         
         boolean returnValue=sim.simular(cadena_revisar.trim(), param);
       
-        checkIndividualAutomata(param,cadena_revisar);
+        checkIndividualAutomata(cadena_revisar);
         if (returnValue){
             resultado.add(cadena_revisar.length()+preIndex);
             resultado.add(cadena_revisar);
             return resultado;
         }
         else{
-            if (!cadena_revisar.isEmpty())//si 
+            if (!cadena_revisar.isEmpty()){
                 System.out.println("Error en la linea " + lineaActual + ": la cadena " + cadena_revisar + " es inválida");
+                this.output=false;
+            }
             
             
         }
@@ -422,6 +439,10 @@ public class LexerAnalyzer {
         
     }
     
+    /**
+     * Método para definir los mini autómatas para comparar
+     * las expresiones regulares
+     */
     public void vocabulario(){
         RegexConverter convert = new RegexConverter();
         
@@ -510,13 +531,13 @@ public class LexerAnalyzer {
         
         
         
-        
-       
-        
-        
     }
-    
-    public void checkIndividualAutomata(Automata AFN, String regex){
+    /**
+     * Método para revisar que tipo de sub autómata es aceptado por una 
+     * expresión regular
+     * @param regex expresión regular a comparar
+     */
+    public void checkIndividualAutomata(String regex){
         ArrayList<Automata> conjunto = conjuntoAutomatas();
         ArrayList<Boolean> resultado = new ArrayList();
         for (int i = 0;i<regex.length();i++){
@@ -540,6 +561,12 @@ public class LexerAnalyzer {
         }
     }
     
+    /**
+     * Método que devuelve las posiciones en las que el valor que tiene 
+     * en cada posicion es true
+     * @param bool arreglo de booleanos
+     * @return arreglo de enteros
+     */
     public ArrayList<Integer>  checkBoolean(ArrayList<Boolean> bool){
         ArrayList<Integer> posiciones = new ArrayList();
        
@@ -551,6 +578,10 @@ public class LexerAnalyzer {
         
     }
     
+    /**
+     * Método para crear un conjunto de autómatas
+     * @return arreglo de autómatas
+     */
     public ArrayList<Automata> conjuntoAutomatas(){
         ArrayList<Automata> conjunto = new ArrayList();
         conjunto.add(this.letter_);
