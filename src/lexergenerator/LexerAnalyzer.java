@@ -127,7 +127,8 @@ public class LexerAnalyzer {
         //ParserSpecification
      
         //END File
-        lineaActual = cadena.size();
+        lineaActual = avanzarLinea((int)scan.get(0));
+       
         ArrayList res3 = checkExpression("\"END\""+this.espacio,lineaActual,0);
         int index4 = returnArray(res3);
         
@@ -163,32 +164,32 @@ public class LexerAnalyzer {
         String returnString= "";
         
         //characters
-        lineaActual++;
+        lineaActual = avanzarLinea(lineaActual);
         //["Characters" = {SetDecl}
         if (!this.cadena.get(lineaActual).contains("CHARACTERS")){
             System.out.println("No contiene la palabra CHARACTERS");
             return new ArrayList();
         }
-         lineaActual++;
+        lineaActual = avanzarLinea(lineaActual);
             
         while (true){
             ArrayList res2 = setDeclaration(lineaActual);
             if (res2.isEmpty()){
-                lineaActual--;
+                lineaActual = retrocederLinea(lineaActual);
                 break;
                 
             }
             returnIndex += (int)res2.get(0);
             returnString += (String)res2.get(1);
-            lineaActual++;
+            lineaActual = avanzarLinea(lineaActual);
         }
         //keywords
-        lineaActual++;
+        //lineaActual = avanzarLinea(lineaActual);
         //whitespaceDecl
-        lineaActual++;
+      // lineaActual = avanzarLinea(lineaActual);
               
         ArrayList outputScan = new ArrayList();
-        outputScan.add(returnIndex);
+        outputScan.add(lineaActual);
         outputScan.add(returnString);
        return outputScan;
     }
@@ -397,7 +398,7 @@ public class LexerAnalyzer {
      * en la posicion 1 el último string analizado
      */
     public ArrayList checkAutomata(Automata param,int lineaActual, int index){
-        String cadena_encontrada="";
+       
         String cadena_revisar = this.cadena.get(lineaActual).substring(index);
         
         int preIndex = 0;
@@ -408,7 +409,7 @@ public class LexerAnalyzer {
                 preIndex++;
                 cadena_revisar = cadena_revisar.substring(preIndex, cadena_revisar.length());
             }
-            if (cadena_revisar.indexOf(" ")!=-1)
+            if (cadena_revisar.contains(" "))
                 cadena_revisar = cadena_revisar.substring(0, cadena_revisar.indexOf(" ")+1);
         }catch(Exception e){}
         try{
@@ -532,6 +533,20 @@ public class LexerAnalyzer {
         
         
     }
+    
+    public Integer avanzarLinea(int lineaActual){
+       while (true){
+           if (this.cadena.containsKey(++lineaActual))
+               return lineaActual;
+       }
+    }
+    public Integer retrocederLinea(int lineaActual){
+       while (true){
+           if (this.cadena.containsKey(--lineaActual))
+               return lineaActual;
+       }
+    }
+    
     /**
      * Método para revisar que tipo de sub autómata es aceptado por una 
      * expresión regular

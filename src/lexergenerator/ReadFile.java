@@ -46,12 +46,13 @@ public class ReadFile {
                while ((sCurrentLine = br.readLine()) != null) {
                    
                     
-                    detailString.put(cantidadLineas, sCurrentLine);
+                    
                     
                     if (!sCurrentLine.equals("")){
                         input+=sCurrentLine+"\r\n";
-                        cantidadLineas++;
+                        detailString.put(cantidadLineas, sCurrentLine);
                     }
+                    cantidadLineas++;
                 
                 }
              
