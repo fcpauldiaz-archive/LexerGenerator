@@ -12,6 +12,9 @@ import java.util.HashMap;
  * @author Pablo
  */
 public class LexerGenerator {
+    
+    public static String EPSILON = "ε";
+    public static char EPSILON_CHAR = EPSILON.charAt(0);
 
     /**
      * @param args the command line arguments
@@ -21,6 +24,7 @@ public class LexerGenerator {
         ReadFile read = new ReadFile();
         HashMap input = read.leerArchivo();
         LexerAnalyzer lexer = new LexerAnalyzer(input);
+        lexer.vocabulario();
         lexer.check(input);
         lexer.getOutput();
         
