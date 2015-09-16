@@ -308,6 +308,7 @@ public class LexerAnalyzer {
     /**
      * Método para revisar el Set
      * @param lineaActual 
+     * @param lastIndex último índice de la líneaActual
      * @return ArrayList
      * Set = BasicSet (('+'|'-') BasicSet)*.
      */
@@ -351,6 +352,7 @@ public class LexerAnalyzer {
     /**
      * 
      * @param lineaActual 
+     * @param lastIndex último índice de la cadena utilizado
      * @return ArrayList
      * BasicSet = string | ident | Char [ "..." Char].
      */
@@ -603,6 +605,11 @@ public class LexerAnalyzer {
         
     }
     
+    /**
+     * Método para avanzar de línea, busca la línea que actual
+     * @param lineaActual
+     * @return lineaActual
+     */
     public Integer avanzarLinea(int lineaActual){
        while (true){
            if (this.cadena.containsKey(++lineaActual))
@@ -610,6 +617,11 @@ public class LexerAnalyzer {
        }
     }
     
+    /**
+     * Método para retroceder de línea, busca la línea anterior actual
+     * @param lineaActual
+     * @return lineaActual
+     */
     public Integer retrocederLinea(int lineaActual){
        while (true){
            if (this.cadena.containsKey(--lineaActual))
