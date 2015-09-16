@@ -363,7 +363,7 @@ public class LexerAnalyzer {
       
         //BasicSet = {string}
         
-       // ArrayList res = checkExpression(this.string+"|"+this.ident,lineaActual,lastIndex);
+       // ident | string | "CHR(number).."CHR"(number).
         ArrayList resBasicSet = checkAutomata(this.basicSet_,lineaActual,lastIndex);
        if (!resBasicSet.isEmpty()){
             cadenas.add((String)resBasicSet.get(1));
@@ -371,13 +371,7 @@ public class LexerAnalyzer {
         }
         
        
-        
-      Collections.sort(cadenas, (String o1, String o2) -> {
-          Integer a1 = o1.length();
-          Integer a2 = o2.length();
-          return a2-a1;
-        });
-        
+    
         ArrayList fin = new ArrayList();
         
         if (!cadenas.isEmpty()){
