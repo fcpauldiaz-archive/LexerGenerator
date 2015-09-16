@@ -24,7 +24,6 @@ public class AFNConstruct<T> {
     
     public AFNConstruct(String regex) {
         this.regex = regex;
-       
         
     }
     

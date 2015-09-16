@@ -116,7 +116,7 @@ public class RegexConverter {
                     }
                 }
             }
-            regex = balancearParentesis(regex);
+            //regex = balancearParentesis(regex);
             return regex;
         }
         
@@ -232,7 +232,7 @@ public class RegexConverter {
                 
             }
            
-            regex = balancearParentesis(regex);
+            //regex = balancearParentesis(regex);
             
             return regex;
         }

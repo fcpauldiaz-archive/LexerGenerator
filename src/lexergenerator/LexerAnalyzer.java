@@ -42,6 +42,7 @@ public class LexerAnalyzer {
     private Automata igual_;
     private Automata plusOrMinus_;
     private Automata espacio_;
+    private Automata basicChar_;
     private Simulacion sim;
     
     
@@ -126,7 +127,8 @@ public class LexerAnalyzer {
         
         
         //END File
-        lineaActual = avanzarLinea((int)scan.get(0));
+        if (!scan.isEmpty())
+            lineaActual = avanzarLinea((int)scan.get(0));
        
         ArrayList res3 = checkExpression("\"END\""+this.espacio,lineaActual,0);
         int index4 = returnArray(res3);
@@ -368,11 +370,7 @@ public class LexerAnalyzer {
 
         }
         
-        if (cadenas.isEmpty()){
-        ArrayList resBasicChar = basicChar(lineaActual);
-            if (!resBasicChar.isEmpty())
-                cadenas.add((String)resBasicChar.get(1));
-        }
+       
         
       Collections.sort(cadenas, (String o1, String o2) -> {
           Integer a1 = o1.length();
@@ -392,14 +390,14 @@ public class LexerAnalyzer {
         
     }
     
-    public ArrayList<String> basicChar(int lineaActual){
-        ArrayList res = Char(lineaActual);
+    public ArrayList<String> basicChar(int lineaActual,int lastIndex){
+        ArrayList res = Char(lineaActual,lastIndex);
         if (res.isEmpty())
             return new ArrayList();
         ArrayList res2 = checkExpression("\\.\\.",lineaActual,0);
         if (res2.isEmpty())
             return new ArrayList();
-        ArrayList res3 = Char(lineaActual);
+        ArrayList res3 = Char(lineaActual,lastIndex);
         
         if (res3.isEmpty())
             return new ArrayList();
@@ -415,18 +413,14 @@ public class LexerAnalyzer {
      * @param lineaActual
      * @return 
      */
-    public ArrayList<String> Char(int lineaActual){
+    public ArrayList<String> Char(int lineaActual,int lastIndex){
         
-        ArrayList res = checkExpression(this.character,lineaActual,0);
+        ArrayList res = checkAutomata(this.character_,lineaActual,lastIndex);
         if (!res.isEmpty()){
            
             return res;
         }
-        ArrayList res2 = checkExpression("CHR\\("+this.number+"\\)",lineaActual,0);   
-        if (!res2.isEmpty()){
-            
-            return res2;
-        }
+        
         return new ArrayList();
     }
     /**
@@ -480,7 +474,7 @@ public class LexerAnalyzer {
                 cadena_revisar = cadena_revisar.substring(0, cadena_revisar.indexOf(" ")+1);
         }catch(Exception e){}
         try{
-            cadena_revisar = cadena_revisar.substring(0, cadena_revisar.indexOf("."));
+               cadena_revisar = cadena_revisar.substring(0, cadena_revisar.lastIndexOf("."));
         }catch(Exception e){}
         
         ArrayList resultado = new ArrayList();
@@ -495,7 +489,7 @@ public class LexerAnalyzer {
         }
         else{
             if (!cadena_revisar.isEmpty()){
-                System.out.println("Error en la linea " + lineaActual + ": la cadena " + cadena_revisar + " es inválida");
+                System.out.println("Error en la linea " + lineaActual + ": la cadena " + cadena_revisar + " es no es:" + param.getTipo());
                 this.output=false;
             }
             
@@ -579,12 +573,34 @@ public class LexerAnalyzer {
         
         Automata apch1 = ThomsonAlgorithim.afnSimple("\'");
         Automata apch2 = ThomsonAlgorithim.afnSimple("\'");
-        Automata chKleene = ThomsonAlgorithim.union(number_, letter_);
-        character_ = ThomsonAlgorithim.cerraduraKleene(chKleene);
-        character_ = ThomsonAlgorithim.concatenacion(ap1, character_);
-        character_ = ThomsonAlgorithim.concatenacion(character_,ap2);
+        character_ = ThomsonAlgorithim.union(number_, letter_);
+        character_ = ThomsonAlgorithim.concatenacion(apch1, character_);
+        character_ = ThomsonAlgorithim.concatenacion(character_,apch2);
+        regex = convert.infixToPostfix("\"CHR\"(");
+        ThomsonAlgorithim = new AFNConstruct(regex);
+        ThomsonAlgorithim.construct();
+        Automata leftChar = ThomsonAlgorithim.getAfn();
+        
+        System.out.println(leftChar);
+        Automata rigthChar = ThomsonAlgorithim.afnSimple(")");
+        leftChar = ThomsonAlgorithim.concatenacion(number_, leftChar);
+       
+        Automata innerChar = ThomsonAlgorithim.concatenacion(rigthChar, leftChar);
+       
+        character_ = ThomsonAlgorithim.union(character_,innerChar);
         character_.setTipo("character");
+        System.out.println(character_);
+        
+        
+        Automata pointChar = ThomsonAlgorithim.afnSimple(".");
+        Automata pointChar2 = ThomsonAlgorithim.afnSimple(".");
+        pointChar = ThomsonAlgorithim.concatenacion(pointChar, pointChar2);
+        basicChar_ = ThomsonAlgorithim.concatenacion(character_, pointChar);
+        basicChar_ = ThomsonAlgorithim.concatenacion(basicChar_,character_);
+        basicChar_.setTipo("Basic Char");
+        
         basicSet_ = ThomsonAlgorithim.union(string_, ident_);
+        basicSet_ = ThomsonAlgorithim.union(basicSet_, basicChar_);
         basicSet_.setTipo("Basic Set");
         
         regex = convert.infixToPostfix(" "+"="+" ");
