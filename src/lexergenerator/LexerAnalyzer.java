@@ -28,7 +28,7 @@ public class LexerAnalyzer {
     private final String ident= letter + "("+letter+"|"+digit+")*"; //identificador
     private final String string="\""+"("+number+"|"+letter+"|[^\\\"])*"+"\"";
     private final String character="\'"+"("+number+"|"+letter+"|[^\\\'])"+"\'";
-    private final String espacio = "(\\s)*";
+    private final String espacio = "(" +" "+")*";
     private boolean strict =false;
     private boolean output = true;
     
@@ -43,6 +43,9 @@ public class LexerAnalyzer {
     private Automata plusOrMinus_;
     private Automata espacio_;
     private Automata basicChar_;
+    private Automata cocol_;
+    private Automata compiler_;
+    private Automata end_;
     private Simulacion sim;
     
     
@@ -53,53 +56,7 @@ public class LexerAnalyzer {
     }
     
    
-    /**
-     * Método para revisar si la línea del archivo está sintácticamente correcta
-     * de acuerdo a CocoL
-     * @param regex expresión a compararar
-     * @param lineaActual línea actual del archivo
-     * @param index índice para hacer un substring
-     * @return regresa un ArrayList con la cadena encontrada y el último índice
-     */
-    public ArrayList checkExpression (String regex,int lineaActual,int index){
-        String cadena_encontrada="";
-        String cadena_revisar = this.cadena.get(lineaActual).substring(index);
-        ArrayList res = new ArrayList();
-        try{
-        Pattern pattern = Pattern.compile(regex);
-        
-       
-        Matcher matcher = pattern.matcher(cadena_revisar);
-        Pattern p = Pattern.compile("."+"|"+"."+this.espacio);
-         Matcher m = p.matcher(cadena_revisar);
-       
-       if (m.matches())
-           return new ArrayList();
-        if (matcher.find()) {
-            cadena_encontrada=matcher.group();
-            
-            
-            res.add(matcher.end());   //último índice de la cadena encontrada
-            res.add(cadena_encontrada);
-            return res;
-            
-        }
-        else{//si no lo encuentra es porque hay un error
-                if (!cadena_revisar.isEmpty())//si 
-                    System.out.println("Error en la linea " + lineaActual + ": la cadena " + cadena_revisar + " es inválida");
-                else
-                    System.out.println("Error en la línea " + lineaActual + ": falta un identificador");
-                
-            // System.out.println("Se buscaba " + regex);
-           //System.out.println("Advertencia en la linea " + lineaActual+ ": la cadena " + cadena_revisar + " es inválida"); 
-        }
-        } catch(Exception e){
-           System.out.println("Error en la linea " + lineaActual+ ": la cadena " + cadena_revisar + " es inválida");
-        }
-        
-       
-        return res;
-    }
+   
     /**
      * Revisar formato de la primera línea
      * ScannerSpecification
@@ -109,11 +66,21 @@ public class LexerAnalyzer {
     public void check(HashMap<Integer,String> cadena){
         int lineaActual = 1;
         int index = 0;
-        ArrayList res = checkExpression("Cocol = \"COMPILER\""+this.espacio,lineaActual,index);
+       // ArrayList res = checkExpression("Cocol = \"COMPILER\""+this.espacio,lineaActual,index);
+        ArrayList res = checkAutomata(this.cocol_,lineaActual,index);
         
-        int index2  = returnArray(res);
+        int index_  = returnArray(res);
+        ArrayList res_ = checkAutomata(this.igual_,lineaActual,index_+index);
+        
+        int index__  = returnArray(res_);
+        ArrayList res_1 = checkAutomata(this.compiler_,lineaActual,index__+index_);
+        
+        int index2  = returnArray(res_1);
+        
+        
+        
        
-        ArrayList res2 = checkExpression(this.ident,lineaActual,index2);
+        ArrayList res2 = checkAutomata(this.ident_,lineaActual,index2+index__+index_);
         //System.out.println(res2.get(1));
         
         //ScannerSpecification
@@ -130,24 +97,19 @@ public class LexerAnalyzer {
         if (!scan.isEmpty())
             lineaActual = avanzarLinea((int)scan.get(0));
        
-        ArrayList res3 = checkExpression("\"END\""+this.espacio,lineaActual,0);
+        ArrayList res3 = checkAutomata(this.end_,lineaActual,0);
         int index4 = returnArray(res3);
         
-        ArrayList res4 = checkExpression(this.ident,lineaActual,index4);
-        int index5 = returnArray(res4);
+        ArrayList res4 = checkAutomata(this.ident_,lineaActual,index4);
+        
         //revisar identificadores
         if (!res4.isEmpty()&&!res2.isEmpty()){
-            if (!res4.get(1).equals(res2.get(1))){
-                System.out.println("Error Linea " + lineaActual + ": los identificadores no coinciden");
+            if (!res4.get(1).toString().trim().equals(res2.get(1).toString().trim())){
+                System.out.println("Error Linea " + lineaActual + ": los identificadores "+ res4.get(1).toString().trim()+ " y "+ res2.get(1).toString().trim() +" no coinciden");
                 output=false;
             }
-           
          
         }
-        
-        ArrayList res5 = checkExpression("\'.\'"+this.espacio,lineaActual,index5);
-       // System.out.println(res5.get(1));
-        
         
         
     }
@@ -384,23 +346,6 @@ public class LexerAnalyzer {
         
     }
     
-    public ArrayList<String> basicChar(int lineaActual,int lastIndex){
-        ArrayList res = Char(lineaActual,lastIndex);
-        if (res.isEmpty())
-            return new ArrayList();
-        ArrayList res2 = checkExpression("\\.\\.",lineaActual,0);
-        if (res2.isEmpty())
-            return new ArrayList();
-        ArrayList res3 = Char(lineaActual,lastIndex);
-        
-        if (res3.isEmpty())
-            return new ArrayList();
-        ArrayList result = new ArrayList();
-        result.add((int)res.get(0)+(int)res2.get(0)+(int)res3.get(0));
-        result.add((String)res.get(1)+(String)res2.get(1)+(String)res3.get(1));
-        return result;
-                    
-    }
     
     /**
      * Método para revisar si un character
@@ -502,12 +447,15 @@ public class LexerAnalyzer {
     public void vocabulario(){
         RegexConverter convert = new RegexConverter();
         
-        String regex = convert.infixToPostfix("[a-z]");
+        
+        
+        
+        String regex = convert.infixToPostfix(this.espacio+"[a-z]"+this.espacio);
         AFNConstruct ThomsonAlgorithim = new AFNConstruct(regex);
         ThomsonAlgorithim.construct();
         letter_ = ThomsonAlgorithim.getAfn();
         
-        regex = convert.infixToPostfix("[A-Z]");
+        regex = convert.infixToPostfix(espacio+"[A-Z]"+espacio);
         ThomsonAlgorithim = new AFNConstruct(regex);
         ThomsonAlgorithim.construct();
         Automata letterMayuscula_ = ThomsonAlgorithim.getAfn();
@@ -525,7 +473,7 @@ public class LexerAnalyzer {
         espacio_.setTipo("espacio");
         
         //System.out.println(letter_);
-        regex = convert.infixToPostfix("[0-9]");
+        regex = convert.infixToPostfix(espacio+"[0-9]"+espacio);
         ThomsonAlgorithim.setRegex(regex);
         ThomsonAlgorithim.construct();
         digit_ = ThomsonAlgorithim.getAfn();
@@ -575,7 +523,7 @@ public class LexerAnalyzer {
         ThomsonAlgorithim.construct();
         Automata leftChar = ThomsonAlgorithim.getAfn();
         
-        System.out.println(leftChar);
+       
         Automata rigthChar = ThomsonAlgorithim.afnSimple(")");
         leftChar = ThomsonAlgorithim.concatenacion(number_, leftChar);
        
@@ -583,7 +531,7 @@ public class LexerAnalyzer {
        
         character_ = ThomsonAlgorithim.union(character_,innerChar);
         character_.setTipo("character");
-        System.out.println(character_);
+       
         
         
         Automata pointChar = ThomsonAlgorithim.afnSimple(".");
@@ -597,20 +545,35 @@ public class LexerAnalyzer {
         basicSet_ = ThomsonAlgorithim.union(basicSet_, basicChar_);
         basicSet_.setTipo("Basic Set");
         
-        regex = convert.infixToPostfix(" "+"="+" ");
+        regex = convert.infixToPostfix("("+" " +")*"+"="+"("+" " +")*");
         ThomsonAlgorithim.setRegex(regex);
         ThomsonAlgorithim.construct();
         igual_  = ThomsonAlgorithim.getAfn();
         igual_.setTipo("=");
+      
         
-       
         Automata plus = ThomsonAlgorithim.afnSimple("+");
         Automata minus = ThomsonAlgorithim.afnSimple("-");
         plusOrMinus_ = ThomsonAlgorithim.union(plus, minus);
         plusOrMinus_.setTipo("(+|-)");
         
        
-        
+        regex = convert.infixToPostfix("Cocol");
+        ThomsonAlgorithim.setRegex(regex);
+        ThomsonAlgorithim.construct();
+         cocol_ = ThomsonAlgorithim.getAfn();
+         cocol_.setTipo("Cocol");
+        regex = convert.infixToPostfix("\"COMPILER\"");
+        ThomsonAlgorithim.setRegex(regex);
+        ThomsonAlgorithim.construct();
+        compiler_ = ThomsonAlgorithim.getAfn();
+        compiler_.setTipo("\"COMPILER\"");
+        regex = convert.infixToPostfix("\"END\"");
+        ThomsonAlgorithim.setRegex(regex);
+        ThomsonAlgorithim.construct();
+        end_ = ThomsonAlgorithim.getAfn();
+        end_.setTipo("\"END\"");
+       
         
         
     }

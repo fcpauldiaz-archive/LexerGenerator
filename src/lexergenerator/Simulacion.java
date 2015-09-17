@@ -129,6 +129,7 @@ public class Simulacion {
         
         for (Estado estado_aceptacion : aceptacion){
             if (conjunto.contains(estado_aceptacion)){
+              
                 res = true;
             }
         }
