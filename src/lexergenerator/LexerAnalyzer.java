@@ -52,6 +52,145 @@ public class LexerAnalyzer {
         this.cadena=cadena;
     }
     
+      /**
+     * Método para definir los mini autómatas para comparar
+     * las expresiones regulares
+     */
+    public void vocabulario(){
+        RegexConverter convert = new RegexConverter();
+        
+        
+        
+        
+        String regex = convert.infixToPostfix(this.espacio+"[@-z]"+this.espacio);
+        AFNConstruct ThomsonAlgorithim = new AFNConstruct(regex);
+        ThomsonAlgorithim.construct();
+        letter_ = ThomsonAlgorithim.getAfn();
+        
+       /* regex = convert.infixToPostfix(espacio+"[A-Z]"+espacio);
+        ThomsonAlgorithim = new AFNConstruct(regex);
+        ThomsonAlgorithim.construct();
+        Automata letterMayuscula_ = ThomsonAlgorithim.getAfn();
+        letter_ =  ThomsonAlgorithim.union(letter_, letterMayuscula_);*/
+       
+       
+        //letter_ = ThomsonAlgorithim.concatenacion(letter_, espacio_);
+        //letter_ = ThomsonAlgorithim.concatenacion(espacio_, letter_);
+        letter_.setTipo("Letra");
+        
+        regex = convert.infixToPostfix("("+" "+")*");
+        ThomsonAlgorithim.setRegex(regex);
+        ThomsonAlgorithim.construct();
+        espacio_  = ThomsonAlgorithim.getAfn();
+        espacio_.setTipo("espacio");
+        
+        //System.out.println(letter_);
+        regex = convert.infixToPostfix(espacio+"[0-9]"+espacio);
+        ThomsonAlgorithim.setRegex(regex);
+        ThomsonAlgorithim.construct();
+        digit_ = ThomsonAlgorithim.getAfn();
+       // digit_ = ThomsonAlgorithim.concatenacion(digit_, espacio_);
+        //digit_ = ThomsonAlgorithim.concatenacion(espacio_, digit_);
+        digit_.setTipo("digit");
+        
+        
+       
+        Automata digitKleene = ThomsonAlgorithim.cerraduraKleene(digit_);
+        //System.out.println(numberKleene);
+        number_ = ThomsonAlgorithim.concatenacion(digit_, digitKleene);
+        number_.setTipo("número");
+        Automata letterOrDigit = ThomsonAlgorithim.union(letter_, digit_);
+        //System.out.println(letterOrDigit);
+        Automata letterOrDigitKleene = ThomsonAlgorithim.cerraduraKleene(letterOrDigit);
+       // System.out.println(letterOrDigitKleene);
+        ident_ = ThomsonAlgorithim.concatenacion(letter_, letterOrDigitKleene);
+        ident_.setTipo("identificador");
+       // System.out.println(ident_);
+        Automata ap1 = ThomsonAlgorithim.afnSimple("\"");
+        Automata ap2 = ThomsonAlgorithim.afnSimple("\"");
+        Automata stringKleene = ThomsonAlgorithim.union(number_, letter_);
+        string_ = ThomsonAlgorithim.cerraduraKleene(stringKleene);
+        string_ = ThomsonAlgorithim.concatenacion(ap1, string_);
+        string_ = ThomsonAlgorithim.concatenacion(string_,ap2);
+        
+        regex = convert.infixToPostfix("\\|\"|\'");
+        ThomsonAlgorithim = new AFNConstruct(regex);
+        ThomsonAlgorithim.construct();
+        Automata specialChars = ThomsonAlgorithim.getAfn();
+        string_ = ThomsonAlgorithim.union(string_, specialChars);
+        
+        
+        string_.setTipo("string");
+      
+         
+        
+        
+        Automata apch1 = ThomsonAlgorithim.afnSimple("\'");
+        Automata apch2 = ThomsonAlgorithim.afnSimple("\'");
+        character_ = ThomsonAlgorithim.union(number_, letter_);
+        character_ = ThomsonAlgorithim.concatenacion(apch1, character_);
+        character_ = ThomsonAlgorithim.concatenacion(character_,apch2);
+        regex = convert.infixToPostfix("\"CHR\"(");
+        ThomsonAlgorithim = new AFNConstruct(regex);
+        ThomsonAlgorithim.construct();
+        Automata leftChar = ThomsonAlgorithim.getAfn();
+        
+       
+        Automata rigthChar = ThomsonAlgorithim.afnSimple(")");
+        leftChar = ThomsonAlgorithim.concatenacion(number_, leftChar);
+       
+        Automata innerChar = ThomsonAlgorithim.concatenacion(rigthChar, leftChar);
+       
+        character_ = ThomsonAlgorithim.union(character_,innerChar);
+        character_.setTipo("character");
+       
+        
+        
+        Automata pointChar = ThomsonAlgorithim.afnSimple(".");
+        Automata pointChar2 = ThomsonAlgorithim.afnSimple(".");
+        pointChar = ThomsonAlgorithim.concatenacion(pointChar, pointChar2);
+        basicChar_ = ThomsonAlgorithim.concatenacion(character_, pointChar);
+        basicChar_ = ThomsonAlgorithim.concatenacion(basicChar_,character_);
+        basicChar_.setTipo("Basic Char");
+        
+        basicSet_ = ThomsonAlgorithim.union(string_, ident_);
+        basicSet_ = ThomsonAlgorithim.union(basicSet_, basicChar_);
+        basicSet_.setTipo("Basic Set");
+        
+        regex = convert.infixToPostfix("("+" " +")*"+"="+"("+" " +")*");
+        ThomsonAlgorithim.setRegex(regex);
+        ThomsonAlgorithim.construct();
+        igual_  = ThomsonAlgorithim.getAfn();
+        igual_.setTipo("=");
+      
+        
+        Automata plus = ThomsonAlgorithim.afnSimple("+");
+        Automata minus = ThomsonAlgorithim.afnSimple("-");
+        plusOrMinus_ = ThomsonAlgorithim.union(plus, minus);
+        plusOrMinus_.setTipo("(+|-)");
+        
+       
+       
+        regex = convert.infixToPostfix("COMPILER");
+        ThomsonAlgorithim.setRegex(regex);
+        ThomsonAlgorithim.construct();
+        compiler_ = ThomsonAlgorithim.getAfn();
+        compiler_.setTipo("\"COMPILER\"");
+        regex = convert.infixToPostfix("END");
+        ThomsonAlgorithim.setRegex(regex);
+        ThomsonAlgorithim.construct();
+        end_ = ThomsonAlgorithim.getAfn();
+        end_.setTipo("\"END\"");
+       
+        
+        
+    }
+    
+   /**
+    * Revisar segundo archivo de input
+    * puede ser todo en una línea o diferentes líneas
+    * @param cadena 
+    */
    public  void check(HashMap<Integer,String> cadena){
        
        for (Map.Entry<Integer, String> entry : cadena.entrySet()) {
@@ -172,7 +311,7 @@ public class LexerAnalyzer {
             
         }
         
-        //
+        //[TOKENS]
         
         //lineaActual = avanzarLinea(lineaActual);
         //whitespaceDecl
@@ -460,12 +599,11 @@ public class LexerAnalyzer {
                 Character c = cadena.charAt(i);
                
                     if (c != ' '){
-                       
                    
-                    if (i<=cadena.length()-2)
-                        or += c +"|";
-                    if (i>cadena.length()-2)
-                        or +=c;
+                        if (i<=cadena.length()-2)
+                            or += c +"|";
+                        if (i>cadena.length()-2)
+                            or +=c;
 
                 }
             }
@@ -505,140 +643,6 @@ public class LexerAnalyzer {
         return -1;
     }
     
-    
-    /**
-     * Método para definir los mini autómatas para comparar
-     * las expresiones regulares
-     */
-    public void vocabulario(){
-        RegexConverter convert = new RegexConverter();
-        
-        
-        
-        
-        String regex = convert.infixToPostfix(this.espacio+"[@-z]"+this.espacio);
-        AFNConstruct ThomsonAlgorithim = new AFNConstruct(regex);
-        ThomsonAlgorithim.construct();
-        letter_ = ThomsonAlgorithim.getAfn();
-        
-       /* regex = convert.infixToPostfix(espacio+"[A-Z]"+espacio);
-        ThomsonAlgorithim = new AFNConstruct(regex);
-        ThomsonAlgorithim.construct();
-        Automata letterMayuscula_ = ThomsonAlgorithim.getAfn();
-        letter_ =  ThomsonAlgorithim.union(letter_, letterMayuscula_);*/
-       
-       
-        //letter_ = ThomsonAlgorithim.concatenacion(letter_, espacio_);
-        //letter_ = ThomsonAlgorithim.concatenacion(espacio_, letter_);
-        letter_.setTipo("Letra");
-        
-        regex = convert.infixToPostfix("("+" "+")*");
-        ThomsonAlgorithim.setRegex(regex);
-        ThomsonAlgorithim.construct();
-        espacio_  = ThomsonAlgorithim.getAfn();
-        espacio_.setTipo("espacio");
-        
-        //System.out.println(letter_);
-        regex = convert.infixToPostfix(espacio+"[0-9]"+espacio);
-        ThomsonAlgorithim.setRegex(regex);
-        ThomsonAlgorithim.construct();
-        digit_ = ThomsonAlgorithim.getAfn();
-       // digit_ = ThomsonAlgorithim.concatenacion(digit_, espacio_);
-        //digit_ = ThomsonAlgorithim.concatenacion(espacio_, digit_);
-        digit_.setTipo("digit");
-        
-        
-       
-        Automata digitKleene = ThomsonAlgorithim.cerraduraKleene(digit_);
-        //System.out.println(numberKleene);
-        number_ = ThomsonAlgorithim.concatenacion(digit_, digitKleene);
-        number_.setTipo("número");
-        Automata letterOrDigit = ThomsonAlgorithim.union(letter_, digit_);
-        //System.out.println(letterOrDigit);
-        Automata letterOrDigitKleene = ThomsonAlgorithim.cerraduraKleene(letterOrDigit);
-       // System.out.println(letterOrDigitKleene);
-        ident_ = ThomsonAlgorithim.concatenacion(letter_, letterOrDigitKleene);
-        ident_.setTipo("identificador");
-       // System.out.println(ident_);
-        Automata ap1 = ThomsonAlgorithim.afnSimple("\"");
-        Automata ap2 = ThomsonAlgorithim.afnSimple("\"");
-        Automata stringKleene = ThomsonAlgorithim.union(number_, letter_);
-        string_ = ThomsonAlgorithim.cerraduraKleene(stringKleene);
-        string_ = ThomsonAlgorithim.concatenacion(ap1, string_);
-        string_ = ThomsonAlgorithim.concatenacion(string_,ap2);
-        
-        regex = convert.infixToPostfix("\\|\"|\'");
-        ThomsonAlgorithim = new AFNConstruct(regex);
-        ThomsonAlgorithim.construct();
-        Automata specialChars = ThomsonAlgorithim.getAfn();
-        string_ = ThomsonAlgorithim.union(string_, specialChars);
-        
-        
-        string_.setTipo("string");
-      
-         
-        
-        
-        Automata apch1 = ThomsonAlgorithim.afnSimple("\'");
-        Automata apch2 = ThomsonAlgorithim.afnSimple("\'");
-        character_ = ThomsonAlgorithim.union(number_, letter_);
-        character_ = ThomsonAlgorithim.concatenacion(apch1, character_);
-        character_ = ThomsonAlgorithim.concatenacion(character_,apch2);
-        regex = convert.infixToPostfix("\"CHR\"(");
-        ThomsonAlgorithim = new AFNConstruct(regex);
-        ThomsonAlgorithim.construct();
-        Automata leftChar = ThomsonAlgorithim.getAfn();
-        
-       
-        Automata rigthChar = ThomsonAlgorithim.afnSimple(")");
-        leftChar = ThomsonAlgorithim.concatenacion(number_, leftChar);
-       
-        Automata innerChar = ThomsonAlgorithim.concatenacion(rigthChar, leftChar);
-       
-        character_ = ThomsonAlgorithim.union(character_,innerChar);
-        character_.setTipo("character");
-       
-        
-        
-        Automata pointChar = ThomsonAlgorithim.afnSimple(".");
-        Automata pointChar2 = ThomsonAlgorithim.afnSimple(".");
-        pointChar = ThomsonAlgorithim.concatenacion(pointChar, pointChar2);
-        basicChar_ = ThomsonAlgorithim.concatenacion(character_, pointChar);
-        basicChar_ = ThomsonAlgorithim.concatenacion(basicChar_,character_);
-        basicChar_.setTipo("Basic Char");
-        
-        basicSet_ = ThomsonAlgorithim.union(string_, ident_);
-        basicSet_ = ThomsonAlgorithim.union(basicSet_, basicChar_);
-        basicSet_.setTipo("Basic Set");
-        
-        regex = convert.infixToPostfix("("+" " +")*"+"="+"("+" " +")*");
-        ThomsonAlgorithim.setRegex(regex);
-        ThomsonAlgorithim.construct();
-        igual_  = ThomsonAlgorithim.getAfn();
-        igual_.setTipo("=");
-      
-        
-        Automata plus = ThomsonAlgorithim.afnSimple("+");
-        Automata minus = ThomsonAlgorithim.afnSimple("-");
-        plusOrMinus_ = ThomsonAlgorithim.union(plus, minus);
-        plusOrMinus_.setTipo("(+|-)");
-        
-       
-       
-        regex = convert.infixToPostfix("COMPILER");
-        ThomsonAlgorithim.setRegex(regex);
-        ThomsonAlgorithim.construct();
-        compiler_ = ThomsonAlgorithim.getAfn();
-        compiler_.setTipo("\"COMPILER\"");
-        regex = convert.infixToPostfix("END");
-        ThomsonAlgorithim.setRegex(regex);
-        ThomsonAlgorithim.construct();
-        end_ = ThomsonAlgorithim.getAfn();
-        end_.setTipo("\"END\"");
-       
-        
-        
-    }
     
     /**
      * Método para avanzar de línea, busca la línea que actual
