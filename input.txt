@@ -6,8 +6,7 @@ Z
 A
 9
 92
-1A 2F
-
+2B 9A
 01
 if
 while

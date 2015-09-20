@@ -7,14 +7,9 @@
 package lexergenerator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Clase para revisar la estructura de un archivo de CocoL
@@ -46,7 +41,7 @@ public class LexerAnalyzer {
     private Simulacion sim;
     private Stack compare = new Stack();
     private boolean union = false;
-    private int indexAutomata=0;
+    private int indexAutomata=-1;
     
     private ArrayList<Automata> generador = new ArrayList();
     
@@ -460,18 +455,25 @@ public class LexerAnalyzer {
     public void crearAutomata(String cadena){
         if (cadena.startsWith("\"")){
             String or = "";
+             cadena=  cadena.replace("\"", "");
             for (int i = 0;i<cadena.length();i++){
                 Character c = cadena.charAt(i);
-                if (i!=cadena.length()-2&&c!='\"')
-                    or += c +"|";
-                if (i==cadena.length()-2)
-                    or +=c;
+               
+                    if (c != ' '){
+                       
+                   
+                    if (i<=cadena.length()-2)
+                        or += c +"|";
+                    if (i>cadena.length()-2)
+                        or +=c;
 
-
+                }
             }
+            
 
             RegexConverter convert = new RegexConverter();
             String regex = convert.infixToPostfix("("+or+")+");
+           
             AFNConstruct ThomsonAlgorithim = new AFNConstruct(regex);
             ThomsonAlgorithim.construct();
             Automata temp = ThomsonAlgorithim.getAfn();
@@ -482,11 +484,14 @@ public class LexerAnalyzer {
                     temp = ThomsonAlgorithim.concatenacion(temp, generador.get(indexAutomata));
             }
             temp.setTipo((String)this.compare.pop());
+           
+           
             union=false;
             generador.add(temp);
         }
         else{
-            indexAutomata = buscarAFN(cadena);
+            indexAutomata = buscarAFN(cadena.trim());
+            System.out.println(indexAutomata);
             union=true;
         }
         
