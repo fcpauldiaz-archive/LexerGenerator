@@ -358,7 +358,7 @@ public class RegexConverter {
 	public  String infixToPostfix(String regex) {
 		String postfix = new String();
                 regex = abreviacionOr(regex);
-                regex = abreviacionAnd(regex);
+                //regex = abreviacionAnd(regex);
 		Stack<Character> stack = new Stack<>();
 
 		String formattedRegEx = formatRegEx(regex);

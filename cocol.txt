@@ -1,16 +1,13 @@
-Cocol = "COMPILER" Ejemplo
-
+COMPILER Ejemplo
 CHARACTERS
 
-character = 'b'
 letter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
 digit = "123456789".
+binario = "01".
 hexdigit = digit + "ABCDEF".
-
 KEYWORDS
-
 if = "if".
 while = "while".
 
 
-"END" Ejemplo.
+END Ejemplo.

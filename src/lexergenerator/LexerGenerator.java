@@ -22,11 +22,15 @@ public class LexerGenerator {
     public static void main(String[] args) {
         // TODO code application logic here
         ReadFile read = new ReadFile();
-        HashMap input = read.leerArchivo();
-        LexerAnalyzer lexer = new LexerAnalyzer(input);
+        HashMap cocol = read.leerArchivo("cocol");
+        HashMap input = read.leerArchivo("input");
+        LexerAnalyzer lexer = new LexerAnalyzer(cocol);
         lexer.vocabulario();
-        lexer.check(input);
+        lexer.construct(cocol);
         lexer.getOutput();
+        lexer.check(input);
+        
+      
         
     }
 

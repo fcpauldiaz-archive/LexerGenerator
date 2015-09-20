@@ -9,6 +9,10 @@ package lexergenerator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,16 +24,9 @@ public class LexerAnalyzer {
     
     
     private final HashMap<Integer,String> cadena;
-     /* Vocabulario de CocoL */
-    private final String letter= "[a-zA-z]";
-     //System.out.println(letter);
-    private final String digit="\\d";
-    private final String number=digit+"("+digit+")*";
-    private final String ident= letter + "("+letter+"|"+digit+")*"; //identificador
-    private final String string="\""+"("+number+"|"+letter+"|[^\\\"])*"+"\"";
-    private final String character="\'"+"("+number+"|"+letter+"|[^\\\'])"+"\'";
+    
+  
     private final String espacio = "(" +" "+")*";
-    private boolean strict =false;
     private boolean output = true;
     
     private Automata letter_;
@@ -43,10 +40,15 @@ public class LexerAnalyzer {
     private Automata plusOrMinus_;
     private Automata espacio_;
     private Automata basicChar_;
-    private Automata cocol_;
+    
     private Automata compiler_;
     private Automata end_;
     private Simulacion sim;
+    private Stack compare = new Stack();
+    private boolean union = false;
+    private int indexAutomata=0;
+    
+    private ArrayList<Automata> generador = new ArrayList();
     
     
  
@@ -55,32 +57,40 @@ public class LexerAnalyzer {
         this.cadena=cadena;
     }
     
+   public  void check(HashMap<Integer,String> cadena){
+       
+       for (Map.Entry<Integer, String> entry : cadena.entrySet()) {
+        Integer key = entry.getKey();
+        String value = entry.getValue();
+        String[] parts = value.split(" ");
+        for (int i= 0;i<parts.length;i++){
+            this.checkIndividualAutomata(parts[i], generador,key);
+        }
+        
+    
+}
+       
+   }
    
    
+ 
     /**
      * Revisar formato de la primera línea
      * ScannerSpecification
      * ParserSpecification
      * @param cadena HashMap de la cadena y sus números de línea
      */
-    public void check(HashMap<Integer,String> cadena){
+    public void construct(HashMap<Integer,String> cadena){
         int lineaActual = 1;
         int index = 0;
        // ArrayList res = checkExpression("Cocol = \"COMPILER\""+this.espacio,lineaActual,index);
-        ArrayList res = checkAutomata(this.cocol_,lineaActual,index);
-        
-        int index_  = returnArray(res);
-        ArrayList res_ = checkAutomata(this.igual_,lineaActual,index_+index);
-        
-        int index__  = returnArray(res_);
-        ArrayList res_1 = checkAutomata(this.compiler_,lineaActual,index__+index_);
+      
+        ArrayList res_1 = checkAutomata(this.compiler_,lineaActual,index);
         
         int index2  = returnArray(res_1);
         
         
-        
-       
-        ArrayList res2 = checkAutomata(this.ident_,lineaActual,index2+index__+index_);
+        ArrayList res2 = checkAutomata(this.ident_,lineaActual,index2);
         //System.out.println(res2.get(1));
         
         //ScannerSpecification
@@ -197,7 +207,7 @@ public class LexerAnalyzer {
     
     public ArrayList keywordDeclaration(int lineaActual){
         
-        if (this.cadena.get(lineaActual).contains("\"END\"")||this.cadena.get(lineaActual).contains("CHARACTERS"))
+        if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("CHARACTERS"))
             return new ArrayList();
         
         
@@ -350,6 +360,7 @@ public class LexerAnalyzer {
     /**
      * Método para revisar si un character
      * @param lineaActual
+     * @param lastIndex
      * @return 
      */
     public ArrayList<String> Char(int lineaActual,int lastIndex){
@@ -368,10 +379,10 @@ public class LexerAnalyzer {
     
     public void getOutput(){
         if (output){
-            System.out.println("Archivo Aceptado");
+            System.out.println("Archivo Cocol/R Aceptado");
         }
         else{
-            System.out.println("Archivo no aceptado");
+            System.out.println("Archivo  Cocol/R no aceptado, tiene errores de estructura");
         }
     }
     
@@ -419,8 +430,14 @@ public class LexerAnalyzer {
         ArrayList resultado = new ArrayList();
         
         boolean returnValue=sim.simular(cadena_revisar.trim(), param);
+        
+        if (param == this.basicSet_||param==this.string_)
+            crearAutomata(cadena_revisar);
+        if (param == this.ident_)
+            this.compare.push(cadena_revisar);
+            
       
-        checkIndividualAutomata(cadena_revisar);
+        
         if (returnValue){
             resultado.add(cadena_revisar.length()+preIndex);
             resultado.add(cadena_revisar);
@@ -440,6 +457,50 @@ public class LexerAnalyzer {
         
     }
     
+    public void crearAutomata(String cadena){
+        if (cadena.startsWith("\"")){
+            String or = "";
+            for (int i = 0;i<cadena.length();i++){
+                Character c = cadena.charAt(i);
+                if (i!=cadena.length()-2&&c!='\"')
+                    or += c +"|";
+                if (i==cadena.length()-2)
+                    or +=c;
+
+
+            }
+
+            RegexConverter convert = new RegexConverter();
+            String regex = convert.infixToPostfix("("+or+")+");
+            AFNConstruct ThomsonAlgorithim = new AFNConstruct(regex);
+            ThomsonAlgorithim.construct();
+            Automata temp = ThomsonAlgorithim.getAfn();
+           
+
+            if (union==true){
+                if (indexAutomata!=-1)
+                    temp = ThomsonAlgorithim.concatenacion(temp, generador.get(indexAutomata));
+            }
+            temp.setTipo((String)this.compare.pop());
+            union=false;
+            generador.add(temp);
+        }
+        else{
+            indexAutomata = buscarAFN(cadena);
+            union=true;
+        }
+        
+    }
+    
+    public int buscarAFN(String tipo){
+        for (int i = 0;i<generador.size();i++){
+            if (generador.get(i).getTipo().equals(tipo))
+                return i;
+        }
+        return -1;
+    }
+    
+    
     /**
      * Método para definir los mini autómatas para comparar
      * las expresiones regulares
@@ -450,16 +511,16 @@ public class LexerAnalyzer {
         
         
         
-        String regex = convert.infixToPostfix(this.espacio+"[a-z]"+this.espacio);
+        String regex = convert.infixToPostfix(this.espacio+"[@-z]"+this.espacio);
         AFNConstruct ThomsonAlgorithim = new AFNConstruct(regex);
         ThomsonAlgorithim.construct();
         letter_ = ThomsonAlgorithim.getAfn();
         
-        regex = convert.infixToPostfix(espacio+"[A-Z]"+espacio);
+       /* regex = convert.infixToPostfix(espacio+"[A-Z]"+espacio);
         ThomsonAlgorithim = new AFNConstruct(regex);
         ThomsonAlgorithim.construct();
         Automata letterMayuscula_ = ThomsonAlgorithim.getAfn();
-        letter_ =  ThomsonAlgorithim.union(letter_, letterMayuscula_);
+        letter_ =  ThomsonAlgorithim.union(letter_, letterMayuscula_);*/
        
        
         //letter_ = ThomsonAlgorithim.concatenacion(letter_, espacio_);
@@ -558,17 +619,13 @@ public class LexerAnalyzer {
         plusOrMinus_.setTipo("(+|-)");
         
        
-        regex = convert.infixToPostfix("Cocol");
-        ThomsonAlgorithim.setRegex(regex);
-        ThomsonAlgorithim.construct();
-         cocol_ = ThomsonAlgorithim.getAfn();
-         cocol_.setTipo("Cocol");
-        regex = convert.infixToPostfix("\"COMPILER\"");
+       
+        regex = convert.infixToPostfix("COMPILER");
         ThomsonAlgorithim.setRegex(regex);
         ThomsonAlgorithim.construct();
         compiler_ = ThomsonAlgorithim.getAfn();
         compiler_.setTipo("\"COMPILER\"");
-        regex = convert.infixToPostfix("\"END\"");
+        regex = convert.infixToPostfix("END");
         ThomsonAlgorithim.setRegex(regex);
         ThomsonAlgorithim.construct();
         end_ = ThomsonAlgorithim.getAfn();
@@ -606,29 +663,30 @@ public class LexerAnalyzer {
      * Método para revisar que tipo de sub autómata es aceptado por una 
      * expresión regular
      * @param regex expresión regular a comparar
+     * @param conjunto arreglo de autómatas
      */
-    public void checkIndividualAutomata(String regex){
-        ArrayList<Automata> conjunto = conjuntoAutomatas();
+    public void checkIndividualAutomata(String regex, ArrayList<Automata> conjunto,int lineaActual){
+        
         ArrayList<Boolean> resultado = new ArrayList();
-        for (int i = 0;i<regex.length();i++){
-            Character ch = regex.charAt(i);
+       
+            
             for (int j = 0;j<conjunto.size();j++){
-                resultado.add(sim.simular(ch.toString(), conjunto.get(j)));
+                resultado.add(sim.simular(regex, conjunto.get(j)));
                
             }
            
             ArrayList<Integer> posiciones = checkBoolean(resultado);
-            resultado.clear();
+            //resultado.clear();
             
            
             for (int k = 0;k<posiciones.size();k++){
                 
-                System.out.println(ch.toString()+ ": " + conjunto.get(posiciones.get(k)).getTipo());
+                System.out.println(regex+ ": " + conjunto.get(posiciones.get(k)).getTipo());
             }
             if (posiciones.isEmpty()){
-               System.out.println(ch.toString()+ " no fue reconocido");
+               System.out.println("Error línea archivo " + lineaActual +" : "+regex+ " no fue reconocido");
             }
-        }
+        
     }
     
     /**
@@ -667,6 +725,12 @@ public class LexerAnalyzer {
         
         return conjunto;
         
+        
+        
+    }
+
+    public ArrayList<Automata> getGenerador() {
+        return generador;
     }
 }
 
