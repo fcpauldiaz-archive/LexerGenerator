@@ -236,10 +236,9 @@ public class LexerAnalyzer {
         //ParserSpecification
      
         
-        
+        lineaActual = (int)scan.get(0);
         //END File
-        if (!scan.isEmpty())
-            lineaActual = avanzarLinea((int)scan.get(0));
+        
        
         ArrayList res3 = checkAutomata(this.end_,lineaActual,0);
         int index4 = returnArray(res3);
@@ -313,8 +312,12 @@ public class LexerAnalyzer {
         
         //[TOKENS]
         
-        //lineaActual = avanzarLinea(lineaActual);
+        lineaActual = avanzarLinea(lineaActual);
         //whitespaceDecl
+       
+        boolean space = whiteSpaceDeclaration(lineaActual);
+        if (space)
+            lineaActual = avanzarLinea(lineaActual);
       // lineaActual = avanzarLinea(lineaActual);
               
         ArrayList outputScan = new ArrayList();
@@ -328,20 +331,24 @@ public class LexerAnalyzer {
      * @param lineaActual
      * @return 
      */
-    public ArrayList whiteSpaceDeclaration(int lineaActual){
-        if (!this.cadena.get(lineaActual).contains("IGNORE")){
-            return new ArrayList();
+    public boolean whiteSpaceDeclaration(int lineaActual){
+        if (this.cadena.get(lineaActual).contains("IGNORE")){
+            return true;
         }
-        ArrayList space = set(lineaActual,0);
+        else{
+            return false;
+        }
+        /*ArrayList space = set(lineaActual,0);
         if (space.isEmpty())
             return new ArrayList();
         
-        return space;
+        return space;*/
     }
     
     public ArrayList keywordDeclaration(int lineaActual){
         
-        if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("CHARACTERS"))
+        if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("CHARACTERS")
+                ||this.cadena.get(lineaActual).contains("IGNORE"))
             return new ArrayList();
         
         
