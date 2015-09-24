@@ -77,7 +77,7 @@ public class CodeGenerator {
             ""+"\n"+
             "public class "+this.nombreArchivo+" {"+"\n"+
             ""+"\n"+
-            "private Simulacion sim = new Simulacion();"+"\n"+
+            "\t"+"private Simulacion sim = new Simulacion();"+"\n"+
                 
             "\t"+"public " + this.nombreArchivo+"(){"+"\n"+"\n"
              
@@ -314,7 +314,7 @@ public class CodeGenerator {
    
     /**
      * Método para exportar los autómatas a texto plano
-     * @return 
+     * @return Devuelve un string con los autómatass
      */
     public String crearAutomatasTexto(){
        String afn = "";
