@@ -7,8 +7,10 @@
 package lexergenerator;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import javax.swing.JFileChooser;
@@ -74,6 +76,35 @@ public class ReadFile {
         }
         return null;
         
+    }
+     public void crearArchivo(String output,String nombreArchivo){
+        try {
+            
+                
+                //output += "\r\n"+"\r\n"+"\r\n"+leerArchivo();
+                File file;
+                File dummy = new File("");
+                String path = dummy.getAbsolutePath();
+              
+               
+                file = new File(path+"/generador/"+nombreArchivo+".java");
+                // if FileCreator doesnt exists, then create it
+               
+                
+               
+                FileWriter fw = new FileWriter(file);
+                BufferedWriter bw = new BufferedWriter(fw);
+               
+                bw.write(output+"\r\n");
+            
+
+                bw.close();
+
+                System.out.println("Se ha creado el archivo exitosamente");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

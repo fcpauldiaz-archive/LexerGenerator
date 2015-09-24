@@ -38,8 +38,8 @@ public class LexerAnalyzer {
     
     private Automata compiler_;
     private Automata end_;
-    private Simulacion sim;
-    private Stack compare = new Stack();
+    private final Simulacion sim;
+    private final Stack compare = new Stack();
     private boolean union = false;
     private int indexAutomata=-1;
     
@@ -314,10 +314,15 @@ public class LexerAnalyzer {
         
         lineaActual = avanzarLinea(lineaActual);
         //whitespaceDecl
-       
+        while (true){
         boolean space = whiteSpaceDeclaration(lineaActual);
-        if (space)
-            lineaActual = avanzarLinea(lineaActual);
+            if (space)
+                lineaActual = avanzarLinea(lineaActual);
+            else{
+                break;
+            }
+        }
+        
       // lineaActual = avanzarLinea(lineaActual);
               
         ArrayList outputScan = new ArrayList();
@@ -332,17 +337,7 @@ public class LexerAnalyzer {
      * @return 
      */
     public boolean whiteSpaceDeclaration(int lineaActual){
-        if (this.cadena.get(lineaActual).contains("IGNORE")){
-            return true;
-        }
-        else{
-            return false;
-        }
-        /*ArrayList space = set(lineaActual,0);
-        if (space.isEmpty())
-            return new ArrayList();
-        
-        return space;*/
+        return this.cadena.get(lineaActual).contains("IGNORE");
     }
     
     public ArrayList keywordDeclaration(int lineaActual){
@@ -553,7 +548,7 @@ public class LexerAnalyzer {
     public ArrayList checkAutomata(Automata param,int lineaActual, int index){
        
         String cadena_revisar = this.cadena.get(lineaActual).substring(index);
-        
+       
         int preIndex = 0;
         try{
           
@@ -572,11 +567,7 @@ public class LexerAnalyzer {
         
         boolean returnValue=sim.simular(cadena_revisar.trim(), param);
         
-        if (param == this.basicSet_||param==this.string_)
-            crearAutomata(cadena_revisar);
-        if (param == this.ident_)
-            this.compare.push(cadena_revisar);
-            
+        
       
         
         if (returnValue){

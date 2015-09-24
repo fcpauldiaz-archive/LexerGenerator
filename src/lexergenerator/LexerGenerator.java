@@ -28,7 +28,12 @@ public class LexerGenerator {
         lexer.vocabulario();
         lexer.construct(cocol);
         lexer.getOutput();
-        lexer.check(input);
+        //lexer.check(input);
+        CodeGenerator generator = new CodeGenerator(cocol);
+        generator.encontrarNombre();
+        
+        generator.generarCharactersYKeywords();
+        generator.generarClaseAnalizadora();
         
       
         

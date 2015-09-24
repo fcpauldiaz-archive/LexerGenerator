@@ -6,6 +6,7 @@ letter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
 digit = "123456789".
 binario = "01".
 hexdigit = digit + "ABCDEF".
+lol = "LOL".
 
 KEYWORDS
 if = "if".
