@@ -27,6 +27,9 @@ public class CodeGenerator {
         this.cadena=cadena;
     }
     
+    /**
+     * Método para encontrar el nombre del archivo a generar
+     */
     public void encontrarNombre(){
         
         for (Map.Entry<Integer, String> entry : cadena.entrySet()) {
@@ -43,7 +46,7 @@ public class CodeGenerator {
     
     }
    /**
-    * Genera la clase analizadora
+    * Genera la  estructura de la clase analizadora
     */
     public void generarClaseAnalizadora() {
 
@@ -51,6 +54,7 @@ public class CodeGenerator {
             "/**"+"\n"+
             " * Nombre del archivo: "+this.nombreArchivo+".java"+"\n"+
             " * Universidad del Valle de Guatemala"+"\n"+
+            " * Pablo Diaz 13203 " + "\n"+
             " * Descripción: Segundo proyecto. Generador de analizador léxico"+"\n"+
             "**/"+"\n"+
             ""+"\n"+
@@ -68,8 +72,7 @@ public class CodeGenerator {
             "import java.util.List;"+"\n"+
             "import java.util.HashMap;"+"\n"+
             "import java.util.Iterator;"+"\n"+
-            "import java.util.LinkedHashMap;"+"\n"+
-            "import java.util.Scanner;"+"\n"+
+           
           
             ""+"\n"+
             "public class "+this.nombreArchivo+" {"+"\n"+
@@ -90,6 +93,9 @@ public class CodeGenerator {
         
     }
     
+    /*
+    * Método para pasara character y keywords a expresiones regulares
+    */
     public void generarCharactersYKeywords(){
         
         for (Map.Entry<Integer, String> entry : cadena.entrySet()) {
@@ -120,7 +126,14 @@ public class CodeGenerator {
         
     }
     
-     public String crearCadenasOr(String cadena){
+    /**
+     * Crea una cadena con operaciones or en cada caracter
+     * En caso de haber concatenaciones calcula si tiene que
+     * ser por la izquierda o derecha
+     * @param cadena a evaluar
+     * @return String con la cadena modificada
+     */
+    public String crearCadenasOr(String cadena){
         String or = "";
         if ((cadena.startsWith("\"")||cadena.startsWith("\'"))&&(!cadena.contains("+"))){
              
@@ -189,8 +202,13 @@ public class CodeGenerator {
         }
         return or;
      }
-     
-     public String concatenacion(String anterior, String actual){
+    /**
+     * Método auxiliar que se llama cuando hay más de una concatenación
+     * @param anterior String con lo ya concatenado
+     * @param actual String con lo que falta concatenar
+     * @return String con expresión regular
+     */ 
+    public String concatenacion(String anterior, String actual){
             String resultado = "";
             String cadenaOr=anterior;
             if (actual.contains("\""))
@@ -207,7 +225,7 @@ public class CodeGenerator {
             }
         return resultado;
      }
-     /**
+    /**
      * Método para avanzar de línea, busca la línea que actual
      * @param lineaActual
      * @return lineaActual
@@ -219,6 +237,11 @@ public class CodeGenerator {
        }
     }
     
+    /**
+     * Método para calcular la posición a concatenar
+     * @param str
+     * @return 
+     */
     public int calcularConcatenacion(String str){
         int posicion = 0;
         int posConc = str.indexOf("+");
@@ -231,7 +254,11 @@ public class CodeGenerator {
         
         return posicion;
     }
-    
+    /**
+     * Método para buscar un identificador en el archivo
+     * @param search identificador a buscar
+     * @return Devuelve el identificador
+     */
     public String buscarIdent(String search){
         String res = "";
         for (Map.Entry<String, String> entry : cadenaCompleta.entrySet()) {
@@ -248,7 +275,12 @@ public class CodeGenerator {
         
     }
     
-     public String buscarExpr(String search){
+    /**
+     * Método para buscar un identificador en el archivo
+     * @param search identificador a buscar
+     * @return devuelve expresión regular asociada al identificador
+     */
+    public String buscarExpr(String search){
         String res = "";
         for (Map.Entry<String, String> entry : cadenaCompleta.entrySet()) {
             String value = entry.getKey();
@@ -263,7 +295,13 @@ public class CodeGenerator {
         return res;
      }
     
-   public  int count( final String s, final char c ) {
+    /**
+     * Método para calcular el número de ocurrencias de un character
+     * @param s string completo 
+     * @param c character a calcular ocurrencias
+     * @return 
+     */
+    public  int count( final String s, final char c ) {
         final char[] chars = s.toCharArray();
         int count = 0;
         for(int i=0; i<chars.length; i++) {
@@ -274,7 +312,11 @@ public class CodeGenerator {
         return count;
     }
    
-   public String crearAutomatasTexto(){
+    /**
+     * Método para exportar los autómatas a texto plano
+     * @return 
+     */
+    public String crearAutomatasTexto(){
        String afn = "";
        afn += "\n";
        afn += "\tpublic void automatas(){";
