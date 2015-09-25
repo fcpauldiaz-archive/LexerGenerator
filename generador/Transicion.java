@@ -4,7 +4,7 @@
 * 02/07/2015
 */
 
-package lexergenerator;
+
 
 /**
  * Estructura de datos para modelar una transición de un autómata

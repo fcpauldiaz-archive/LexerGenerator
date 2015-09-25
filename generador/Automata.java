@@ -4,7 +4,7 @@
 * Pablo Díaz 13203
 */
 
-package lexergenerator;
+
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -109,7 +109,7 @@ public class Automata {
     public void createAlfabeto(String regex) {
         for (Character ch: regex.toCharArray()){
            
-            if (ch != '|' && ch != '.' && ch != '*' && ch != LexerGenerator.EPSILON_CHAR)
+            if (ch != '|' && ch != '.' && ch != '*' && ch != resultadoGeneradorMain.EPSILON_CHAR)
                 this.alfabeto.add(Character.toString(ch));
         }
     }

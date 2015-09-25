@@ -22,6 +22,7 @@ public class LexerAnalyzer {
     
   
     private final String espacio = "(" +" "+")*";
+    private final String ANY = this.espacio+"[ -']"+"|"+"[@-z]"+this.espacio;
     private boolean output = true;
     
     private Automata letter_;
@@ -62,10 +63,11 @@ public class LexerAnalyzer {
         
         
         
-        String regex = convert.infixToPostfix(this.espacio+"[@-z]"+this.espacio);
+        String regex = convert.infixToPostfix(ANY);
         AFNConstruct ThomsonAlgorithim = new AFNConstruct(regex);
         ThomsonAlgorithim.construct();
         letter_ = ThomsonAlgorithim.getAfn();
+       
         
        /* regex = convert.infixToPostfix(espacio+"[A-Z]"+espacio);
         ThomsonAlgorithim = new AFNConstruct(regex);
@@ -236,9 +238,9 @@ public class LexerAnalyzer {
         //ParserSpecification
      
         
-        lineaActual = (int)scan.get(0);
+       
         //END File
-        
+        lineaActual = (int)scan.get(0);
        
         ArrayList res3 = checkAutomata(this.end_,lineaActual,0);
         int index4 = returnArray(res3);
@@ -280,14 +282,12 @@ public class LexerAnalyzer {
         lineaActual = avanzarLinea(lineaActual);
          //["Characters" = {SetDecl}
         while (true){
-            ArrayList res2 = setDeclaration(lineaActual);
-            if (res2.isEmpty()){
+            boolean res2 = setDeclaration(lineaActual);
+            if (!res2){
                 lineaActual = retrocederLinea(lineaActual);
                 break;
                 
             }
-            returnIndex += (int)res2.get(0);
-            returnString += (String)res2.get(1);
             lineaActual = avanzarLinea(lineaActual);
         }
         //[KEYWRORDS]
@@ -327,7 +327,7 @@ public class LexerAnalyzer {
               
         ArrayList outputScan = new ArrayList();
         outputScan.add(lineaActual);
-        outputScan.add(returnString);
+        outputScan.add(true);
        return outputScan;
     }
     
@@ -380,32 +380,59 @@ public class LexerAnalyzer {
      * SetDecl = ident '=' Set '.'.
      * 
      */
-    public ArrayList<String> setDeclaration(int lineaActual){
+    public boolean setDeclaration(int lineaActual){
         
         if (this.cadena.get(lineaActual).contains("\"END\"")||this.cadena.get(lineaActual).contains("KEYWORDS"))
-            return new ArrayList();
+            return false;
         //revisar identificador
         //ArrayList res1 = checkExpression(this.ident,lineaActual,0);
-        ArrayList identifier = checkAutomata(this.ident_,lineaActual,0);
-        int index1  = returnArray(identifier);
-        if (identifier.isEmpty()){
-            return new ArrayList();
+        
+        try{
+            int indexSearch = this.cadena.get(lineaActual).indexOf("=")-1;
+            while (this.cadena.get(lineaActual).substring(0, indexSearch).contains(" "))
+                indexSearch--;
+           
+            boolean identifier = checkAutomata(this.ident_,this.cadena.get(lineaActual).substring(0,indexSearch));
+            ///  int index1  = returnArray(identifier);
+              if (!identifier){
+                  return false;
+              }
+        }catch(Exception e){
+            System.out.println("Error, no hay \"=\" en la línea " + lineaActual);
         }
+        
+      
         
         //revisar '='
         //ArrayList res2 = checkExpression(this.espacio+'='+this.espacio,lineaActual,index1);
-        ArrayList equals = checkAutomata(this.igual_,lineaActual,index1);
         
-        int index2 = returnArray(equals);
-        if (equals.isEmpty())
-            return new ArrayList();
+         try{
+            int indexSearch = this.cadena.get(lineaActual).indexOf("=");
+            int indexSearch2 = indexSearch + 1;
+            boolean equals = checkAutomata(this.igual_,this.cadena.get(lineaActual).substring(indexSearch, indexSearch2));
+            //int index2 = returnArray(equals);
+            if (!equals)
+                return false;
+        }catch(Exception e){
+            System.out.println("Error, no hay \"=\" en la línea " + lineaActual);
+        }
+     
         
         //revisar Set
-        ArrayList resSet = set(lineaActual,index2+index1);
+         try{
+            int indexSearch = this.cadena.get(lineaActual).indexOf("=")+1;
+            String cadenaRevisar = this.cadena.get(lineaActual).substring(indexSearch);
+            while(cadenaRevisar.startsWith(" "))
+                cadenaRevisar = this.cadena.get(lineaActual).substring(++indexSearch);
+            if (cadenaRevisar.contains("."))
+                cadenaRevisar = cadenaRevisar.replace(".", "");
+            boolean resSet = set(lineaActual,cadenaRevisar);
+         }catch(Exception e){}
+        //ArrayList resSet = set(lineaActual,index2+index1);
       
-        if (resSet.isEmpty())
-            return new ArrayList();
-        int index3 = returnArray(resSet);
+       // if (resSet.isEmpty())
+        //    return new ArrayList();
+        //int index3 = returnArray(resSet);
         
        //revisar '.'
        // ArrayList res4 = checkExpression(this.espacio+"."+this.espacio,lineaActual,index3);
@@ -413,7 +440,7 @@ public class LexerAnalyzer {
           //  return new ArrayList();
         
         
-        return resSet;
+        return true;
     }
     /**
      * Método para revisar el Set
@@ -422,42 +449,44 @@ public class LexerAnalyzer {
      * @return ArrayList
      * Set = BasicSet (('+'|'-') BasicSet)*.
      */
-    public ArrayList set(int lineaActual,int lastIndex){
+    public boolean set(int lineaActual,String regex){
         int index = 0;
         
-        String ret ="";
+        String revisar =regex;
         //Set = BasicSet
-        ArrayList basic = basicSet(lineaActual,lastIndex);
+        if (regex.contains("+"))
+            revisar = regex.substring(0,regex.indexOf("+"));
+        else if (regex.contains("-"))
+            revisar = regex.substring(0,regex.indexOf("-"));
         
-        if (basic.isEmpty())
-            return new ArrayList();
+        boolean basic = basicSet(lineaActual,revisar);
         
-        index=(int)basic.get(0);
-        ret += (String)basic.get(1);
-        lastIndex += index;
+        if (!basic)
+            return false;
+        
+        
+        
         while(true){
-            ArrayList bl = checkAutomata(this.plusOrMinus_,lineaActual,lastIndex);
-            if (bl.isEmpty()){
+            if (regex.contains("+"))
+                revisar = regex.substring(regex.indexOf("+"),regex.indexOf("+")+1);
+            else
                 break;
-                }
-            lastIndex += (int)bl.get(0);
-            ArrayList b = basicSet(lineaActual,lastIndex);
-            if (b.isEmpty())
+            boolean bl = checkAutomata(this.plusOrMinus_,revisar);
+            if (!bl)
                 break;
-            lastIndex += (int)b.get(0);
-           
-            index = index + (int)bl.get(0)+(int)b.get(0);
-            ret = ret + (String)bl.get(1)+ (String)b.get(1);
+                
+            regex = regex.substring(regex.indexOf("+")+1);
             
-            
+            boolean b = basicSet(lineaActual,regex.trim());
+            if (!b)
+                return false;
+
+
+
         }
+
         
-        ArrayList fin = new ArrayList();
-        fin.add(lastIndex);
-        fin.add(ret);
-        if (ret.equals(""))
-            fin=basic;
-        return fin;
+        return true;
     }
     /**
      * 
@@ -466,29 +495,26 @@ public class LexerAnalyzer {
      * @return ArrayList
      * BasicSet = string | ident | Char [ "..." Char].
      */
-    public ArrayList<String> basicSet(int lineaActual,int lastIndex){
-        ArrayList<String> cadenas = new ArrayList();
+    public boolean basicSet(int lineaActual,String regex){
+        //ArrayList<String> cadenas = new ArrayList();
       
         //BasicSet = {string}
         
        // ident | string | "CHR(number).."CHR"(number).
-        ArrayList resBasicSet = checkAutomata(this.basicSet_,lineaActual,lastIndex);
-       if (!resBasicSet.isEmpty()){
+       boolean resBasicSet = checkAutomata(this.basicSet_,regex);
+       /*if (!resBasicSet.isEmpty()){
             cadenas.add((String)resBasicSet.get(1));
 
-        }
+        }*/
         
-       
+       if (!resBasicSet)
+            System.out.println("Error línea archivo "+ lineaActual + regex + " no fue reconocido");
     
-        ArrayList fin = new ArrayList();
-        
-        if (!cadenas.isEmpty()){
-           
-            fin.add(cadenas.get(0).length());
-            fin.add(cadenas.get(0));
-        }
        
-        return fin;
+        
+        
+       
+        return resBasicSet;
         
     }
     
@@ -587,6 +613,11 @@ public class LexerAnalyzer {
         
         return resultado;
         
+    }
+    
+    
+    public boolean checkAutomata(Automata param, String regex){
+        return sim.simular(regex, param);
     }
     
     public void crearAutomata(String cadena){

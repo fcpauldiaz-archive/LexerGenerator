@@ -4,7 +4,7 @@
 * Descripción: Clase que implementa el algoritmo de Thomson
 */
 
-package lexergenerator;
+
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -139,13 +139,13 @@ public class AFNConstruct<T> {
         ArrayList<Estado> anteriorFin    = automataFN.getEstadosAceptacion();
         
         // agregar transiciones desde el nuevo estado inicial
-        nuevoInicio.getTransiciones().add(new Transicion(nuevoInicio, anteriorInicio, LexerGenerator.EPSILON));
-        nuevoInicio.getTransiciones().add(new Transicion(nuevoInicio, nuevoFin, LexerGenerator.EPSILON));
+        nuevoInicio.getTransiciones().add(new Transicion(nuevoInicio, anteriorInicio, resultadoGeneradorMain.EPSILON));
+        nuevoInicio.getTransiciones().add(new Transicion(nuevoInicio, nuevoFin, resultadoGeneradorMain.EPSILON));
         
         // agregar transiciones desde el anterior estado final
         for (int i =0; i<anteriorFin.size();i++){
-            anteriorFin.get(i).getTransiciones().add(new Transicion(anteriorFin.get(i), anteriorInicio,LexerGenerator.EPSILON));
-            anteriorFin.get(i).getTransiciones().add(new Transicion(anteriorFin.get(i), nuevoFin, LexerGenerator.EPSILON));
+            anteriorFin.get(i).getTransiciones().add(new Transicion(anteriorFin.get(i), anteriorInicio,resultadoGeneradorMain.EPSILON));
+            anteriorFin.get(i).getTransiciones().add(new Transicion(anteriorFin.get(i), nuevoFin, resultadoGeneradorMain.EPSILON));
         }
         afn_kleene.setAlfabeto(automataFN.getAlfabeto());
         afn_kleene.setLenguajeR(automataFN.getLenguajeR());
@@ -176,7 +176,7 @@ public class AFNConstruct<T> {
                 //se utiliza un ciclo porque los estados de aceptacion son un array
                 for (int k = 0;k<AFN2.getEstadosAceptacion().size();k++)
                 {
-                    tmp.setTransiciones(new Transicion((Estado) AFN2.getEstadosAceptacion().get(k),AFN1.getEstadoInicial(),LexerGenerator.EPSILON));
+                    tmp.setTransiciones(new Transicion((Estado) AFN2.getEstadosAceptacion().get(k),AFN1.getEstadoInicial(),resultadoGeneradorMain.EPSILON));
                 }
             }
             afn_concat.addEstados(tmp);
@@ -214,7 +214,7 @@ public class AFNConstruct<T> {
         //se crea un nuevo estado inicial
         Estado nuevoInicio = new Estado(0);
         //se crea una transicion del nuevo estado inicial al primer automata
-        nuevoInicio.setTransiciones(new Transicion(nuevoInicio,AFN2.getEstadoInicial(),LexerGenerator.EPSILON));
+        nuevoInicio.setTransiciones(new Transicion(nuevoInicio,AFN2.getEstadoInicial(),resultadoGeneradorMain.EPSILON));
 
         afn_union.addEstados(nuevoInicio);
         afn_union.setEstadoInicial(nuevoInicio);
@@ -244,14 +244,14 @@ public class AFNConstruct<T> {
         ArrayList<Estado> anteriorFin2    = AFN2.getEstadosAceptacion();
         
         // agregar transiciones desde el nuevo estado inicial
-        nuevoInicio.getTransiciones().add(new Transicion(nuevoInicio, anteriorInicio, LexerGenerator.EPSILON));
+        nuevoInicio.getTransiciones().add(new Transicion(nuevoInicio, anteriorInicio, resultadoGeneradorMain.EPSILON));
         
          // agregar transiciones desde el anterior AFN 1 al estado final
         for (int k =0; k<anteriorFin.size();k++)
-            anteriorFin.get(k).getTransiciones().add(new Transicion(anteriorFin.get(k), nuevoFin, LexerGenerator.EPSILON));
+            anteriorFin.get(k).getTransiciones().add(new Transicion(anteriorFin.get(k), nuevoFin, resultadoGeneradorMain.EPSILON));
          // agregar transiciones desde el anterior AFN 2 al estado final
         for (int k =0; k<anteriorFin.size();k++)
-            anteriorFin2.get(k).getTransiciones().add(new Transicion(anteriorFin2.get(k),nuevoFin,LexerGenerator.EPSILON));
+            anteriorFin2.get(k).getTransiciones().add(new Transicion(anteriorFin2.get(k),nuevoFin,resultadoGeneradorMain.EPSILON));
         
         HashSet alfabeto = new HashSet();
         alfabeto.addAll(AFN1.getAlfabeto());

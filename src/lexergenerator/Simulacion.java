@@ -44,7 +44,7 @@ public class Simulacion {
            
             for (Transicion t: (ArrayList<Transicion>)actual.getTransiciones()){
                 
-                if (t.getSimbolo().equals(LexerGenerator.EPSILON)&&!resultado.contains(t.getFin())){
+                if (t.getSimbolo().equals(LexerGeneratorMain.EPSILON)&&!resultado.contains(t.getFin())){
                     resultado.add(t.getFin());
                     pilaClosure.push(t.getFin());
                 }

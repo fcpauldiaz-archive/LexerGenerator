@@ -11,7 +11,7 @@ import java.util.HashMap;
  *
  * @author Pablo
  */
-public class LexerGenerator {
+public class LexerGeneratorMain {
     
     public static String EPSILON = "ε";
     public static char EPSILON_CHAR = EPSILON.charAt(0);
@@ -34,6 +34,7 @@ public class LexerGenerator {
         
         generator.generarCharactersYKeywords();
         generator.generarClaseAnalizadora();
+        generator.generarMain();
         
       
         

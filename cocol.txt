@@ -2,11 +2,13 @@ COMPILER Ejemplo
 
 CHARACTERS
 
-letter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
+letter  =    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
 digit = "123456789".
 binario = "01".
 hexdigit = digit + "ABCDEF".
 lol = "LOL".
+character = 'b'.
+space = ' '.
 
 KEYWORDS
 if = "if".

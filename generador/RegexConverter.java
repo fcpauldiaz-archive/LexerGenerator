@@ -4,7 +4,8 @@
 * 29/07/2015
 */
 
-package lexergenerator;
+
+
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -92,7 +93,7 @@ public class RegexConverter {
                 {
                     if (regex.charAt(i-1) == ')')
                     {
-                        regex = insertCharAt(regex,i,"|"+LexerGenerator.EPSILON+")");
+                        regex = insertCharAt(regex,i,"|"+resultadoGeneradorMain.EPSILON+")");
                         
                         int j =i;
                         while (j!=0)
@@ -111,7 +112,7 @@ public class RegexConverter {
                     }
                     else
                     {
-                        regex = insertCharAt(regex,i,"|"+LexerGenerator.EPSILON+")");
+                        regex = insertCharAt(regex,i,"|"+resultadoGeneradorMain.EPSILON+")");
                         regex = insertCharAt(regex,i-1,"("+regex.charAt(i-1));
                     }
                 }

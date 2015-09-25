@@ -109,7 +109,7 @@ public class Automata {
     public void createAlfabeto(String regex) {
         for (Character ch: regex.toCharArray()){
            
-            if (ch != '|' && ch != '.' && ch != '*' && ch != LexerGenerator.EPSILON_CHAR)
+            if (ch != '|' && ch != '.' && ch != '*' && ch != LexerGeneratorMain.EPSILON_CHAR)
                 this.alfabeto.add(Character.toString(ch));
         }
     }

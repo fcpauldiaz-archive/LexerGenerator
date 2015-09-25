@@ -4,7 +4,7 @@
 *
 */
 
-package lexergenerator;
+
 
 import java.util.ArrayList;
 

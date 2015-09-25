@@ -63,7 +63,7 @@ public class CodeGenerator {
             "import java.io.FileOutputStream;"+"\n"+
             "import java.io.FileWriter;"+"\n"+
             "import java.io.PrintWriter;"+"\n"+
-            "import java.io.FileNotFoundException;"+"\n"+
+            "import java.util.Map;"+"\n"+
             "import java.util.Scanner;"+"\n"+
             "import javax.swing.JFileChooser;"+"\n"+
             "import java.util.Collections;"+"\n"+
@@ -78,14 +78,20 @@ public class CodeGenerator {
             "public class "+this.nombreArchivo+" {"+"\n"+
             ""+"\n"+
             "\t"+"private Simulacion sim = new Simulacion();"+"\n"+
+            "\t"+"private ArrayList<Automata> automatas = new ArrayList();"+"\n"+
+            "\t"+"private HashMap<Integer,String> input;"+"\n"+    
                 
-            "\t"+"public " + this.nombreArchivo+"(){"+"\n"+"\n"
+            "\t"+"public " + this.nombreArchivo+"(HashMap input){"+"\n"+
+             "\t"+"\t"+"this.input=input;"+"\n"+
+            "\t"+"\n"+
              
-           +"\t" + "}"    
+           "\t" + "}"    
                 
         );
 
         scanner_total += crearAutomatasTexto();
+        scanner_total += generar();
+        scanner_total += metodoRevisar();
         scanner_total+="\n"+"}";
         
         ReadFile fileCreator = new ReadFile();
@@ -134,10 +140,11 @@ public class CodeGenerator {
      * @return String con la cadena modificada
      */
     public String crearCadenasOr(String cadena){
-        String or = "";
+        String or = " ";
         if ((cadena.startsWith("\"")||cadena.startsWith("\'"))&&(!cadena.contains("+"))){
              
-             cadena=  cadena.replace("\"", "");
+            cadena=  cadena.replace("\"", "");
+            cadena=  cadena.replace("\'", "");
             for (int i = 0;i<cadena.length();i++){
                 Character c = cadena.charAt(i);
                
@@ -180,11 +187,11 @@ public class CodeGenerator {
                 int lado = calcularConcatenacion(or);
                 if (lado == -1){
                     
-                    or = "("+buscarExpr(or) +")("+ cadenaOr+")";
+                    or = "("+buscarExpr(or) +")|("+ cadenaOr+")";
                 }
                 else if (lado == 1){
                     
-                    or = "("+cadenaOr +")("+ buscarExpr(or)+")";
+                    or = "("+cadenaOr +")|("+ buscarExpr(or)+")";
                 }
                 
                 while (!pilaConcatenacion.isEmpty()){
@@ -217,11 +224,11 @@ public class CodeGenerator {
             int lado = calcularConcatenacion(actual);
             if (lado == -1){
 
-                resultado = "("+buscarExpr(actual) +")("+ cadenaOr+")";
+                resultado = "("+buscarExpr(actual) +")|("+ cadenaOr+")";
             }
             else if (lado == 1){
 
-                resultado = "("+cadenaOr +")("+ buscarExpr(actual)+")";
+                resultado = "("+cadenaOr +")|("+ buscarExpr(actual)+")";
             }
         return resultado;
      }
@@ -321,20 +328,28 @@ public class CodeGenerator {
        afn += "\n";
        afn += "\tpublic void automatas(){";
        afn += "\n";
-       afn += "\t"+"\t"+"ArrayList<Automata> automatas = new ArrayList();"+"\n";
        int counter = 0;
        for (Map.Entry<String, String> entry : cadenaCompleta.entrySet()) {
             String value = entry.getValue();
             String key = entry.getKey();
-            
-            afn += "\n"+
-                 "\t"+"\t" + "RegexConverter convert_"+counter+"= new RegexConverter("+"\""+value+"\""+");"+"\n"+
-                 "\t"+"\t" +"String regex_"+counter+" = convert_"+counter+".infixToPostfix();"+"\n"+
-                 "\t"+"\t" +"AFNConstruct ThomsonAlgorithim_"+counter+" = new AFNConstruct(regex_"+counter+");"+"\n"+
-                 "\t"+"\t" +"ThomsonAlgorithim_"+counter+".construct();"+"\n"+
-                 "\t"+"\t" +"Automata temp_"+counter+ " = ThomsonAlgorithim_"+counter+".getAfn();"+"\n"+
-                 "\t"+ "\t" +"temp.setTipo("+"\""+key+"\""+")"+"\n"+
-                 "\t"+"\t" +"automatas.add(temp_"+counter+ ");"+"\n";
+            if (value.length()>1)
+                afn += "\n"+
+                     "\t"+"\t" + "RegexConverter convert_"+counter+"= new RegexConverter();"+"\n"+
+                     "\t"+"\t" +"String regex_"+counter+" = convert_"+counter+".infixToPostfix("+"\""+value+"\""+");"+"\n"+
+                     "\t"+"\t" +"AFNConstruct ThomsonAlgorithim_"+counter+" = new AFNConstruct(regex_"+counter+");"+"\n"+
+                     "\t"+"\t" +"ThomsonAlgorithim_"+counter+".construct();"+"\n"+
+                     "\t"+"\t" +"Automata temp_"+counter+ " = ThomsonAlgorithim_"+counter+".getAfn();"+"\n"+
+                     "\t"+ "\t" +"temp_"+counter+".setTipo("+"\""+key+"\""+");"+"\n"+
+                     "\t"+"\t" +"automatas.add(temp_"+counter+ ");"+"\n";
+            else{
+                 afn += "\n"+
+                     
+                    
+                     "\t"+"\t" +"Automata temp_"+counter+ " ="+"ThomsonAlgorithim_0"+".afnSimple("+"\""+value+"\""+");"+"\n"+
+                     "\t"+ "\t" +"temp_"+counter+".setTipo("+"\""+key+"\""+");"+"\n"+
+                     "\t"+"\t" +"automatas.add(temp_"+counter+ ");"+"\n";
+                
+            }
             counter++;
         }
        afn += "\t}";
@@ -342,4 +357,116 @@ public class CodeGenerator {
        
        return afn;
    }
+    /**
+     * Métodos auxiliares para revisar autómatas
+     * @return string con los métodos
+     */
+    public String generar(){
+        String metodoVer= "\n"+
+     "\t"+" /**" +"\n "+
+     "\t"+"* Método para revisar que tipo de sub autómata es aceptado por una "+"\n"+
+     "\t"+"* expresión regular"+"\n"+
+     "\t"+"* @param regex expresión regular a comparar"+"\n"+
+     "\t"+"* @param conjunto arreglo de autómatas"+"\n"+
+     "\t"+"*/"+"\n"+
+    "\t"+"public void checkIndividualAutomata(String regex, ArrayList<Automata> conjunto,int lineaActual){"+"\n"+
+        
+        "\t"+"\t"+"ArrayList<Boolean> resultado = new ArrayList();"+"\n"+
+       
+            
+            "\t"+"\t"+"for (int j = 0;j<conjunto.size();j++){"+"\n"+
+                "\t"+"\t"+"\t"+"resultado.add(sim.simular(regex, conjunto.get(j)));"+"\n"+
+               
+           "\t"+ "\t"+"}"+"\n"+
+           
+            "\t"+"\t"+"ArrayList<Integer> posiciones = checkBoolean(resultado);"+"\n"+
+            "\t"+"\t"+"//resultado.clear();"+"\n"+
+            
+           
+            "\t"+"\t"+"for (int k = 0;k<posiciones.size();k++){"+"\n"+
+                
+                "\t"+"\t"+"\t"+"System.out.println(regex+ \": \" + conjunto.get(posiciones.get(k)).getTipo());"+"\n"+
+            "\t"+"\t"+"}"+"\n"+
+            "\t"+"\t"+"if (posiciones.isEmpty()){"+"\n"+
+               "\t"+"\t"+"\t"+"System.out.println(\"Error línea archivo \" + lineaActual +\" : \"+regex+ \" no fue reconocido\");"+"\n"+
+            "\t"+"\t"+"}"+"\n"+
+        
+    "\t"+"}"+"\n"+
+    
+    "\t"+"/**"+"\n"+
+    "\t"+" * Método que devuelve las posiciones en las que el valor que tiene "+"\n"+
+    "\t"+" * en cada posicion es true"+"\n"+
+    "\t"+" * @param bool arreglo de booleanos"+"\n"+
+    "\t"+" * @return arreglo de enteros"+"\n"+
+    "\t"+" */"+"\n"+
+    "\t"+"public ArrayList<Integer>  checkBoolean(ArrayList<Boolean> bool){"+"\n"+
+        "\t"+"\t"+"ArrayList<Integer> posiciones = new ArrayList();"+"\n"+
+       
+        "\t"+"\t"+"for (int i = 0;i<bool.size();i++){"+"\n"+
+            "\t"+"\t"+"\t"+"if (bool.get(i))"+"\n"+
+                "\t"+"\t"+"\t"+"\t"+"posiciones.add(i);"+"\n"+
+        "\t"+"\t"+"}"+"\n"+
+        "\t"+"\t"+"return posiciones;"+"\n"+
+        
+    "\t"+"}"+"\n";
+        return metodoVer;
+    }
+    
+    public String metodoRevisar(){
+        String res = "\n"+
+        "\t"+"public void revisar(){"+"\n"+
+
+        "\t"+"\t"+"for (Map.Entry<Integer, String> entry : input.entrySet()) {"+"\n"+
+	        "\t"+ "\t"+"\t"+"Integer key = entry.getKey();"+"\n"+
+	        "\t"+"\t"+"\t"+"String value = entry.getValue();"+"\n"+
+	        "\t"+"\t"+"\t"+"String[] parts = value.split(\" \");"+"\n"+
+	        "\t"+"\t"+"\t"+"for (int j = 0;j<value.length();j++){"+"\n"+
+		        "\t"+"\t"+"\t"+"\t"+"for (int i= 0;i<parts.length;i++){"+"\n"+
+		            "\t"+"\t"+"\t"+"\t"+"\t"+"this.checkIndividualAutomata(value.charAt(j)+\"\", automatas,key);"+"\n"+
+		        "\t"+"\t"+"\t"+"\t"+"}"+"\n"+
+	    	"\t"+"\t"+"\t"+"}"+"\n"+
+	    "\t"+"\t"+"}"+"\n"+
+	"\t"+"}"+"\n";
+        return res;
+    }
+    
+    public void generarMain(){
+        String res = "\n"+
+        
+        
+        "import java.util.HashMap;"+"\n"+
+
+        "/**"+"\n"+
+         "*"+"\n"+
+         "* @author Pablo"+"\n"+
+         "*/"+"\n"+
+        "public class "+ "resultadoGenerador" +"Main"+" {"+"\n"+
+    
+            "public static String EPSILON = \"ε\";"+"\n"+
+            "public static char EPSILON_CHAR = EPSILON.charAt(0);"+"\n"+
+    
+
+    "/**"+"\n"+
+     "* @param args the command line arguments"+"\n"+
+    " */"+"\n"+
+    "public static void main(String[] args) {"+"\n"+
+        "\t"+ "// TODO code application logic here"+"\n"+
+        "\t"+"ReadFile read = new ReadFile();"+"\n"+
+        "\t"+"HashMap input = read.leerArchivo(\"input\");"+"\n"+
+        "\t"+this.nombreArchivo+" resGenerator = new "+this.nombreArchivo+"(input);"+"\n"+
+        "\t"+"resGenerator.automatas();"+"\n"+
+         "\t"+"resGenerator.revisar();"+
+        
+     
+        
+      
+        
+        "\t"+"}"+"\n"+
+
+    "}"+"\n";
+        
+        ReadFile fileCreator = new ReadFile();
+        fileCreator.crearArchivo(res, "resultadoGeneradorMain");
+        
+    }
 }

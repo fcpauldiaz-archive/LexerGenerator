@@ -2,11 +2,10 @@ a
 b
 c
 Z
-
 A
 9
-92
-2B 9A
+34
+2B 6A
 01
 if
 while

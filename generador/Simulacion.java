@@ -4,7 +4,7 @@
 * Pablo Díaz 13203
 */
 
-package lexergenerator;
+
 
 import java.io.File;
 import java.io.FileWriter;
@@ -44,7 +44,7 @@ public class Simulacion {
            
             for (Transicion t: (ArrayList<Transicion>)actual.getTransiciones()){
                 
-                if (t.getSimbolo().equals(LexerGenerator.EPSILON)&&!resultado.contains(t.getFin())){
+                if (t.getSimbolo().equals(resultadoGeneradorMain.EPSILON)&&!resultado.contains(t.getFin())){
                     resultado.add(t.getFin());
                     pilaClosure.push(t.getFin());
                 }

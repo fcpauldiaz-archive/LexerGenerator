@@ -92,7 +92,7 @@ public class RegexConverter {
                 {
                     if (regex.charAt(i-1) == ')')
                     {
-                        regex = insertCharAt(regex,i,"|"+LexerGenerator.EPSILON+")");
+                        regex = insertCharAt(regex,i,"|"+LexerGeneratorMain.EPSILON+")");
                         
                         int j =i;
                         while (j!=0)
@@ -111,7 +111,7 @@ public class RegexConverter {
                     }
                     else
                     {
-                        regex = insertCharAt(regex,i,"|"+LexerGenerator.EPSILON+")");
+                        regex = insertCharAt(regex,i,"|"+LexerGeneratorMain.EPSILON+")");
                         regex = insertCharAt(regex,i-1,"("+regex.charAt(i-1));
                     }
                 }
