@@ -444,8 +444,8 @@ public class LexerAnalyzer {
     }
     /**
      * Método para revisar el Set
-     * @param lineaActual 
-     * @param lastIndex último índice de la líneaActual
+     * @param regex string a revisar
+     * @param lineaActual del archivo
      * @return ArrayList
      * Set = BasicSet (('+'|'-') BasicSet)*.
      */
@@ -491,7 +491,7 @@ public class LexerAnalyzer {
     /**
      * 
      * @param lineaActual 
-     * @param lastIndex último índice de la cadena utilizado
+     * @param regex string a revisar
      * @return ArrayList
      * BasicSet = string | ident | Char [ "..." Char].
      */

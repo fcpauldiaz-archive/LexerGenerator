@@ -48,7 +48,7 @@ public class Ejemplo {
 		automatas.add(temp_1);
 
 		RegexConverter convert_2= new RegexConverter();
-		String regex_2 = convert_2.infixToPostfix("digit+"ABCDEF"");
+		String regex_2 = convert_2.infixToPostfix("( 1|2|3|4|5|6|7|8|9)|( A|B|C|D|E|F)");
 		AFNConstruct ThomsonAlgorithim_2 = new AFNConstruct(regex_2);
 		ThomsonAlgorithim_2.construct();
 		Automata temp_2 = ThomsonAlgorithim_2.getAfn();

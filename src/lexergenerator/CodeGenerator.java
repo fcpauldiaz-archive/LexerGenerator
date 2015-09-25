@@ -181,6 +181,7 @@ public class CodeGenerator {
                 if (w.contains("\""))
                     postIndex = w.indexOf(("\""));
                 String wFinal = cadena.substring(preIndex,preIndex+postIndex+2);
+                
                 System.out.println(wFinal);
                 String cadenaOr = crearCadenasOr(wFinal);
                 //calcular si se concatena a la izquierda o derecha
@@ -251,7 +252,7 @@ public class CodeGenerator {
      */
     public int calcularConcatenacion(String str){
         int posicion = 0;
-        int posConc = str.indexOf("+");
+        int posConc = str.indexOf("+")+1;
         String ident = buscarIdent(str);
         int indexIdent = str.indexOf(ident) + ident.length();
         if (indexIdent<posConc)
