@@ -25,6 +25,7 @@ public class Ejemplo {
 	private Simulacion sim = new Simulacion();
 	private ArrayList<Automata> automatas = new ArrayList();
 	private HashMap<Integer,String> input;
+	private ArrayList keywords = new ArrayList();
 	public Ejemplo(HashMap input){
 		this.input=input;
 	
@@ -71,17 +72,25 @@ public class Ejemplo {
 		temp_4.setTipo("lol");
 		automatas.add(temp_4);
 
-		Automata temp_5 =ThomsonAlgorithim_0.afnSimple(" ");
-		temp_5.setTipo("space");
+		RegexConverter convert_5= new RegexConverter();
+		String regex_5 = convert_5.infixToPostfix("(P|Q|R|S|T|U|V|W|X|Y|Z)");
+		AFNConstruct ThomsonAlgorithim_5 = new AFNConstruct(regex_5);
+		ThomsonAlgorithim_5.construct();
+		Automata temp_5 = ThomsonAlgorithim_5.getAfn();
+		temp_5.setTipo("list");
 		automatas.add(temp_5);
 
-		RegexConverter convert_6= new RegexConverter();
-		String regex_6 = convert_6.infixToPostfix(" 1|2|3|4|5|6|7|8|9");
-		AFNConstruct ThomsonAlgorithim_6 = new AFNConstruct(regex_6);
-		ThomsonAlgorithim_6.construct();
-		Automata temp_6 = ThomsonAlgorithim_6.getAfn();
-		temp_6.setTipo("digit");
+		Automata temp_6 =ThomsonAlgorithim_0.afnSimple(" ");
+		temp_6.setTipo("space");
 		automatas.add(temp_6);
+
+		RegexConverter convert_7= new RegexConverter();
+		String regex_7 = convert_7.infixToPostfix(" 1|2|3|4|5|6|7|8|9");
+		AFNConstruct ThomsonAlgorithim_7 = new AFNConstruct(regex_7);
+		ThomsonAlgorithim_7.construct();
+		Automata temp_7 = ThomsonAlgorithim_7.getAfn();
+		temp_7.setTipo("digit");
+		automatas.add(temp_7);
 	}
 	 /**
  	* Método para revisar que tipo de sub autómata es aceptado por una 
@@ -124,11 +133,17 @@ public class Ejemplo {
 			String value = entry.getValue();
 			String[] parts = value.split(" ");
 			for (int j = 0;j<value.length();j++){
-				for (int i= 0;i<parts.length;i++){
+				if (!keywords.contains(value))
 					this.checkIndividualAutomata(value.charAt(j)+"", automatas,key);
-				}
 			}
+			if (keywords.contains(value))
+					System.out.println(value +":" + value);
 		}
 	}
+
+	public void keyWords(){
+		keywords.add("if");
+		keywords.add("while");
+		}
 
 }

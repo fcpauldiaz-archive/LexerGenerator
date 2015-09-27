@@ -127,12 +127,9 @@ public class LexerAnalyzer {
          
         
         
-        Automata apch1 = ThomsonAlgorithim.afnSimple("\'");
-        Automata apch2 = ThomsonAlgorithim.afnSimple("\'");
+       
         character_ = ThomsonAlgorithim.union(number_, letter_);
-        character_ = ThomsonAlgorithim.concatenacion(apch1, character_);
-        character_ = ThomsonAlgorithim.concatenacion(character_,apch2);
-        regex = convert.infixToPostfix("\"CHR\"(");
+        regex = convert.infixToPostfix("CHR(");
         ThomsonAlgorithim = new AFNConstruct(regex);
         ThomsonAlgorithim.construct();
         Automata leftChar = ThomsonAlgorithim.getAfn();
@@ -145,6 +142,8 @@ public class LexerAnalyzer {
        
         character_ = ThomsonAlgorithim.union(character_,innerChar);
         character_.setTipo("character");
+       
+        
        
         
         
@@ -299,13 +298,11 @@ public class LexerAnalyzer {
         lineaActual = avanzarLinea(lineaActual);
         //[KEYWORDS = {KeyWordDeclaration}]
         while (true){
-            ArrayList keywords = keywordDeclaration(lineaActual);
-            if (keywords.isEmpty()){
+            boolean keywords = keywordDeclaration(lineaActual);
+            if (!keywords){
                 lineaActual = retrocederLinea(lineaActual);
                 break;
             }
-            returnIndex += (int)keywords.get(0);
-            returnString += (String)keywords.get(1);
             lineaActual = avanzarLinea(lineaActual);
             
         }
@@ -340,36 +337,42 @@ public class LexerAnalyzer {
         return this.cadena.get(lineaActual).contains("IGNORE");
     }
     
-    public ArrayList keywordDeclaration(int lineaActual){
+    public boolean keywordDeclaration(int lineaActual){
         
         if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("CHARACTERS")
                 ||this.cadena.get(lineaActual).contains("IGNORE"))
-            return new ArrayList();
+            return false;
+        
+        //revisr identificador y símbolo '='
+        try{
+            int indexSearch = this.cadena.get(lineaActual).indexOf("=")-1;
+             while (this.cadena.get(lineaActual).substring(0, indexSearch).contains(" "))
+                indexSearch--;
+           
+            boolean identifier = checkAutomata(this.ident_,this.cadena.get(lineaActual).substring(0,indexSearch));
+            ///  int index1  = returnArray(identifier);
+              if (!identifier){
+                  return false;
+              }
+           
+        }catch(Exception e){}
         
         
-        ArrayList res1 = checkAutomata(this.ident_,lineaActual,0);
-        int index1  = returnArray(res1);
-        if (res1.isEmpty()){
-            return new ArrayList();
-        }
+         //revisar string
+        try{
+            int indexSearch = this.cadena.get(lineaActual).indexOf("=")+1;
+            String cadenaRevisar = this.cadena.get(lineaActual).substring(indexSearch);
+            while(cadenaRevisar.startsWith(" "))
+                cadenaRevisar = this.cadena.get(lineaActual).substring(++indexSearch);
+            if (cadenaRevisar.substring(0, cadenaRevisar.length()).contains("."))
+                cadenaRevisar = cadenaRevisar.substring(0, cadenaRevisar.length()-1);
+            boolean resSet = checkAutomata(this.string_,cadenaRevisar);
+         }catch(Exception e){
+             this.output=false;
+         }
         
-        ArrayList res2 = checkAutomata(this.igual_,lineaActual,index1);
-        
-        int index2 = returnArray(res2);
-        if (res2.isEmpty())
-            return new ArrayList();
-        
-         //revisar '='
-       
-        ArrayList res3 = checkAutomata(this.string_,lineaActual,index1+index2);
-        
-        int index3 = returnArray(res3);
-        if (res3.isEmpty())
-            return new ArrayList();
-        
-        
-        
-        return res3;
+        //si lelga hasta aquí la cadena es válida
+        return true;
     }
     
     
@@ -399,6 +402,7 @@ public class LexerAnalyzer {
               }
         }catch(Exception e){
             System.out.println("Error, no hay \"=\" en la línea " + lineaActual);
+            this.output=false;
         }
         
       
@@ -415,6 +419,7 @@ public class LexerAnalyzer {
                 return false;
         }catch(Exception e){
             System.out.println("Error, no hay \"=\" en la línea " + lineaActual);
+            this.output=false;
         }
      
         
@@ -424,10 +429,12 @@ public class LexerAnalyzer {
             String cadenaRevisar = this.cadena.get(lineaActual).substring(indexSearch);
             while(cadenaRevisar.startsWith(" "))
                 cadenaRevisar = this.cadena.get(lineaActual).substring(++indexSearch);
-            if (cadenaRevisar.contains("."))
-                cadenaRevisar = cadenaRevisar.replace(".", "");
+            if (cadenaRevisar.substring(0, cadenaRevisar.length()).contains("."))
+                cadenaRevisar = cadenaRevisar.substring(0, cadenaRevisar.length()-1);
             boolean resSet = set(lineaActual,cadenaRevisar);
-         }catch(Exception e){}
+         }catch(Exception e){
+             this.output=false;
+         }
         //ArrayList resSet = set(lineaActual,index2+index1);
       
        // if (resSet.isEmpty())
@@ -466,7 +473,25 @@ public class LexerAnalyzer {
         
         
         
-        while(true){
+       
+        if (regex.contains("+")){
+           String[] parts = regex.split("\\+");
+           for (int i = 0;i<parts.length;i++){
+               //System.out.println(parts[i]);
+               checkAutomata(this.basicSet_,parts[i]);
+           }
+          
+            
+        }
+       
+
+        
+        return true;
+    }
+    
+    public boolean revisarRecursive(String regex, int lineaActual){
+        String revisar;
+         while(true){
             if (regex.contains("+"))
                 revisar = regex.substring(regex.indexOf("+"),regex.indexOf("+")+1);
             else
@@ -476,7 +501,10 @@ public class LexerAnalyzer {
                 break;
                 
             regex = regex.substring(regex.indexOf("+")+1);
-            
+            if (regex.contains("+")){
+                if (revisarRecursive(regex,lineaActual))
+                    regex = regex.substring(lineaActual);
+            }
             boolean b = basicSet(lineaActual,regex.trim());
             if (!b)
                 return false;
@@ -484,10 +512,9 @@ public class LexerAnalyzer {
 
 
         }
-
-        
-        return true;
+       return true;
     }
+    
     /**
      * 
      * @param lineaActual 
@@ -509,9 +536,6 @@ public class LexerAnalyzer {
         
        if (!resBasicSet)
             System.out.println("Error línea archivo "+ lineaActual + regex + " no fue reconocido");
-    
-       
-        
         
        
         return resBasicSet;

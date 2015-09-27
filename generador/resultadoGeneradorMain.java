@@ -16,6 +16,8 @@ public static void main(String[] args) {
 	HashMap input = read.leerArchivo("input");
 	Ejemplo resGenerator = new Ejemplo(input);
 	resGenerator.automatas();
-	resGenerator.revisar();	}
+	resGenerator.keyWords();
+	resGenerator.revisar();
+	}
 }
 

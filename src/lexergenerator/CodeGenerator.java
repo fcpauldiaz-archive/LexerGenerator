@@ -18,10 +18,11 @@ import java.util.Stack;
  */
 public class CodeGenerator {
     
-    private HashMap<Integer,String> cadena;
+    private final HashMap<Integer,String> cadena;
     private String nombreArchivo;
-    private HashMap<String, String> cadenaCompleta = new HashMap();
-    private Stack pilaConcatenacion = new Stack();
+    private final HashMap<String, String> cadenaCompleta = new HashMap();
+    private ArrayList<String> keywords = new ArrayList();
+    private final Stack pilaConcatenacion = new Stack();
     
     public CodeGenerator(HashMap cadena){
         this.cadena=cadena;
@@ -79,7 +80,8 @@ public class CodeGenerator {
             ""+"\n"+
             "\t"+"private Simulacion sim = new Simulacion();"+"\n"+
             "\t"+"private ArrayList<Automata> automatas = new ArrayList();"+"\n"+
-            "\t"+"private HashMap<Integer,String> input;"+"\n"+    
+            "\t"+"private HashMap<Integer,String> input;"+"\n"+   
+             "\t"+"private ArrayList keywords = new ArrayList();"+"\n"+
                 
             "\t"+"public " + this.nombreArchivo+"(HashMap input){"+"\n"+
              "\t"+"\t"+"this.input=input;"+"\n"+
@@ -92,6 +94,7 @@ public class CodeGenerator {
         scanner_total += crearAutomatasTexto();
         scanner_total += generar();
         scanner_total += metodoRevisar();
+        scanner_total += keyWords();
         scanner_total+="\n"+"}";
         
         ReadFile fileCreator = new ReadFile();
@@ -106,29 +109,48 @@ public class CodeGenerator {
         
         for (Map.Entry<Integer, String> entry : cadena.entrySet()) {
         String value = entry.getValue();
-        if (value.contains("CHARACTERS")){
-            int lineaActual = entry.getKey();
-            while(true){
-                lineaActual = avanzarLinea(lineaActual);
-                if (this.cadena.get(lineaActual).contains("KEYWORDS"))
-                    break;
-                String valor = this.cadena.get(lineaActual);
-                valor = valor.trim();
-                int index = valor.indexOf("=");
-                String ident = valor.substring(0,index);
-                String revisar  = valor.substring(++index,valor.length()-1);
-                revisar = revisar.trim();
-                revisar = crearCadenasOr(revisar);
-              
-                cadenaCompleta.put(ident.trim(), revisar);
-               
-                System.out.println(cadenaCompleta);
-                
+            if (value.contains("CHARACTERS")){
+                int lineaActual = entry.getKey();
+                while(true){
+                    lineaActual = avanzarLinea(lineaActual);
+                    if (this.cadena.get(lineaActual).contains("KEYWORDS"))
+                        break;
+                    String valor = this.cadena.get(lineaActual);
+                    valor = valor.trim();
+                    int index = valor.indexOf("=");
+                    String ident = valor.substring(0,index);
+                    String revisar  = valor.substring(++index,valor.length()-1);
+                    revisar = revisar.trim();
+                    revisar = crearCadenasOr(revisar);
+
+                    cadenaCompleta.put(ident.trim(), revisar);
+
+                    //System.out.println(cadenaCompleta);
+
+                }
+
             }
-            
+            if (value.contains("KEYWORDS")){
+                int lineaActual = entry.getKey();
+                while(true){
+                    lineaActual = avanzarLinea(lineaActual);
+                    if (this.cadena.get(lineaActual).contains("END"))
+                        break;
+                    String valor = this.cadena.get(lineaActual);
+                    valor = valor.trim();
+                    int index = valor.indexOf("=");
+                    String ident = valor.substring(0,index);
+                    String revisar  = valor.substring(++index,valor.length()-1);
+                    revisar = revisar.trim();
+                    //revisar = crearCadenasOr(revisar);
+
+                    keywords.add(revisar);
+                    
+                }
+            }
+
         }
-        
-        }
+        System.out.println(cadenaCompleta);
         
     }
     
@@ -162,15 +184,15 @@ public class CodeGenerator {
             
            
         }
-        else{
+        else {
             or = cadena;
             if(cadena.contains("+")){
                 int cantidadConcatenaciones = count(cadena,'+');
                 if (cantidadConcatenaciones>1){
-                    System.out.println(cadena.lastIndexOf("+"));
-                    System.out.println(cadena.substring(0, cadena.indexOf("+", cadena.indexOf("+") + 1)));
+                   // System.out.println(cadena.lastIndexOf("+"));
+                    //System.out.println(cadena.substring(0, cadena.indexOf("+", cadena.indexOf("+") + 1)));
                     pilaConcatenacion.push(cadena.substring(cadena.indexOf("+", cadena.indexOf("+") + 1)));
-                    System.out.println(pilaConcatenacion);
+                   // System.out.println(pilaConcatenacion);
                 }
                // System.out.println(cantidadConcatenaciones);
                 int preIndex=0;
@@ -182,7 +204,7 @@ public class CodeGenerator {
                     postIndex = w.indexOf(("\""));
                 String wFinal = cadena.substring(preIndex,preIndex+postIndex+2);
                 
-                System.out.println(wFinal);
+                //System.out.println(wFinal);
                 String cadenaOr = crearCadenasOr(wFinal);
                 //calcular si se concatena a la izquierda o derecha
                 int lado = calcularConcatenacion(or);
@@ -206,6 +228,14 @@ public class CodeGenerator {
                         or = concatenacion(or,faltante);
                 }
                 
+            }
+            if (cadena.contains("CHR")){
+                int empieza = Integer.parseInt(cadena.substring(cadena.indexOf("(")+1,cadena.indexOf(")")));
+                int termina = Integer.parseInt(cadena.substring(cadena.lastIndexOf("(")+1,cadena.lastIndexOf(")")));
+                
+                
+                RegexConverter convert = new RegexConverter();
+                or = convert.abreviacionOr("["+(char)(empieza)+"-"+(char)(termina)+"]");
             }
         }
         return or;
@@ -422,13 +452,28 @@ public class CodeGenerator {
 	        "\t"+"\t"+"\t"+"String value = entry.getValue();"+"\n"+
 	        "\t"+"\t"+"\t"+"String[] parts = value.split(\" \");"+"\n"+
 	        "\t"+"\t"+"\t"+"for (int j = 0;j<value.length();j++){"+"\n"+
-		        "\t"+"\t"+"\t"+"\t"+"for (int i= 0;i<parts.length;i++){"+"\n"+
+		       
+                        "\t"+"\t"+"\t"+"\t"+"if (!keywords.contains(value))"+"\n"+
 		            "\t"+"\t"+"\t"+"\t"+"\t"+"this.checkIndividualAutomata(value.charAt(j)+\"\", automatas,key);"+"\n"+
-		        "\t"+"\t"+"\t"+"\t"+"}"+"\n"+
+                       
 	    	"\t"+"\t"+"\t"+"}"+"\n"+
+               "\t"+"\t"+"\t"+ "if (keywords.contains(value))"+"\n"+
+                 "\t"+"\t"+"\t"+"\t"+"\t"+"System.out.println(value +\":\" + value);"+"\n"+
 	    "\t"+"\t"+"}"+"\n"+
 	"\t"+"}"+"\n";
         return res;
+    }
+    
+    public String keyWords(){
+        String words = "\n"+
+        "\t"+"public void keyWords(){"+"\n";
+         for (int i =0;i<keywords.size();i++){
+            words +="\t"+"\t"+ "keywords.add("+keywords.get(i)+");"+"\n";
+         
+         }
+         words+="\t"+"\t"+"}"+"\n";
+         
+        return words;
     }
     
     public void generarMain(){
@@ -456,7 +501,8 @@ public class CodeGenerator {
         "\t"+"HashMap input = read.leerArchivo(\"input\");"+"\n"+
         "\t"+this.nombreArchivo+" resGenerator = new "+this.nombreArchivo+"(input);"+"\n"+
         "\t"+"resGenerator.automatas();"+"\n"+
-         "\t"+"resGenerator.revisar();"+
+         "\t"+"resGenerator.keyWords();"+ "\n"+
+         "\t"+"resGenerator.revisar();"+"\n"+
         
      
         

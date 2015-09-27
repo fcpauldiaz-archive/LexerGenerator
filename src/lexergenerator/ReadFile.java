@@ -100,7 +100,7 @@ public class ReadFile {
 
                 bw.close();
 
-                System.out.println("Se ha creado el archivo exitosamente");
+                System.out.println("Se ha creado el archivo " + nombreArchivo +" exitosamente");
 
         } catch (IOException e) {
             e.printStackTrace();
