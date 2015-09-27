@@ -8,12 +8,14 @@ binario = "01".
 hexdigit = digit + "ABCDEF".
 lol = "LOL".
 character = 'b'.
-space = ' '.
-list = CHR(33)..CHR(39).
+espacio = ' '.
+some_chars = CHR(33)..CHR(39).
+escape_chars = some_chars + "\\".
 
 KEYWORDS
 if =    "if".
 while="while".
+true="true".
 
 
 END Lexer.

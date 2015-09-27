@@ -162,24 +162,39 @@ public class CodeGenerator {
      * @return String con la cadena modificada
      */
     public String crearCadenasOr(String cadena){
-        String or = " ";
+        String or = "";
         if ((cadena.startsWith("\"")||cadena.startsWith("\'"))&&(!cadena.contains("+"))){
              
-            cadena=  cadena.replace("\"", "");
-            cadena=  cadena.replace("\'", "");
+            try{
+               
+            cadena=  cadena.substring(cadena.indexOf("\"")+1,cadena.lastIndexOf("\""));
+           
+            }catch(Exception e){}
+            
+             try{
+                
+            cadena=  cadena.substring(cadena.indexOf("\'")+1,cadena.lastIndexOf("\'"));
+           
+            }catch(Exception e){}
+            
             for (int i = 0;i<cadena.length();i++){
                 Character c = cadena.charAt(i);
                
-                    if (c != ' '){
-                   
-                      
-                        if (i<=cadena.length()-2)
+                    
+                        if (c=='\\'){
+                           
+                            or += c;
+                            or += cadena.charAt(i+1);
+                            i++;
+                           
+                        }
+                        else if (i<=cadena.length()-2)
                             or += c +"|";
-                        if (i>cadena.length()-2)
+                        else if (i>cadena.length()-2)
                             or +=c;
                         
 
-                }
+                
             }
            
             
@@ -239,7 +254,7 @@ public class CodeGenerator {
                 or = convert.abreviacionOr("["+(char)(empieza)+"-"+(char)(termina)+"]");
             }
         }
-        return or;
+        return "("+or+")+";
      }
     /**
      * Método auxiliar que se llama cuando hay más de una concatenación
@@ -310,6 +325,7 @@ public class CodeGenerator {
             }
 
         }
+        System.out.println("Identificador no declarado "+ "\n");
         return res;
         
     }
@@ -417,7 +433,7 @@ public class CodeGenerator {
            
             "\t"+"\t"+"for (int k = 0;k<posiciones.size();k++){"+"\n"+
                 
-                "\t"+"\t"+"\t"+"System.out.println(regex+ \": \" + conjunto.get(posiciones.get(k)).getTipo());"+"\n"+
+                "\t"+"\t"+"\t"+"System.out.println(\"<\"+conjunto.get(posiciones.get(k)).getTipo()+ \", \" +\"\\\"\"+regex +\"\\\"\"+\">\");"+"\n"+
             "\t"+"\t"+"}"+"\n"+
             "\t"+"\t"+"if (posiciones.isEmpty()){"+"\n"+
                "\t"+"\t"+"\t"+"System.out.println(\"Error línea archivo \" + lineaActual +\" : \"+regex+ \" no fue reconocido\");"+"\n"+
@@ -459,7 +475,7 @@ public class CodeGenerator {
                        
 	    	"\t"+"\t"+"\t"+"}"+"\n"+
                "\t"+"\t"+"\t"+ "if (keywords.contains(value))"+"\n"+
-                 "\t"+"\t"+"\t"+"\t"+"\t"+"System.out.println(value +\":\" + value);"+"\n"+
+                 "\t"+"\t"+"\t"+"\t"+"\t"+"System.out.println(\"<\"+value +\",\" +\"\\\"\"+ value+\"\\\"\"+\">\");"+"\n"+
 	    "\t"+"\t"+"}"+"\n"+
 	"\t"+"}"+"\n";
         return res;

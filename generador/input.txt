@@ -1,13 +1,17 @@
-a 
+a
 b
 c
 Z
 A
 9
 34
+5F
 2B 6A
 01
 if
 while
+true
+"
+\
 @
 
