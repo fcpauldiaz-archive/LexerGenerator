@@ -337,6 +337,11 @@ public class LexerAnalyzer {
         return this.cadena.get(lineaActual).contains("IGNORE");
     }
     
+    /**
+     * Método para revisar las keywords
+     * @param lineaActual
+     * @return devuelve true si fue aceptada la estructra false contrario
+     */
     public boolean keywordDeclaration(int lineaActual){
         
         if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("CHARACTERS")
@@ -379,7 +384,7 @@ public class LexerAnalyzer {
     /**
      * Método para revisar SetDeclaration
      * @param lineaActual
-     * @return ArrayList con la cadena revisada
+     * @return boolean con el estado de aceptacion
      * SetDecl = ident '=' Set '.'.
      * 
      */
@@ -453,7 +458,7 @@ public class LexerAnalyzer {
      * Método para revisar el Set
      * @param regex string a revisar
      * @param lineaActual del archivo
-     * @return ArrayList
+     * @return boolean (true aceptado, false contrario)
      * Set = BasicSet (('+'|'-') BasicSet)*.
      */
     public boolean set(int lineaActual,String regex){
@@ -476,15 +481,13 @@ public class LexerAnalyzer {
        
         if (regex.contains("+")){
            String[] parts = regex.split("\\+");
-           for (int i = 0;i<parts.length;i++){
-               //System.out.println(parts[i]);
-               checkAutomata(this.basicSet_,parts[i]);
-           }
+            for (String part : parts) {
+                //System.out.println(parts[i]);
+                checkAutomata(this.basicSet_, part);
+            }
           
             
         }
-       
-
         
         return true;
     }
@@ -519,7 +522,7 @@ public class LexerAnalyzer {
      * 
      * @param lineaActual 
      * @param regex string a revisar
-     * @return ArrayList
+     * @return booelan con el estado de aceptacion
      * BasicSet = string | ident | Char [ "..." Char].
      */
     public boolean basicSet(int lineaActual,String regex){
@@ -563,12 +566,18 @@ public class LexerAnalyzer {
      * Revisasr si el archivo no tiene errores
      */
     
-    public void getOutput(){
+    /**
+     * Devuelve el estado final del archivo
+     * @return
+     */
+    public boolean getOutput(){
         if (output){
             System.out.println("Archivo Cocol/R Aceptado");
+            return true;
         }
         else{
             System.out.println("Archivo  Cocol/R no aceptado, tiene errores de estructura");
+            return false;
         }
     }
     
@@ -639,11 +648,19 @@ public class LexerAnalyzer {
         
     }
     
-    
+    /**
+     * Sobrecarga del método para revisar los autómatas en una expresión
+     * @param param
+     * @param regex
+     * @return true aceptado, false si no es acepatada la cadena
+     */
     public boolean checkAutomata(Automata param, String regex){
         return sim.simular(regex, param);
     }
-    
+    /**
+     * Método auxiliar para generar autómatas dependiendo de lo que se ingrese.
+     * @param cadena 
+     */
     public void crearAutomata(String cadena){
         if (cadena.startsWith("\"")){
             String or = "";
@@ -688,6 +705,11 @@ public class LexerAnalyzer {
         
     }
     
+    /**
+     * Método para buscar un autómata dependiendo de su tipo
+     * @param tipo
+     * @return devuleve el indice en el arreglo.
+     */
     public int buscarAFN(String tipo){
         for (int i = 0;i<generador.size();i++){
             if (generador.get(i).getTipo().equals(tipo))
