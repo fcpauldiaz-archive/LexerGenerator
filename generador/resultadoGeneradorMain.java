@@ -14,7 +14,7 @@ public static void main(String[] args) {
 	// TODO code application logic here
 	ReadFile read = new ReadFile();
 	HashMap input = read.leerArchivo("input");
-	Ejemplo resGenerator = new Ejemplo(input);
+	Lexer resGenerator = new Lexer(input);
 	resGenerator.automatas();
 	resGenerator.keyWords();
 	resGenerator.revisar();

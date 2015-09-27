@@ -27,15 +27,17 @@ public class LexerGeneratorMain {
         LexerAnalyzer lexer = new LexerAnalyzer(cocol);
         lexer.vocabulario();
         lexer.construct(cocol);
-        lexer.getOutput();
-        //lexer.check(input);
-        CodeGenerator generator = new CodeGenerator(cocol);
-        generator.encontrarNombre();
         
-        generator.generarCharactersYKeywords();
-        generator.generarClaseAnalizadora();
-        generator.generarMain();
+       
         
+        if (lexer.getOutput()){
+            System.out.println("Generando Analizador Léxico....");
+            CodeGenerator generator = new CodeGenerator(cocol);
+            generator.encontrarNombre();
+            generator.generarCharactersYKeywords();
+            generator.generarClaseAnalizadora();
+            generator.generarMain();
+        }
       
         
     }

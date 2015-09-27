@@ -172,6 +172,7 @@ public class CodeGenerator {
                
                     if (c != ' '){
                    
+                      
                         if (i<=cadena.length()-2)
                             or += c +"|";
                         if (i>cadena.length()-2)

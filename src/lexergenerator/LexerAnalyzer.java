@@ -127,8 +127,11 @@ public class LexerAnalyzer {
          
         
         
-       
+         Automata apch1 = ThomsonAlgorithim.afnSimple("\'");
+        Automata apch2 = ThomsonAlgorithim.afnSimple("\'");
         character_ = ThomsonAlgorithim.union(number_, letter_);
+         character_ = ThomsonAlgorithim.concatenacion(apch1, character_);
+        character_ = ThomsonAlgorithim.concatenacion(character_,apch2);
         regex = convert.infixToPostfix("CHR(");
         ThomsonAlgorithim = new AFNConstruct(regex);
         ThomsonAlgorithim.construct();
@@ -371,6 +374,8 @@ public class LexerAnalyzer {
                 cadenaRevisar = this.cadena.get(lineaActual).substring(++indexSearch);
             if (cadenaRevisar.substring(0, cadenaRevisar.length()).contains("."))
                 cadenaRevisar = cadenaRevisar.substring(0, cadenaRevisar.length()-1);
+            else    
+                System.out.println("No contiene punto al final, línea  " + lineaActual);
             boolean resSet = checkAutomata(this.string_,cadenaRevisar);
          }catch(Exception e){
              this.output=false;
@@ -436,6 +441,8 @@ public class LexerAnalyzer {
                 cadenaRevisar = this.cadena.get(lineaActual).substring(++indexSearch);
             if (cadenaRevisar.substring(0, cadenaRevisar.length()).contains("."))
                 cadenaRevisar = cadenaRevisar.substring(0, cadenaRevisar.length()-1);
+            else
+                 System.out.println("No contiene punto al final, línea " + lineaActual);
             boolean resSet = set(lineaActual,cadenaRevisar);
          }catch(Exception e){
              this.output=false;

@@ -26,6 +26,7 @@ public class RegexConverter {
     
     /** Mapa de precedencia de los operadores. */
 	private final Map<Character, Integer> precedenciaOperadores;
+        private final String escapeChars = "\"" + "\'" +"\\";
         
         //constructor
 	public RegexConverter()
@@ -233,7 +234,7 @@ public class RegexConverter {
             }
            
             //regex = balancearParentesis(regex);
-            
+           
             return regex;
         }
 	/**
@@ -281,6 +282,7 @@ public class RegexConverter {
         
         public String abreviacionOr(String regex){
             String resultado = new String();
+            String pos ="";
             try{        
             for (int i=0;i<regex.length();i++){
                 Character ch = regex.charAt(i);
@@ -291,10 +293,16 @@ public class RegexConverter {
                         resultado +="(";
                         for (int j = 0;j<=fin-inicio;j++)
                         {
+                            if (this.escapeChars.contains(Character.toString((char)(inicio+j))))
+                                   pos="\\";
                             if (j==(fin-inicio))
-                                resultado+= Character.toString((char)(inicio+j));
-                            else
-                             resultado+= Character.toString((char)(inicio+j))+'|';
+                                resultado+= pos + Character.toString((char)(inicio+j));
+                            else{
+                                
+                                resultado+= pos + Character.toString((char)(inicio+j))+'|';
+                                
+                            }
+                            pos="";
                         }
                         resultado +=")";
                         i=i+4;
@@ -318,6 +326,7 @@ public class RegexConverter {
         
           public String abreviacionAnd(String regex){
             String resultado = new String();
+            String pos ="";
            try{         
             for (int i=0;i<regex.length();i++){
                 Character ch = regex.charAt(i);
@@ -328,8 +337,11 @@ public class RegexConverter {
                         resultado +="(";
                         for (int j = 0;j<=fin-inicio;j++)
                         {
+                            
+                                    
+                            
+                            resultado+= pos+Character.toString((char)(inicio+j));
                            
-                            resultado+= Character.toString((char)(inicio+j));
                         }
                         resultado +=")";
                         i=i+4;
@@ -363,19 +375,21 @@ public class RegexConverter {
 
 		String formattedRegEx = formatRegEx(regex);
                 //System.out.println(formattedRegEx);
-		for (Character c : formattedRegEx.toCharArray()) {
+		for (int i = 0;i< formattedRegEx.length();i++) {
+                    Character c = formattedRegEx.charAt(i);
+                   
 			switch (c) {
-				case '(':
+                                    
+                                case '(':
 					stack.push(c);
 					break;
-
-				case ')':
+                                case ')':
 					while (!stack.peek().equals('(')) {
 						postfix += stack.pop();
 					}
 					stack.pop();
 					break;
-
+                                
 				default:
 					while (stack.size() > 0) 
                                         {
@@ -402,7 +416,7 @@ public class RegexConverter {
 
 		while (stack.size() > 0)
 			postfix += stack.pop();
-
+                
 		return postfix;
 	}
 

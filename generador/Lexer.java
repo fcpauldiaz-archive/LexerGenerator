@@ -1,5 +1,5 @@
 /**
- * Nombre del archivo: Ejemplo.java
+ * Nombre del archivo: Lexer.java
  * Universidad del Valle de Guatemala
  * Pablo Diaz 13203 
  * Descripción: Segundo proyecto. Generador de analizador léxico
@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class Ejemplo {
+public class Lexer {
 
 	private Simulacion sim = new Simulacion();
 	private ArrayList<Automata> automatas = new ArrayList();
 	private HashMap<Integer,String> input;
 	private ArrayList keywords = new ArrayList();
-	public Ejemplo(HashMap input){
+	public Lexer(HashMap input){
 		this.input=input;
 	
 	}

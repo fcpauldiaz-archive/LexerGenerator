@@ -1,4 +1,4 @@
-COMPILER Ejemplo
+COMPILER Lexer
 
 CHARACTERS
 
@@ -9,11 +9,11 @@ hexdigit = digit + "ABCDEF".
 lol = "LOL".
 character = 'b'.
 space = ' '.
-list = CHR(80)..CHR(90).
+list = CHR(33)..CHR(39).
 
 KEYWORDS
 if =    "if".
 while="while".
 
 
-END Ejemplo.
+END Lexer.
