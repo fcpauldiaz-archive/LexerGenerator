@@ -5,7 +5,9 @@
 
 package lexergenerator;
 
+import java.io.File;
 import java.util.HashMap;
+import javax.swing.JFileChooser;
 
 /**
  *
@@ -22,8 +24,17 @@ public class LexerGeneratorMain {
     public static void main(String[] args) {
         // TODO code application logic here
         ReadFile read = new ReadFile();
-        HashMap cocol = read.leerArchivo("cocol");
-        HashMap input = read.leerArchivo("input");
+        File file = new File("cocol"+".txt");
+        JFileChooser chooser = new JFileChooser();
+        int returnVal = chooser.showOpenDialog(null);
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+        
+                file = chooser.getSelectedFile();
+        }
+            
+          HashMap cocol = read.leerArchivo(file);
+        
+        
         LexerAnalyzer lexer = new LexerAnalyzer(cocol);
         lexer.vocabulario();
         lexer.construct(cocol);

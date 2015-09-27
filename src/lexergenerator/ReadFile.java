@@ -21,7 +21,7 @@ import javax.swing.JFileChooser;
  */
 public class ReadFile {
     
-     public HashMap leerArchivo(String nombre){
+     public HashMap leerArchivo(File archivo){
       
         int contador=0;
         int tamaño=0;
@@ -38,8 +38,8 @@ public class ReadFile {
                     return null;
                 }
                  *///----------------------------------------------------------------------
-                File file = new File(nombre+".txt");
-                br = new BufferedReader(new FileReader(file.getAbsoluteFile()));
+                //File file = new File(nombre+".txt");
+                br = new BufferedReader(new FileReader(archivo.getAbsoluteFile()));
                 String sCurrentLine;
                
                int cantidadLineas=1;

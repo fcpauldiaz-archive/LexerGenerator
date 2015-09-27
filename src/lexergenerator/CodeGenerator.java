@@ -498,6 +498,8 @@ public class CodeGenerator {
         
         
         "import java.util.HashMap;"+"\n"+
+        "import javax.swing.JFileChooser;"+"\n"+
+        "import java.io.File;"+"\n"+
 
         "/**"+"\n"+
          "*"+"\n"+
@@ -515,7 +517,16 @@ public class CodeGenerator {
     "public static void main(String[] args) {"+"\n"+
         "\t"+ "// TODO code application logic here"+"\n"+
         "\t"+"ReadFile read = new ReadFile();"+"\n"+
-        "\t"+"HashMap input = read.leerArchivo(\"input\");"+"\n"+
+        "\t"+"File file = new File(\"input\"+\".txt\");"+"\n"+
+        "\t"+"JFileChooser chooser = new JFileChooser();"+"\n"+
+        "\t"+"int returnVal = chooser.showOpenDialog(null);"+"\n"+
+        "\t"+"if(returnVal == JFileChooser.APPROVE_OPTION) {"+"\n"+
+        
+                "\t"+"\t"+"file = chooser.getSelectedFile();"+"\n"+
+        "\t"+"}"+"\n"+
+            
+         "\t"+"HashMap input = read.leerArchivo(file);"+"\n"+
+                
         "\t"+this.nombreArchivo+" resGenerator = new "+this.nombreArchivo+"(input);"+"\n"+
         "\t"+"resGenerator.automatas();"+"\n"+
          "\t"+"resGenerator.keyWords();"+ "\n"+

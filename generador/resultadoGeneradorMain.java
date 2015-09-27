@@ -1,5 +1,7 @@
 
 import java.util.HashMap;
+import javax.swing.JFileChooser;
+import java.io.File;
 /**
 *
 * @author Pablo
@@ -13,7 +15,13 @@ public static char EPSILON_CHAR = EPSILON.charAt(0);
 public static void main(String[] args) {
 	// TODO code application logic here
 	ReadFile read = new ReadFile();
-	HashMap input = read.leerArchivo("input");
+	File file = new File("input"+".txt");
+	JFileChooser chooser = new JFileChooser();
+	int returnVal = chooser.showOpenDialog(null);
+	if(returnVal == JFileChooser.APPROVE_OPTION) {
+		file = chooser.getSelectedFile();
+	}
+	HashMap input = read.leerArchivo(file);
 	Lexer resGenerator = new Lexer(input);
 	resGenerator.automatas();
 	resGenerator.keyWords();
