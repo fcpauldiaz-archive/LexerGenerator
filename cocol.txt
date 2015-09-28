@@ -2,20 +2,55 @@ COMPILER Lexer
 
 CHARACTERS
 
-letter  =   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
-digit = "123456789".
-binario = "01".
-hexdigit = digit+"ABCDEF".
-lol = "LOL".
-character = 'b'.
-espacio = ' '.
-some_chars = CHR(33)..CHR(39).
-escape_chars = some_chars + "\\".
+tab           = CHR(09).
+espacio 	  = ' '.
+zero          = '0'.
+zeroToThree   = zero + "123" .
+octalDigit    = zero + "1234567" . 
+nonZeroDigit  = "123456789".
+digit         = '0' + nonZeroDigit .
+hexDigit      = digit + "ABCDEFabcdef" .
+letter        = 'A' .. 'Z' + 'a' .. 'z' + '_' + '$'.
+some_chars 	  = CHR(33)..CHR(39).
+escape_chars  = some_chars + "\\".
 
 KEYWORDS
-if =    "if".
-while="while".
-true="true".
+if 		= "if".
+while   = "while".
+boolean = "boolean".
+byte    = "byte".
+char    = "char".
+class   = "class".
+double  = "double".
+false   = "false".
+final   = "final".
+float   = "float".
+int     = "int".
+long    = "long".
+new     = "new".
+null    = "null".
+short   = "short".
+static  = "static".
+super   = "super".
+this    = "this".
+true    = "true".
+void    = "void".
+
+colon   = ":".
+comma   = ",".
+dec     = "--".
+dot     = ".".
+inc     = "++".
+lbrace  = "{".
+lbrack  = "[".
+lpar    = "(".
+minus   = "-".
+not     = "!".
+plus    = "+".
+rbrace  = "}".
+rbrack  = "]".
+rpar    = ")".
+tilde   = "~".
 
 
 END Lexer.

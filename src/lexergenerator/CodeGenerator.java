@@ -162,7 +162,14 @@ public class CodeGenerator {
      * @return String con la cadena modificada
      */
     public String crearCadenasOr(String cadena){
+        
         String or = "";
+        
+        or = cadenasOrLista(cadena);
+        if (!or.isEmpty()&&!cadena.contains("+"))
+            return or;
+        
+        
         if ((cadena.startsWith("\"")||cadena.startsWith("\'"))&&(!cadena.contains("+"))){
              
             try{
@@ -203,6 +210,7 @@ public class CodeGenerator {
         else {
             or = cadena;
             if(cadena.contains("+")){
+                if ((cadena.contains("\"")||cadena.contains("\'"))&&!cadena.contains("..")){
                 int cantidadConcatenaciones = count(cadena,'+');
                 if (cantidadConcatenaciones>1){
                    // System.out.println(cadena.lastIndexOf("+"));
@@ -214,10 +222,14 @@ public class CodeGenerator {
                 int preIndex=0;
                 if (cadena.contains("\""))
                      preIndex = cadena.indexOf(("\""));
+                 if (cadena.contains("\'"))
+                     preIndex = cadena.indexOf(("\'"));
                 String w = cadena.substring(preIndex+1);
                 int postIndex = w.length()-1;
                 if (w.contains("\""))
                     postIndex = w.indexOf(("\""));
+                if (w.contains("\'"))
+                    postIndex = w.indexOf(("\'"));
                 String wFinal = cadena.substring(preIndex,preIndex+postIndex+2);
                 
                 //System.out.println(wFinal);
@@ -243,19 +255,112 @@ public class CodeGenerator {
                     }
                         or = concatenacion(or,faltante);
                 }
-                
+                }
+                else if (!cadena.contains("..")){
+                    int cantidadConcatenaciones = count(cadena,'+');
+                    if (cantidadConcatenaciones>1){
+                        // System.out.println(cadena.lastIndexOf("+"));
+                         //System.out.println(cadena.substring(0, cadena.indexOf("+", cadena.indexOf("+") + 1)));
+                             pilaConcatenacion.push(cadena.substring(cadena.indexOf("+", cadena.indexOf("+") + 1)));
+                        // System.out.println(pilaConcatenacion);
+                    }
+                    String subcadena = cadena.substring(0,cadena.indexOf("+"));
+                    String ident1 = buscarExpr(subcadena);
+                    String subcadena2 = cadena.substring(cadena.indexOf("+")+1);
+                    String ident2 = buscarExpr(subcadena2);
+                     int lado = calcularConcatenacion(or);
+                if (lado == -1){
+                    
+                    or = "("+ident1 +")|("+ ident2+")";
+                }
+                else if (lado == 1){
+                    
+                    or = "("+ident2 +")|("+ ident1+")";
+                }
+                  while (!pilaConcatenacion.isEmpty()){
+                    String faltante = (String)pilaConcatenacion.pop();
+                    cantidadConcatenaciones = count(faltante,'+');
+                    if (cantidadConcatenaciones>1){
+                        pilaConcatenacion.push(faltante.substring(faltante.indexOf("+", faltante.indexOf("+") + 1)));
+                        faltante = (faltante.substring(0, faltante.indexOf("+", faltante.indexOf("+") + 1)));
+
+                    }
+                    else
+                         faltante = (faltante.substring(faltante.indexOf("+")+1));
+                    or = concatenacionIdent(or,faltante);
+                }
+                    
+                }
+                else{
+                    int cantidadConcatenaciones = count(cadena,'+');
+                     String subcadena2="";
+                    if (cantidadConcatenaciones>1){
+                        // System.out.println(cadena.lastIndexOf("+"));
+                         //System.out.println(cadena.substring(0, cadena.indexOf("+", cadena.indexOf("+") + 1)));
+                             pilaConcatenacion.push(cadena.substring(cadena.indexOf("+", cadena.indexOf("+") + 1)));
+                        // System.out.println(pilaConcatenacion);
+                              subcadena2 = cadena.substring(cadena.indexOf("+")+1,cadena.indexOf("+", cadena.indexOf("+") + 1));
+                    }
+                    else
+                          subcadena2 = cadena.substring(cadena.indexOf("+")+1);
+                    String subcadena = cadena.substring(0,cadena.indexOf("+"));
+                  
+                    String list1 = cadenasOrLista(subcadena);
+                    String list2 = cadenasOrLista(subcadena2);
+                    if (list1.isEmpty())
+                        list1 = crearCadenasOr(subcadena);
+                    if (list2.isEmpty())
+                        list2 = crearCadenasOr(subcadena2);
+                    or = list1+"|"+list2; 
+                      while (!pilaConcatenacion.isEmpty()){
+                    String faltante = (String)pilaConcatenacion.pop();
+                    cantidadConcatenaciones = count(faltante,'+');
+                    if (cantidadConcatenaciones>1){
+                        pilaConcatenacion.push(faltante.substring(faltante.indexOf("+", faltante.indexOf("+") + 1)));
+                        faltante = (faltante.substring(faltante.indexOf("+")+1, faltante.indexOf("+", faltante.indexOf("+") + 1)));
+
+                    }
+                    else
+                         faltante = (faltante.substring(faltante.indexOf("+")+1));
+                    or =  or +"|"+crearCadenasOr(faltante.trim());
+                    
+                }
+                    
+                    return or;
+                }
             }
-            if (cadena.contains("CHR")){
-                int empieza = Integer.parseInt(cadena.substring(cadena.indexOf("(")+1,cadena.indexOf(")")));
-                int termina = Integer.parseInt(cadena.substring(cadena.lastIndexOf("(")+1,cadena.lastIndexOf(")")));
-                
-                
-                RegexConverter convert = new RegexConverter();
-                or = convert.abreviacionOr("["+(char)(empieza)+"-"+(char)(termina)+"]");
-            }
+            
         }
         return "("+or+")+";
      }
+    
+    public String cadenasOrLista(String cadena){
+        String or ="";
+    
+        if (cadena.contains("CHR")||cadena.contains("..")){
+                if (cadena.contains("CHR")){
+                int empieza = Integer.parseInt(cadena.substring(cadena.indexOf("(")+1,cadena.indexOf(")")));
+                int termina = Integer.parseInt(cadena.substring(cadena.lastIndexOf("(")+1,cadena.lastIndexOf(")")));
+                
+               
+                RegexConverter convert = new RegexConverter();
+                or = convert.abreviacionOr("["+(char)(empieza)+"-"+(char)(termina)+"]");
+                }
+                else{
+                    String empieza = (cadena.substring(cadena.indexOf("\'")+1,cadena.indexOf("\'", cadena.indexOf("\'") + 1)));
+                    
+                    String termina = (cadena.substring(cadena.lastIndexOf("\'")-1,cadena.lastIndexOf("\'")));
+                    RegexConverter convert = new RegexConverter();
+                    or =  convert.abreviacionOr("["+(empieza)+"-"+(termina)+"]");
+                }
+              
+            }
+        return or;
+    }
+        public String concatenacionIdent(String anterior, String actual){
+        return anterior + " |" + buscarExpr(actual);
+    }
+    
     /**
      * Método auxiliar que se llama cuando hay más de una concatenación
      * @param anterior String con lo ya concatenado
@@ -266,6 +371,8 @@ public class CodeGenerator {
             String resultado = "";
             String cadenaOr=anterior;
             if (actual.contains("\""))
+                cadenaOr = crearCadenasOr(actual);
+             if (actual.contains("\'"))
                 cadenaOr = crearCadenasOr(actual);
             //calcular si se concatena a la izquierda o derecha
             int lado = calcularConcatenacion(actual);

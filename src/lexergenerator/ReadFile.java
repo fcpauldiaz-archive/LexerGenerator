@@ -52,12 +52,12 @@ public class ReadFile {
                     
                     if (!sCurrentLine.equals("")){
                         input+=sCurrentLine+"\r\n";
-                        detailString.put(cantidadLineas, sCurrentLine);
+                        detailString.put(cantidadLineas, sCurrentLine.trim());
                     }
                     cantidadLineas++;
                 
                 }
-             
+            
                 
            // System.out.println("antes input");
             //System.out.println(input);

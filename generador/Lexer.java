@@ -41,68 +41,84 @@ public class Lexer {
 		automatas.add(temp_0);
 
 		RegexConverter convert_1= new RegexConverter();
-		String regex_1 = convert_1.infixToPostfix("(b)+");
+		String regex_1 = convert_1.infixToPostfix("(0)+");
 		AFNConstruct ThomsonAlgorithim_1 = new AFNConstruct(regex_1);
 		ThomsonAlgorithim_1.construct();
 		Automata temp_1 = ThomsonAlgorithim_1.getAfn();
-		temp_1.setTipo("character");
+		temp_1.setTipo("zero");
 		automatas.add(temp_1);
 
 		RegexConverter convert_2= new RegexConverter();
-		String regex_2 = convert_2.infixToPostfix("(0|1)+");
+		String regex_2 = convert_2.infixToPostfix("(((0)+)|((1|2|3)+))+");
 		AFNConstruct ThomsonAlgorithim_2 = new AFNConstruct(regex_2);
 		ThomsonAlgorithim_2.construct();
 		Automata temp_2 = ThomsonAlgorithim_2.getAfn();
-		temp_2.setTipo("binario");
+		temp_2.setTipo("zeroToThree");
 		automatas.add(temp_2);
 
 		RegexConverter convert_3= new RegexConverter();
-		String regex_3 = convert_3.infixToPostfix("(((1|2|3|4|5|6|7|8|9)+)|((A|B|C|D|E|F)+))+");
+		String regex_3 = convert_3.infixToPostfix("(	)");
 		AFNConstruct ThomsonAlgorithim_3 = new AFNConstruct(regex_3);
 		ThomsonAlgorithim_3.construct();
 		Automata temp_3 = ThomsonAlgorithim_3.getAfn();
-		temp_3.setTipo("hexdigit");
+		temp_3.setTipo("tab");
 		automatas.add(temp_3);
 
 		RegexConverter convert_4= new RegexConverter();
-		String regex_4 = convert_4.infixToPostfix("(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)+");
+		String regex_4 = convert_4.infixToPostfix("(((((0)+)|((1|2|3|4|5|6|7|8|9)+))+)|((A|B|C|D|E|F|a|b|c|d|e|f)+))+");
 		AFNConstruct ThomsonAlgorithim_4 = new AFNConstruct(regex_4);
 		ThomsonAlgorithim_4.construct();
 		Automata temp_4 = ThomsonAlgorithim_4.getAfn();
-		temp_4.setTipo("letter");
+		temp_4.setTipo("hexDigit");
 		automatas.add(temp_4);
 
 		RegexConverter convert_5= new RegexConverter();
-		String regex_5 = convert_5.infixToPostfix("(L|O|L)+");
+		String regex_5 = convert_5.infixToPostfix("(A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)|(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z)|(_)+|($)+");
 		AFNConstruct ThomsonAlgorithim_5 = new AFNConstruct(regex_5);
 		ThomsonAlgorithim_5.construct();
 		Automata temp_5 = ThomsonAlgorithim_5.getAfn();
-		temp_5.setTipo("lol");
+		temp_5.setTipo("letter");
 		automatas.add(temp_5);
 
 		RegexConverter convert_6= new RegexConverter();
-		String regex_6 = convert_6.infixToPostfix("((!|\"|#|$|%|&|\'))+");
+		String regex_6 = convert_6.infixToPostfix("(1|2|3|4|5|6|7|8|9)+");
 		AFNConstruct ThomsonAlgorithim_6 = new AFNConstruct(regex_6);
 		ThomsonAlgorithim_6.construct();
 		Automata temp_6 = ThomsonAlgorithim_6.getAfn();
-		temp_6.setTipo("some_chars");
+		temp_6.setTipo("nonZeroDigit");
 		automatas.add(temp_6);
 
 		RegexConverter convert_7= new RegexConverter();
-		String regex_7 = convert_7.infixToPostfix("(1|2|3|4|5|6|7|8|9)+");
+		String regex_7 = convert_7.infixToPostfix("(((0)+)|((1|2|3|4|5|6|7)+))+");
 		AFNConstruct ThomsonAlgorithim_7 = new AFNConstruct(regex_7);
 		ThomsonAlgorithim_7.construct();
 		Automata temp_7 = ThomsonAlgorithim_7.getAfn();
-		temp_7.setTipo("digit");
+		temp_7.setTipo("octalDigit");
 		automatas.add(temp_7);
 
 		RegexConverter convert_8= new RegexConverter();
-		String regex_8 = convert_8.infixToPostfix("((((!|\"|#|$|%|&|\'))+)|((\\)+))+");
+		String regex_8 = convert_8.infixToPostfix("(!|\"|#|$|%|&|\')");
 		AFNConstruct ThomsonAlgorithim_8 = new AFNConstruct(regex_8);
 		ThomsonAlgorithim_8.construct();
 		Automata temp_8 = ThomsonAlgorithim_8.getAfn();
-		temp_8.setTipo("escape_chars");
+		temp_8.setTipo("some_chars");
 		automatas.add(temp_8);
+
+		RegexConverter convert_9= new RegexConverter();
+		String regex_9 = convert_9.infixToPostfix("(((0)+)|((1|2|3|4|5|6|7|8|9)+))+");
+		AFNConstruct ThomsonAlgorithim_9 = new AFNConstruct(regex_9);
+		ThomsonAlgorithim_9.construct();
+		Automata temp_9 = ThomsonAlgorithim_9.getAfn();
+		temp_9.setTipo("digit");
+		automatas.add(temp_9);
+
+		RegexConverter convert_10= new RegexConverter();
+		String regex_10 = convert_10.infixToPostfix("(((!|\"|#|$|%|&|\'))|((\\)+))+");
+		AFNConstruct ThomsonAlgorithim_10 = new AFNConstruct(regex_10);
+		ThomsonAlgorithim_10.construct();
+		Automata temp_10 = ThomsonAlgorithim_10.getAfn();
+		temp_10.setTipo("escape_chars");
+		automatas.add(temp_10);
 	}
 	 /**
  	* Método para revisar que tipo de sub autómata es aceptado por una 
@@ -156,7 +172,39 @@ public class Lexer {
 	public void keyWords(){
 		keywords.add("if");
 		keywords.add("while");
+		keywords.add("boolean");
+		keywords.add("byte");
+		keywords.add("char");
+		keywords.add("class");
+		keywords.add("double");
+		keywords.add("false");
+		keywords.add("final");
+		keywords.add("float");
+		keywords.add("int");
+		keywords.add("long");
+		keywords.add("new");
+		keywords.add("null");
+		keywords.add("short");
+		keywords.add("static");
+		keywords.add("super");
+		keywords.add("this");
 		keywords.add("true");
+		keywords.add("void");
+		keywords.add(":");
+		keywords.add(",");
+		keywords.add("--");
+		keywords.add(".");
+		keywords.add("++");
+		keywords.add("{");
+		keywords.add("[");
+		keywords.add("(");
+		keywords.add("-");
+		keywords.add("!");
+		keywords.add("+");
+		keywords.add("}");
+		keywords.add("]");
+		keywords.add(")");
+		keywords.add("~");
 		}
 
 }

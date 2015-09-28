@@ -153,6 +153,8 @@ public class LexerAnalyzer {
         Automata pointChar = ThomsonAlgorithim.afnSimple(".");
         Automata pointChar2 = ThomsonAlgorithim.afnSimple(".");
         pointChar = ThomsonAlgorithim.concatenacion(pointChar, pointChar2);
+        pointChar = ThomsonAlgorithim.concatenacion(pointChar, espacio_);
+        pointChar = ThomsonAlgorithim.concatenacion(espacio_, pointChar);
         basicChar_ = ThomsonAlgorithim.concatenacion(character_, pointChar);
         basicChar_ = ThomsonAlgorithim.concatenacion(basicChar_,character_);
         basicChar_.setTipo("Basic Char");
@@ -538,7 +540,8 @@ public class LexerAnalyzer {
         //BasicSet = {string}
         
        // ident | string | "CHR(number).."CHR"(number).
-       boolean resBasicSet = checkAutomata(this.basicSet_,regex);
+       boolean resBasicSet = this.checkAutomata(this.basicSet_,regex.trim());
+      // boolean resBasicSet = bSet(lineaActual,regex);
        /*if (!resBasicSet.isEmpty()){
             cadenas.add((String)resBasicSet.get(1));
 
@@ -552,7 +555,45 @@ public class LexerAnalyzer {
         
     }
     
+    public boolean bSet(int lineaActual, String regex){
     
+        String letter = "abcdefghlmnopqrstuvgwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!\".$%&/()=?¿\'+-[]-´Ç-.,";
+         boolean string= false;
+        if (count(regex,'\"')==2)
+            string =true;
+            
+       
+        if (string)
+            return true;
+        
+        boolean ident =false;
+        boolean ident2 = false;
+        if (count(regex,'\"')==0)
+            ident =true;
+        if (count(regex,'\'')==0)
+            ident2 =true;
+        if ((ident&&ident2))
+            return true;
+        boolean charT = basicChar(lineaActual,regex);
+        if (charT)
+            return true;
+        
+        
+        
+        return false;
+    }
+    
+    
+    public boolean basicChar(int lineaActual, String regex){
+         String letterChar = "abcdefghlmnopqrstuvgwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!\".$%&/()=?¿+-[]-´Ç-., ";
+         if (regex.startsWith("\'"))
+             regex = regex.replaceAll("\'", "");
+         if (letterChar.contains(regex))
+             return true;
+         if (regex.contains("CHR(012345679)"))
+             return true;
+        return false;
+    }
     /**
      * Método para revisar si un character
      * @param lineaActual
@@ -822,6 +863,23 @@ public class LexerAnalyzer {
 
     public ArrayList<Automata> getGenerador() {
         return generador;
+    }
+    
+      /**
+     * Método para calcular el número de ocurrencias de un character
+     * @param s string completo 
+     * @param c character a calcular ocurrencias
+     * @return 
+     */
+    public  int count( final String s, final char c ) {
+        final char[] chars = s.toCharArray();
+        int count = 0;
+        for(int i=0; i<chars.length; i++) {
+          if (chars[i] == c) {
+            count++;
+          }
+        }
+        return count;
     }
 }
 
