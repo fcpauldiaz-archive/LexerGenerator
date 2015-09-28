@@ -27,17 +27,22 @@ public class RegexConverter {
     
     /** Mapa de precedencia de los operadores. */
 	private final Map<Character, Integer> precedenciaOperadores;
+    private final char charKleene = 'û';
+    private final char charConcat = 'ü';
+    private final char charAbrirParentesis = 'ý';
+    private final char charCerrarParentesis = 'þ';
+    private final char charOr = 'ÿ';
+    private final char charPlus = 'ø';
         
         //constructor
 	public RegexConverter()
         {
 		Map<Character, Integer> map = new HashMap<>();
-		map.put('(', 1); // parentesis
+		map.put(charAbrirParentesis, 1); // parentesis
 		map.put('|', 2); // Union o or
 		map.put('.', 3); // explicit concatenation operator
-		map.put('?', 4); // | €
-		map.put('*', 4); // kleene
-		map.put('+', 4); // positivo
+		map.put(charKleene, 4); // kleene
+		map.put(charPlus, 4); // positivo
 		precedenciaOperadores = Collections.unmodifiableMap(map);
               
 	};
@@ -91,14 +96,14 @@ public class RegexConverter {
                  
                 if (ch.equals('?'))
                 {
-                    if (regex.charAt(i-1) == ')')
+                    if (regex.charAt(i-1) == charCerrarParentesis)
                     {
-                        regex = insertCharAt(regex,i,"|"+resultadoGeneradorMain.EPSILON+")");
+                        regex = insertCharAt(regex,i,"|"+resultadoGeneradorMain.EPSILON+charCerrarParentesis);
                         
                         int j =i;
                         while (j!=0)
                         {
-                            if (regex.charAt(j)=='(')
+                            if (regex.charAt(j)==charAbrirParentesis)
                             {
                                 break;
                             }
@@ -107,13 +112,13 @@ public class RegexConverter {
                         
                         }
                         
-                        regex=appendCharAt(regex,j,"(");
+                        regex=appendCharAt(regex,j,charAbrirParentesis);
                          
                     }
                     else
                     {
-                        regex = insertCharAt(regex,i,"|"+resultadoGeneradorMain.EPSILON+")");
-                        regex = insertCharAt(regex,i-1,"("+regex.charAt(i-1));
+                        regex = insertCharAt(regex,i,"|"+resultadoGeneradorMain.EPSILON+charCerrarParentesis);
+                        regex = insertCharAt(regex,i-1,charAbrirParentesis+regex.charAt(i-1));
                     }
                 }
             }
@@ -130,7 +135,7 @@ public class RegexConverter {
             int P1=0;
             for (int i = 0;i<regex.length();i++){
                 Character ch = regex.charAt(i);
-                if (ch.equals('(')){
+                if (ch.equals(charAbrirParentesis)){
                     P1++;
                 }
               
@@ -146,7 +151,7 @@ public class RegexConverter {
             int P1=0;
              for (int i = 0;i<regex.length();i++){
                 Character ch = regex.charAt(i);
-                if (ch.equals(')')){
+                if (ch.equals(charCerrarParentesis)){
                     P1++;
                 }
             }
@@ -166,9 +171,9 @@ public class RegexConverter {
             
             while(P1 != P2){
                 if (P1>P2)
-                    regex +=")";
+                    regex +=charCerrarParentesis;
                 if (P2>P1)
-                    regex ="(" + regex;
+                    regex =charAbrirParentesis + regex;
                 P1 = parentesisIzq(regex);
                 P2 = parentesisDer(regex);
             }
@@ -188,23 +193,23 @@ public class RegexConverter {
             for (int i = 0; i<regex.length();i++){
                  Character ch = regex.charAt(i);
                  
-                if (ch.equals('+'))
+                if (ch.equals(charPlus))
                 {
                     //si hay un ')' antes de un operador
                     //significa que hay que buscar el '(' correspondiente
-                    if (regex.charAt(i-1) == ')'){
+                    if (regex.charAt(i-1) == charCerrarParentesis){
                         
                         int fixPosicion = i;
                         
                         while (fixPosicion != -1)
                         {
-                            if (regex.charAt(fixPosicion)==')')
+                            if (regex.charAt(fixPosicion)==charCerrarParentesis)
                             {
                                compare++;
                                
                             }
                             
-                            if (regex.charAt(fixPosicion)=='(')
+                            if (regex.charAt(fixPosicion)==charAbrirParentesis)
                             {
                                 
                                 compare--;
@@ -218,14 +223,14 @@ public class RegexConverter {
                         }
                       
                         String regexAb = regex.substring(fixPosicion,i);
-                        regex = insertCharAt(regex,i,regexAb+"*");
+                        regex = insertCharAt(regex,i,regexAb+charKleene);
                         
                       
                     }
                     //si no hay parentesis, simplemente se inserta el caracter
                     else
                     {
-                        regex = insertCharAt(regex,i,regex.charAt(i-1)+"*");
+                        regex = insertCharAt(regex,i,regex.charAt(i-1)+charKleene);
                     }
                     
                    
@@ -245,11 +250,10 @@ public class RegexConverter {
          * @return regexExplicit String 
 	 */
 	public  String formatRegEx(String regex) {
-                regex = regex.trim();
-                regex = abreviaturaInterrogacion(regex);
-                regex = abreviaturaCerraduraPositiva(regex);
+        regex = regex.trim();
+        regex = abreviaturaCerraduraPositiva(regex);
 		String  regexExplicit = new String();
-		List<Character> operadores = Arrays.asList('|', '?', '+', '*');
+		List<Character> operadores = Arrays.asList('|', charPlus, charKleene);
 		List<Character> operadoresBinarios = Arrays.asList('|');
                 
                 
@@ -266,7 +270,7 @@ public class RegexConverter {
                         regexExplicit += c1;
                         
                         //mientras la cadena no incluya operadores definidos, será una concatenación implicita
-                        if (!c1.equals('(') && !c2.equals(')') && !operadores.contains(c2) && !operadoresBinarios.contains(c1))
+                        if (!c1.equals(charAbrirParentesis) && !c2.equals(charCerrarParentesis) && !operadores.contains(c2) && !operadoresBinarios.contains(c1))
                         {
                             regexExplicit += '.';
                            
@@ -289,7 +293,7 @@ public class RegexConverter {
                     if (regex.charAt(i+2)=='-'){
                         int inicio = regex.charAt(i+1);
                         int fin = regex.charAt(i+3);
-                        resultado +="(";
+                        resultado +=charAbrirParentesis;
                         for (int j = 0;j<=fin-inicio;j++)
                         {
                             if (j==(fin-inicio))
@@ -297,7 +301,7 @@ public class RegexConverter {
                             else
                              resultado+= Character.toString((char)(inicio+j))+'|';
                         }
-                        resultado +=")";
+                        resultado +=charCerrarParentesis;
                         i=i+4;
                     }
                     else{
@@ -326,13 +330,13 @@ public class RegexConverter {
                     if (regex.charAt(i+2)=='.'){
                         int inicio = regex.charAt(i+1);
                         int fin = regex.charAt(i+3);
-                        resultado +="(";
+                        resultado +=charAbrirParentesis;
                         for (int j = 0;j<=fin-inicio;j++)
                         {
                            
                             resultado+= Character.toString((char)(inicio+j));
                         }
-                        resultado +=")";
+                        resultado +=charCerrarParentesis;
                         i=i+4;
                     }
                 }
@@ -357,21 +361,23 @@ public class RegexConverter {
 	 * @return notacion postfix 
 	 */
 	public  String infixToPostfix(String regex) {
+         
 		String postfix = new String();
-                regex = abreviacionOr(regex);
-                //regex = abreviacionAnd(regex);
+        //regex = abreviacionOr(regex);
+        //regex = abreviacionAnd(regex);
 		Stack<Character> stack = new Stack<>();
-
+      
 		String formattedRegEx = formatRegEx(regex);
-                //System.out.println(formattedRegEx);
-		for (Character c : formattedRegEx.toCharArray()) {
+        
+		for (int i = 0;i<formattedRegEx.length();i++) {
+            Character c = formattedRegEx.charAt(i);
 			switch (c) {
-				case '(':
+                case charAbrirParentesis:
 					stack.push(c);
 					break;
 
-				case ')':
-					while (!stack.peek().equals('(')) {
+				case charCerrarParentesis:
+					while (!stack.peek().equals(charAbrirParentesis)) {
 						postfix += stack.pop();
 					}
 					stack.pop();
@@ -390,8 +396,8 @@ public class RegexConverter {
 							postfix += stack.pop();
                                                        
 						} 
-                                                else 
-                                                {
+                        else 
+                        {
 							break;
 						}
 					}

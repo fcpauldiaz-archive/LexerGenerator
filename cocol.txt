@@ -10,7 +10,7 @@ octalDigit    = zero + "1234567" .
 nonZeroDigit  = "123456789".
 digit         = '0' + nonZeroDigit .
 hexDigit      = digit + "ABCDEFabcdef" .
-letter        = 'A' .. 'Z' + 'a' .. 'z' + '_' + '$'.
+letter        = 'A' .. 'Z' + 'a' .. 'z' + ')' + '*' + '('+ '+' .
 some_chars 	  = CHR(33)..CHR(39).
 escape_chars  = some_chars + "\\".
 
@@ -50,6 +50,8 @@ plus    = "+".
 rbrace  = "}".
 rbrack  = "]".
 rpar    = ")".
+tilde   = "~".
+
 tilde   = "~".
 
 

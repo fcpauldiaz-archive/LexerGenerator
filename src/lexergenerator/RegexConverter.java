@@ -27,6 +27,12 @@ public class RegexConverter {
     /** Mapa de precedencia de los operadores. */
 	private final Map<Character, Integer> precedenciaOperadores;
         private final String escapeChars = "\"" + "\'" +"\\";
+         private final char charKleene = 'û';
+        private final char charConcat = 'ü';
+        private final char charAbrirParentesis = 'ý';
+        private final char charCerrarParentesis = 'þ';
+        private final char charOr = 'ÿ';
+        private final char charPlus = 'ø';
         
         //constructor
 	public RegexConverter()
@@ -305,6 +311,49 @@ public class RegexConverter {
                             pos="";
                         }
                         resultado +=")";
+                        i=i+4;
+                    }
+                    else{
+                        resultado +=ch;
+                    }
+                }
+                else{
+                    resultado+=ch;
+                }
+                
+            }
+            } catch (Exception e){
+                System.out.println("Error en la conversión " + regex);
+                resultado = " ";
+            }
+            
+            return resultado;
+        }
+         public String abreviacionOrS(String regex){
+            String resultado = new String();
+            String pos ="";
+            try{        
+            for (int i=0;i<regex.length();i++){
+                Character ch = regex.charAt(i);
+                if (ch =='[' ){
+                    if (regex.charAt(i+2)=='-'){
+                        int inicio = regex.charAt(i+1);
+                        int fin = regex.charAt(i+3);
+                        resultado +=this.charAbrirParentesis;
+                        for (int j = 0;j<=fin-inicio;j++)
+                        {
+                            if (this.escapeChars.contains(Character.toString((char)(inicio+j))))
+                                   pos="\\";
+                            if (j==(fin-inicio))
+                                resultado+= pos + Character.toString((char)(inicio+j));
+                            else{
+                                
+                                resultado+= pos + Character.toString((char)(inicio+j))+'|';
+                                
+                            }
+                            pos="";
+                        }
+                        resultado +=this.charCerrarParentesis;
                         i=i+4;
                     }
                     else{

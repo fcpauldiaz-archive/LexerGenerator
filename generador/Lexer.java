@@ -33,7 +33,7 @@ public class Lexer {
 	public void automatas(){
 
 		RegexConverter convert_0= new RegexConverter();
-		String regex_0 = convert_0.infixToPostfix("( )+");
+		String regex_0 = convert_0.infixToPostfix("ý þø");
 		AFNConstruct ThomsonAlgorithim_0 = new AFNConstruct(regex_0);
 		ThomsonAlgorithim_0.construct();
 		Automata temp_0 = ThomsonAlgorithim_0.getAfn();
@@ -41,7 +41,7 @@ public class Lexer {
 		automatas.add(temp_0);
 
 		RegexConverter convert_1= new RegexConverter();
-		String regex_1 = convert_1.infixToPostfix("(0)+");
+		String regex_1 = convert_1.infixToPostfix("ý0þø");
 		AFNConstruct ThomsonAlgorithim_1 = new AFNConstruct(regex_1);
 		ThomsonAlgorithim_1.construct();
 		Automata temp_1 = ThomsonAlgorithim_1.getAfn();
@@ -49,7 +49,7 @@ public class Lexer {
 		automatas.add(temp_1);
 
 		RegexConverter convert_2= new RegexConverter();
-		String regex_2 = convert_2.infixToPostfix("(((0)+)|((1|2|3)+))+");
+		String regex_2 = convert_2.infixToPostfix("ýýý0þøþ|ýý1|2|3þøþþø");
 		AFNConstruct ThomsonAlgorithim_2 = new AFNConstruct(regex_2);
 		ThomsonAlgorithim_2.construct();
 		Automata temp_2 = ThomsonAlgorithim_2.getAfn();
@@ -57,7 +57,7 @@ public class Lexer {
 		automatas.add(temp_2);
 
 		RegexConverter convert_3= new RegexConverter();
-		String regex_3 = convert_3.infixToPostfix("(	)");
+		String regex_3 = convert_3.infixToPostfix("ý	þ");
 		AFNConstruct ThomsonAlgorithim_3 = new AFNConstruct(regex_3);
 		ThomsonAlgorithim_3.construct();
 		Automata temp_3 = ThomsonAlgorithim_3.getAfn();
@@ -65,7 +65,7 @@ public class Lexer {
 		automatas.add(temp_3);
 
 		RegexConverter convert_4= new RegexConverter();
-		String regex_4 = convert_4.infixToPostfix("(((((0)+)|((1|2|3|4|5|6|7|8|9)+))+)|((A|B|C|D|E|F|a|b|c|d|e|f)+))+");
+		String regex_4 = convert_4.infixToPostfix("ýýýýý0þøþ|ýý1|2|3|4|5|6|7|8|9þøþþøþ|ýýA|B|C|D|E|F|a|b|c|d|e|fþøþþø");
 		AFNConstruct ThomsonAlgorithim_4 = new AFNConstruct(regex_4);
 		ThomsonAlgorithim_4.construct();
 		Automata temp_4 = ThomsonAlgorithim_4.getAfn();
@@ -73,7 +73,7 @@ public class Lexer {
 		automatas.add(temp_4);
 
 		RegexConverter convert_5= new RegexConverter();
-		String regex_5 = convert_5.infixToPostfix("(A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)|(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z)|(_)+|($)+");
+		String regex_5 = convert_5.infixToPostfix("ýA|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Zþ|ýa|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|zþ|ý)þø|ý*þø|ý(þø|+");
 		AFNConstruct ThomsonAlgorithim_5 = new AFNConstruct(regex_5);
 		ThomsonAlgorithim_5.construct();
 		Automata temp_5 = ThomsonAlgorithim_5.getAfn();
@@ -81,7 +81,7 @@ public class Lexer {
 		automatas.add(temp_5);
 
 		RegexConverter convert_6= new RegexConverter();
-		String regex_6 = convert_6.infixToPostfix("(1|2|3|4|5|6|7|8|9)+");
+		String regex_6 = convert_6.infixToPostfix("ý1|2|3|4|5|6|7|8|9þø");
 		AFNConstruct ThomsonAlgorithim_6 = new AFNConstruct(regex_6);
 		ThomsonAlgorithim_6.construct();
 		Automata temp_6 = ThomsonAlgorithim_6.getAfn();
@@ -89,7 +89,7 @@ public class Lexer {
 		automatas.add(temp_6);
 
 		RegexConverter convert_7= new RegexConverter();
-		String regex_7 = convert_7.infixToPostfix("(((0)+)|((1|2|3|4|5|6|7)+))+");
+		String regex_7 = convert_7.infixToPostfix("ýýý0þøþ|ýý1|2|3|4|5|6|7þøþþø");
 		AFNConstruct ThomsonAlgorithim_7 = new AFNConstruct(regex_7);
 		ThomsonAlgorithim_7.construct();
 		Automata temp_7 = ThomsonAlgorithim_7.getAfn();
@@ -97,7 +97,7 @@ public class Lexer {
 		automatas.add(temp_7);
 
 		RegexConverter convert_8= new RegexConverter();
-		String regex_8 = convert_8.infixToPostfix("(!|\"|#|$|%|&|\')");
+		String regex_8 = convert_8.infixToPostfix("ý!|\"|#|$|%|&|\'þ");
 		AFNConstruct ThomsonAlgorithim_8 = new AFNConstruct(regex_8);
 		ThomsonAlgorithim_8.construct();
 		Automata temp_8 = ThomsonAlgorithim_8.getAfn();
@@ -105,7 +105,7 @@ public class Lexer {
 		automatas.add(temp_8);
 
 		RegexConverter convert_9= new RegexConverter();
-		String regex_9 = convert_9.infixToPostfix("(((0)+)|((1|2|3|4|5|6|7|8|9)+))+");
+		String regex_9 = convert_9.infixToPostfix("ýýý0þøþ|ýý1|2|3|4|5|6|7|8|9þøþþø");
 		AFNConstruct ThomsonAlgorithim_9 = new AFNConstruct(regex_9);
 		ThomsonAlgorithim_9.construct();
 		Automata temp_9 = ThomsonAlgorithim_9.getAfn();
@@ -113,7 +113,7 @@ public class Lexer {
 		automatas.add(temp_9);
 
 		RegexConverter convert_10= new RegexConverter();
-		String regex_10 = convert_10.infixToPostfix("(((!|\"|#|$|%|&|\'))|((\\)+))+");
+		String regex_10 = convert_10.infixToPostfix("ýýý!|\"|#|$|%|&|\'þþ|ýý\\þøþþø");
 		AFNConstruct ThomsonAlgorithim_10 = new AFNConstruct(regex_10);
 		ThomsonAlgorithim_10.construct();
 		Automata temp_10 = ThomsonAlgorithim_10.getAfn();
@@ -204,6 +204,7 @@ public class Lexer {
 		keywords.add("}");
 		keywords.add("]");
 		keywords.add(")");
+		keywords.add("~");
 		keywords.add("~");
 		}
 

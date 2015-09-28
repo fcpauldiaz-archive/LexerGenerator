@@ -20,6 +20,12 @@ public class AFNConstruct<T> {
    
     private Automata afn;
     private String regex;
+    private final char charKleene = 'û';
+    private final char charConcat = 'ü';
+    private final char charAbrirParentesis = 'ý';
+    private final char charCerrarParentesis = 'þ';
+    private final char charOr = 'ÿ';
+    private final char charPlus = 'ø';
    
     
     public AFNConstruct(String regex) {
@@ -38,7 +44,7 @@ public class AFNConstruct<T> {
         //Crea un automata por cada operacion
         for (Character c : this.regex.toCharArray()) {
             switch(c){
-                case '*':
+                case charKleene:
                      Automata kleene = cerraduraKleene((Automata) pilaAFN.pop());
                      pilaAFN.push(kleene);
                      this.afn=kleene;

@@ -23,6 +23,8 @@ public class CodeGenerator {
     private final HashMap<String, String> cadenaCompleta = new HashMap();
     private ArrayList<String> keywords = new ArrayList();
     private final Stack pilaConcatenacion = new Stack();
+    private final char charAbrirParentesis = 'ý';
+    private final char charCerrarParentesis = 'þ';
     
     public CodeGenerator(HashMap cadena){
         this.cadena=cadena;
@@ -168,8 +170,10 @@ public class CodeGenerator {
         or = cadenasOrLista(cadena);
         if (!or.isEmpty()&&!cadena.contains("+"))
             return or;
-        
-        
+        if (cadena.equals("\'+\'")){
+            System.out.println(cadena);
+            return "+";
+        }
         if ((cadena.startsWith("\"")||cadena.startsWith("\'"))&&(!cadena.contains("+"))){
              
             try{
@@ -238,11 +242,11 @@ public class CodeGenerator {
                 int lado = calcularConcatenacion(or);
                 if (lado == -1){
                     
-                    or = "("+buscarExpr(or) +")|("+ cadenaOr+")";
+                    or = this.charAbrirParentesis+buscarExpr(or) +this.charCerrarParentesis+"|"+this.charAbrirParentesis+ cadenaOr+this.charCerrarParentesis;
                 }
                 else if (lado == 1){
                     
-                    or = "("+cadenaOr +")|("+ buscarExpr(or)+")";
+                    or = this.charAbrirParentesis+cadenaOr +this.charCerrarParentesis+"|"+this.charAbrirParentesis+ buscarExpr(or)+this.charCerrarParentesis;
                 }
                 
                 while (!pilaConcatenacion.isEmpty()){
@@ -271,11 +275,11 @@ public class CodeGenerator {
                      int lado = calcularConcatenacion(or);
                 if (lado == -1){
                     
-                    or = "("+ident1 +")|("+ ident2+")";
+                    or = this.charAbrirParentesis+ident1 +this.charCerrarParentesis+"|"+this.charAbrirParentesis+ ident2+this.charCerrarParentesis;
                 }
                 else if (lado == 1){
                     
-                    or = "("+ident2 +")|("+ ident1+")";
+                    or = this.charAbrirParentesis+ident2 +this.charCerrarParentesis+"|"+this.charAbrirParentesis+ ident1+this.charCerrarParentesis;
                 }
                   while (!pilaConcatenacion.isEmpty()){
                     String faltante = (String)pilaConcatenacion.pop();
@@ -331,7 +335,7 @@ public class CodeGenerator {
             }
             
         }
-        return "("+or+")+";
+        return this.charAbrirParentesis+or+this.charCerrarParentesis+"ø";
      }
     
     public String cadenasOrLista(String cadena){
@@ -344,14 +348,14 @@ public class CodeGenerator {
                 
                
                 RegexConverter convert = new RegexConverter();
-                or = convert.abreviacionOr("["+(char)(empieza)+"-"+(char)(termina)+"]");
+                or = convert.abreviacionOrS("["+(char)(empieza)+"-"+(char)(termina)+"]");
                 }
                 else{
                     String empieza = (cadena.substring(cadena.indexOf("\'")+1,cadena.indexOf("\'", cadena.indexOf("\'") + 1)));
                     
                     String termina = (cadena.substring(cadena.lastIndexOf("\'")-1,cadena.lastIndexOf("\'")));
                     RegexConverter convert = new RegexConverter();
-                    or =  convert.abreviacionOr("["+(empieza)+"-"+(termina)+"]");
+                    or =  convert.abreviacionOrS("["+(empieza)+"-"+(termina)+"]");
                 }
               
             }
@@ -378,11 +382,11 @@ public class CodeGenerator {
             int lado = calcularConcatenacion(actual);
             if (lado == -1){
 
-                resultado = "("+buscarExpr(actual) +")|("+ cadenaOr+")";
+                resultado = this.charAbrirParentesis+buscarExpr(actual) +")|"+this.charAbrirParentesis+ cadenaOr+this.charCerrarParentesis;
             }
             else if (lado == 1){
 
-                resultado = "("+cadenaOr +")|("+ buscarExpr(actual)+")";
+                resultado = this.charAbrirParentesis+cadenaOr +")|"+this.charAbrirParentesis+ buscarExpr(actual)+this.charCerrarParentesis;
             }
         return resultado;
      }
@@ -470,6 +474,10 @@ public class CodeGenerator {
           if (chars[i] == c) {
             count++;
           }
+          if (i+1<chars.length){
+              if (chars[i]=='\''&&chars[i+1]=='+'&&chars[i+2]=='\'')
+                  count--;
+        }
         }
         return count;
     }
@@ -572,19 +580,19 @@ public class CodeGenerator {
         "\t"+"public void revisar(){"+"\n"+
 
         "\t"+"\t"+"for (Map.Entry<Integer, String> entry : input.entrySet()) {"+"\n"+
-	        "\t"+ "\t"+"\t"+"Integer key = entry.getKey();"+"\n"+
-	        "\t"+"\t"+"\t"+"String value = entry.getValue();"+"\n"+
-	        "\t"+"\t"+"\t"+"String[] parts = value.split(\" \");"+"\n"+
-	        "\t"+"\t"+"\t"+"for (int j = 0;j<value.length();j++){"+"\n"+
-		       
+            "\t"+ "\t"+"\t"+"Integer key = entry.getKey();"+"\n"+
+            "\t"+"\t"+"\t"+"String value = entry.getValue();"+"\n"+
+            "\t"+"\t"+"\t"+"String[] parts = value.split(\" \");"+"\n"+
+            "\t"+"\t"+"\t"+"for (int j = 0;j<value.length();j++){"+"\n"+
+               
                         "\t"+"\t"+"\t"+"\t"+"if (!keywords.contains(value))"+"\n"+
-		            "\t"+"\t"+"\t"+"\t"+"\t"+"this.checkIndividualAutomata(value.charAt(j)+\"\", automatas,key);"+"\n"+
+                    "\t"+"\t"+"\t"+"\t"+"\t"+"this.checkIndividualAutomata(value.charAt(j)+\"\", automatas,key);"+"\n"+
                        
-	    	"\t"+"\t"+"\t"+"}"+"\n"+
+            "\t"+"\t"+"\t"+"}"+"\n"+
                "\t"+"\t"+"\t"+ "if (keywords.contains(value))"+"\n"+
                  "\t"+"\t"+"\t"+"\t"+"\t"+"System.out.println(\"<\"+value +\",\" +\"\\\"\"+ value+\"\\\"\"+\">\");"+"\n"+
-	    "\t"+"\t"+"}"+"\n"+
-	"\t"+"}"+"\n";
+        "\t"+"\t"+"}"+"\n"+
+    "\t"+"}"+"\n";
         return res;
     }
     
