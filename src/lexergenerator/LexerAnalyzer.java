@@ -413,7 +413,14 @@ public class LexerAnalyzer {
          }
         return false;
     }
-    
+    /**
+     * Se verifica la sintaxis de los tokens mediantes expresiones regulares
+     * Se modifican los simbolos ingresados a los símbolos de los 
+     * autómatas
+     * @param lineaActual
+     * @param cadenaRevisar
+     * @return true si no da errores, false si lo tiene error de sintaxis.
+     */
     public boolean tokenExpr(int lineaActual,String cadenaRevisar){
         String antesRevisar = cadenaRevisar;
         cadenaRevisar = cadenaRevisar.replaceAll("\\{", this.charAbrirParentesis+"");
@@ -424,14 +431,13 @@ public class LexerAnalyzer {
         cadenaRevisar = cadenaRevisar.replaceAll("\\(",this.charAbrirParentesis+"");
         cadenaRevisar = cadenaRevisar.replaceAll("\\)",this.charCerrarParentesis+"");
         
-        
        
         String regex;
         RegexConverter convert = new RegexConverter();
         regex = convert.infixToPostfix(cadenaRevisar);
        
         if (regex.isEmpty()){
-            LexerGeneratorMain.errores.SynErr(lineaActual, "Expresión mal ingresada");
+            LexerGeneratorMain.errores.SynErr(lineaActual, "Expresión mal ingresada"+"\n" + antesRevisar);
             return false;
         }    
         
@@ -1184,6 +1190,13 @@ public class LexerAnalyzer {
         }
         return count;
     }
+    /**
+     * Método para remplazar la última ocurrencia de un caracter
+     * @param string
+     * @param toReplace
+     * @param replacement
+     * @return string modificado
+     */
     public  String replaceLast(String string, String toReplace, String replacement) {
         int pos = string.lastIndexOf(toReplace);
         if (pos > -1) {
