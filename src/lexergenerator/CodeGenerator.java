@@ -21,10 +21,15 @@ public class CodeGenerator {
     private final HashMap<Integer,String> cadena;
     private String nombreArchivo;
     private final HashMap<String, String> cadenaCompleta = new HashMap();
-    private ArrayList<String> keywords = new ArrayList();
+    private final ArrayList<String> keywords = new ArrayList();
     private final Stack pilaConcatenacion = new Stack();
-    private final char charAbrirParentesis = 'ý';
-    private final char charCerrarParentesis = 'þ';
+    private final ArrayList<String> ignoreSets = new ArrayList();
+    private final char charKleene = '∞';
+    private final char charConcat = '•';
+    private final char charAbrirParentesis = '≤';
+    private final char charCerrarParentesis = '≥';
+    private final char charOr = '∫';
+    private final char charPlus = '∩';
     
     public CodeGenerator(HashMap cadena){
         this.cadena=cadena;
@@ -84,6 +89,7 @@ public class CodeGenerator {
             "\t"+"private ArrayList<Automata> automatas = new ArrayList();"+"\n"+
             "\t"+"private HashMap<Integer,String> input;"+"\n"+   
              "\t"+"private ArrayList keywords = new ArrayList();"+"\n"+
+            "\t"+"private ArrayList ignoreSets = new ArrayList();" +"\n"+
                 
             "\t"+"public " + this.nombreArchivo+"(HashMap input){"+"\n"+
              "\t"+"\t"+"this.input=input;"+"\n"+
@@ -97,6 +103,7 @@ public class CodeGenerator {
         scanner_total += generar();
         scanner_total += metodoRevisar();
         scanner_total += keyWords();
+        scanner_total += ignoreWords();
         scanner_total+="\n"+"}";
         
         ReadFile fileCreator = new ReadFile();
@@ -104,13 +111,30 @@ public class CodeGenerator {
         
     }
     
+    public void ignoreSets(){
+        for (Map.Entry<Integer, String> entry : cadena.entrySet()) {
+               String value = entry.getValue();
+               int lineaActual = entry.getKey();
+               if (this.cadena.get(lineaActual).contains("IGNORE")){
+                    if (value.contains("\'"))
+                        value = value.replaceAll("\'", "");
+                   
+                    
+                   ignoreSets.add(value.substring(6,value.indexOf(".")));
+                   
+               }
+        
+        }
+        
+    }
+    
     /*
     * Método para pasara character y keywords a expresiones regulares
     */
     public void generarCharactersYKeywords(){
-        
+        ignoreSets();
         for (Map.Entry<Integer, String> entry : cadena.entrySet()) {
-        String value = entry.getValue();
+            String value = entry.getValue();
             if (value.contains("CHARACTERS")){
                 int lineaActual = entry.getKey();
                 while(true){
@@ -118,14 +142,18 @@ public class CodeGenerator {
                     if (this.cadena.get(lineaActual).contains("KEYWORDS"))
                         break;
                     String valor = this.cadena.get(lineaActual);
+                    
                     valor = valor.trim();
                     int index = valor.indexOf("=");
                     String ident = valor.substring(0,index);
                     String revisar  = valor.substring(++index,valor.length()-1);
                     revisar = revisar.trim();
                     revisar = crearCadenasOr(revisar);
-
+                    
+                  
+                           
                     cadenaCompleta.put(ident.trim(), revisar);
+                    
 
                     //System.out.println(cadenaCompleta);
 
@@ -136,7 +164,7 @@ public class CodeGenerator {
                 int lineaActual = entry.getKey();
                 while(true){
                     lineaActual = avanzarLinea(lineaActual);
-                    if (this.cadena.get(lineaActual).contains("END"))
+                    if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("IGNORE"))
                         break;
                     String valor = this.cadena.get(lineaActual);
                     valor = valor.trim();
@@ -145,8 +173,16 @@ public class CodeGenerator {
                     String revisar  = valor.substring(++index,valor.length()-1);
                     revisar = revisar.trim();
                     //revisar = crearCadenasOr(revisar);
-
-                    keywords.add(revisar);
+                    
+                    for (int j = 0;j<ignoreSets.size();j++){
+                      
+                        if (!ignoreSets.get(j).contains(ident.trim())){
+                           
+                           keywords.add(revisar);
+                            
+                        }
+                    }
+                    
                     
                 }
             }
@@ -168,10 +204,12 @@ public class CodeGenerator {
         String or = "";
         
         or = cadenasOrLista(cadena);
-        if (!or.isEmpty()&&!cadena.contains("+"))
+        if (!or.isEmpty()&&!cadena.contains("+")){
+            //System.out.println(or);
             return or;
+        }
         if (cadena.equals("\'+\'")){
-            System.out.println(cadena);
+            //System.out.println(cadena);
             return "+";
         }
         if ((cadena.startsWith("\"")||cadena.startsWith("\'"))&&(!cadena.contains("+"))){
@@ -199,8 +237,10 @@ public class CodeGenerator {
                             i++;
                            
                         }
-                        else if (i<=cadena.length()-2)
-                            or += c +"|";
+                        else if (i<=cadena.length()-2){
+                            or += c;
+                            or += charOr;
+                        }            
                         else if (i>cadena.length()-2)
                             or +=c;
                         
@@ -242,11 +282,11 @@ public class CodeGenerator {
                 int lado = calcularConcatenacion(or);
                 if (lado == -1){
                     
-                    or = this.charAbrirParentesis+buscarExpr(or) +this.charCerrarParentesis+"|"+this.charAbrirParentesis+ cadenaOr+this.charCerrarParentesis;
+                    or = this.charAbrirParentesis+buscarExpr(or) +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ cadenaOr+this.charCerrarParentesis;
                 }
                 else if (lado == 1){
                     
-                    or = this.charAbrirParentesis+cadenaOr +this.charCerrarParentesis+"|"+this.charAbrirParentesis+ buscarExpr(or)+this.charCerrarParentesis;
+                    or = this.charAbrirParentesis+cadenaOr +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ buscarExpr(or)+this.charCerrarParentesis;
                 }
                 
                 while (!pilaConcatenacion.isEmpty()){
@@ -275,11 +315,11 @@ public class CodeGenerator {
                      int lado = calcularConcatenacion(or);
                 if (lado == -1){
                     
-                    or = this.charAbrirParentesis+ident1 +this.charCerrarParentesis+"|"+this.charAbrirParentesis+ ident2+this.charCerrarParentesis;
+                    or = this.charAbrirParentesis+ident1 +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ ident2+this.charCerrarParentesis;
                 }
                 else if (lado == 1){
                     
-                    or = this.charAbrirParentesis+ident2 +this.charCerrarParentesis+"|"+this.charAbrirParentesis+ ident1+this.charCerrarParentesis;
+                    or = this.charAbrirParentesis+ident2 +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ ident1+this.charCerrarParentesis;
                 }
                   while (!pilaConcatenacion.isEmpty()){
                     String faltante = (String)pilaConcatenacion.pop();
@@ -315,7 +355,7 @@ public class CodeGenerator {
                         list1 = crearCadenasOr(subcadena);
                     if (list2.isEmpty())
                         list2 = crearCadenasOr(subcadena2);
-                    or = list1+"|"+list2; 
+                    or = list1+charOr+list2; 
                       while (!pilaConcatenacion.isEmpty()){
                     String faltante = (String)pilaConcatenacion.pop();
                     cantidadConcatenaciones = count(faltante,'+');
@@ -326,21 +366,50 @@ public class CodeGenerator {
                     }
                     else
                          faltante = (faltante.substring(faltante.indexOf("+")+1));
-                    or =  or +"|"+crearCadenasOr(faltante.trim());
+                    or =  or +this.charOr+crearCadenasOr(faltante.trim());
                     
                 }
                     
                     return or;
                 }
+            }else if (cadena.contains("-")){
+               if ((cadena.contains("\"")||cadena.contains("\'"))&&!cadena.contains("..")){
+                int cantidadConcatenaciones = count(cadena,'-');
+                if (cantidadConcatenaciones>1){
+                   // System.out.println(cadena.lastIndexOf("+"));
+                    //System.out.println(cadena.substring(0, cadena.indexOf("+", cadena.indexOf("+") + 1)));
+                    pilaConcatenacion.push(cadena.substring(cadena.indexOf("-", cadena.indexOf("-") + 1)));
+                   // System.out.println(pilaConcatenacion);
+                }
+               // System.out.println(cantidadConcatenaciones);
+                int preIndex=0;
+                if (cadena.contains("\""))
+                     preIndex = cadena.indexOf(("\""));
+                 if (cadena.contains("\'"))
+                     preIndex = cadena.indexOf(("\'"));
+                String w = cadena.substring(preIndex+1);
+                int postIndex = w.length()-1;
+                if (w.contains("\""))
+                    postIndex = w.indexOf(("\""));
+                if (w.contains("\'"))
+                    postIndex = w.indexOf(("\'"));
+                String wFinal = cadena.substring(preIndex,preIndex+postIndex+2);
+                String cadenaOr = crearCadenasOr(wFinal);
+                String subcadena = cadena.substring(0,cadena.indexOf("-"));
+                String tiene =  buscarExpr(subcadena);
+                String quitar = cadenaOr;
+                or = buscarExpr(subcadena);
+               } 
             }
             
         }
-        return this.charAbrirParentesis+or+this.charCerrarParentesis+"ø";
+        
+        return this.charAbrirParentesis+or+this.charCerrarParentesis+this.charPlus;
      }
     
     public String cadenasOrLista(String cadena){
         String or ="";
-    
+       
         if (cadena.contains("CHR")||cadena.contains("..")){
                 if (cadena.contains("CHR")){
                 int empieza = Integer.parseInt(cadena.substring(cadena.indexOf("(")+1,cadena.indexOf(")")));
@@ -348,21 +417,21 @@ public class CodeGenerator {
                 
                
                 RegexConverter convert = new RegexConverter();
-                or = convert.abreviacionOrS("["+(char)(empieza)+"-"+(char)(termina)+"]");
+                or = convert.abreviacionOr("["+(char)(empieza)+"-"+(char)(termina)+"]");
                 }
                 else{
                     String empieza = (cadena.substring(cadena.indexOf("\'")+1,cadena.indexOf("\'", cadena.indexOf("\'") + 1)));
                     
                     String termina = (cadena.substring(cadena.lastIndexOf("\'")-1,cadena.lastIndexOf("\'")));
                     RegexConverter convert = new RegexConverter();
-                    or =  convert.abreviacionOrS("["+(empieza)+"-"+(termina)+"]");
+                    or =  convert.abreviacionOr("["+(empieza)+"-"+(termina)+"]");
                 }
               
             }
         return or;
     }
         public String concatenacionIdent(String anterior, String actual){
-        return anterior + " |" + buscarExpr(actual);
+        return anterior + this.charOr + buscarExpr(actual);
     }
     
     /**
@@ -382,11 +451,11 @@ public class CodeGenerator {
             int lado = calcularConcatenacion(actual);
             if (lado == -1){
 
-                resultado = this.charAbrirParentesis+buscarExpr(actual) +")|"+this.charAbrirParentesis+ cadenaOr+this.charCerrarParentesis;
+                resultado = this.charAbrirParentesis+buscarExpr(actual) +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ cadenaOr+this.charCerrarParentesis;
             }
             else if (lado == 1){
 
-                resultado = this.charAbrirParentesis+cadenaOr +")|"+this.charAbrirParentesis+ buscarExpr(actual)+this.charCerrarParentesis;
+                resultado = this.charAbrirParentesis+cadenaOr +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ buscarExpr(actual)+this.charCerrarParentesis;
             }
         return resultado;
      }
@@ -450,7 +519,7 @@ public class CodeGenerator {
         String res = "";
         for (Map.Entry<String, String> entry : cadenaCompleta.entrySet()) {
             String value = entry.getKey();
-            if (search.contains(value)){
+            if (search.trim().contains(value)){
                 return entry.getValue();
                 
                 
@@ -608,6 +677,18 @@ public class CodeGenerator {
         return words;
     }
     
+     public String ignoreWords(){
+        String words = "\n"+
+        "\t"+"public void ignoreWords(){"+"\n";
+         for (int i =0;i<this.ignoreSets.size();i++){
+            words +="\t"+"\t"+ "ignoreSets.add(\""+ignoreSets.get(i).trim()+"\");"+"\n";
+         
+         }
+         words+="\t"+"\t"+"}"+"\n";
+         
+        return words;
+    }
+    
     public void generarMain(){
         String res = "\n"+
         
@@ -644,8 +725,9 @@ public class CodeGenerator {
                 
         "\t"+this.nombreArchivo+" resGenerator = new "+this.nombreArchivo+"(input);"+"\n"+
         "\t"+"resGenerator.automatas();"+"\n"+
-         "\t"+"resGenerator.keyWords();"+ "\n"+
-         "\t"+"resGenerator.revisar();"+"\n"+
+        "\t"+"resGenerator.keyWords();"+ "\n"+
+        "\t"+"resGenerator.ignoreWords();"+ "\n"+
+        "\t"+"resGenerator.revisar();"+"\n"+
         
      
         

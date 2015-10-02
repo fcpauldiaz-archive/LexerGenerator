@@ -17,6 +17,7 @@ public class LexerGeneratorMain {
     
     public static String EPSILON = "ε";
     public static char EPSILON_CHAR = EPSILON.charAt(0);
+    public static Errors errores = new Errors();
 
     /**
      * @param args the command line arguments
@@ -25,13 +26,7 @@ public class LexerGeneratorMain {
         // TODO code application logic here
         ReadFile read = new ReadFile();
         File file = new File("cocol"+".txt");
-        JFileChooser chooser = new JFileChooser();
-        int returnVal = chooser.showOpenDialog(null);
-        if(returnVal == JFileChooser.APPROVE_OPTION) {
         
-                file = chooser.getSelectedFile();
-        }
-            
           HashMap cocol = read.leerArchivo(file);
         
         
@@ -42,7 +37,7 @@ public class LexerGeneratorMain {
        
         
         if (lexer.getOutput()){
-            System.out.println("");
+            /*System.out.println("");
             System.out.println("Generando Analizador Léxico....");
             CodeGenerator generator = new CodeGenerator(cocol);
             generator.encontrarNombre();
@@ -50,8 +45,9 @@ public class LexerGeneratorMain {
             generator.generarClaseAnalizadora();
             generator.generarMain();
             System.out.println("");
-            System.out.println("Ejecute el Main de la carpeta generador para probar el input");
+            System.out.println("Ejecute el Main de la carpeta generador para probar el input");*/
         }
+        System.out.println("Cantidad Errores: " + errores.getCount());
       
         
     }

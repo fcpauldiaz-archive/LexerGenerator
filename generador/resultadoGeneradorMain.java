@@ -25,6 +25,7 @@ public static void main(String[] args) {
 	Lexer resGenerator = new Lexer(input);
 	resGenerator.automatas();
 	resGenerator.keyWords();
+	resGenerator.ignoreWords();
 	resGenerator.revisar();
 	}
 }

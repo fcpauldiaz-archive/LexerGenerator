@@ -27,20 +27,20 @@ public class RegexConverter {
     
     /** Mapa de precedencia de los operadores. */
 	private final Map<Character, Integer> precedenciaOperadores;
-    private final char charKleene = 'û';
-    private final char charConcat = 'ü';
-    private final char charAbrirParentesis = 'ý';
-    private final char charCerrarParentesis = 'þ';
-    private final char charOr = 'ÿ';
-    private final char charPlus = 'ø';
-        
+    private final char charKleene = '∞';
+    private final char charConcat = '•';
+    private final char charAbrirParentesis = '≤';
+    private final char charCerrarParentesis = '≥';
+    private final char charOr = '∫';
+    private final char charPlus = '∩';
+    
         //constructor
 	public RegexConverter()
         {
 		Map<Character, Integer> map = new HashMap<>();
 		map.put(charAbrirParentesis, 1); // parentesis
-		map.put('|', 2); // Union o or
-		map.put('.', 3); // explicit concatenation operator
+		map.put(charOr, 2); // Union o or
+		map.put(charConcat, 3); // explicit concatenation operator
 		map.put(charKleene, 4); // kleene
 		map.put(charPlus, 4); // positivo
 		precedenciaOperadores = Collections.unmodifiableMap(map);
@@ -98,7 +98,7 @@ public class RegexConverter {
                 {
                     if (regex.charAt(i-1) == charCerrarParentesis)
                     {
-                        regex = insertCharAt(regex,i,"|"+resultadoGeneradorMain.EPSILON+charCerrarParentesis);
+                        regex = insertCharAt(regex,i,charOr+resultadoGeneradorMain.EPSILON+charCerrarParentesis);
                         
                         int j =i;
                         while (j!=0)
@@ -117,7 +117,7 @@ public class RegexConverter {
                     }
                     else
                     {
-                        regex = insertCharAt(regex,i,"|"+resultadoGeneradorMain.EPSILON+charCerrarParentesis);
+                        regex = insertCharAt(regex,i,charOr+resultadoGeneradorMain.EPSILON+charCerrarParentesis);
                         regex = insertCharAt(regex,i-1,charAbrirParentesis+regex.charAt(i-1));
                     }
                 }
@@ -253,8 +253,8 @@ public class RegexConverter {
         regex = regex.trim();
         regex = abreviaturaCerraduraPositiva(regex);
 		String  regexExplicit = new String();
-		List<Character> operadores = Arrays.asList('|', charPlus, charKleene);
-		List<Character> operadoresBinarios = Arrays.asList('|');
+		List<Character> operadores = Arrays.asList(charOr, charPlus, charKleene);
+		List<Character> operadoresBinarios = Arrays.asList(charOr);
                 
                 
                 //recorrer la cadena
@@ -272,7 +272,7 @@ public class RegexConverter {
                         //mientras la cadena no incluya operadores definidos, será una concatenación implicita
                         if (!c1.equals(charAbrirParentesis) && !c2.equals(charCerrarParentesis) && !operadores.contains(c2) && !operadoresBinarios.contains(c1))
                         {
-                            regexExplicit += '.';
+                            regexExplicit += this.charConcat;
                            
                         }
                         
@@ -299,7 +299,7 @@ public class RegexConverter {
                             if (j==(fin-inicio))
                                 resultado+= Character.toString((char)(inicio+j));
                             else
-                             resultado+= Character.toString((char)(inicio+j))+'|';
+                             resultado+= Character.toString((char)(inicio+j))+charOr;
                         }
                         resultado +=charCerrarParentesis;
                         i=i+4;
@@ -327,7 +327,7 @@ public class RegexConverter {
             for (int i=0;i<regex.length();i++){
                 Character ch = regex.charAt(i);
                 if (ch =='[' ){
-                    if (regex.charAt(i+2)=='.'){
+                    if (regex.charAt(i+2)==this.charConcat){
                         int inicio = regex.charAt(i+1);
                         int fin = regex.charAt(i+3);
                         resultado +=charAbrirParentesis;

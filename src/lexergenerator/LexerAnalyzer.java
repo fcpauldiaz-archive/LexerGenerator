@@ -19,10 +19,18 @@ public class LexerAnalyzer {
     
     
     private final HashMap<Integer,String> cadena;
+    private final char charKleene = '∞';
+    private final char charConcat = '•';
+    private final char charAbrirParentesis = '≤';
+    private final char charCerrarParentesis = '≥';
+    private final char charOr = '∫';
+    private final char charPlus = '∩';
+    private final char charInt = 'Ω';
+   
     
   
-    private final String espacio = "(" +" "+")*";
-    private final String ANY = this.espacio+"[ -']"+"|"+"[@-z]"+this.espacio;
+    private final String espacio = charAbrirParentesis  +" "+charCerrarParentesis+this.charKleene;
+    private final String ANY = this.espacio+"[ -.]"+this.charOr+"[@-z]"+this.espacio;
     private boolean output = true;
     
     private Automata letter_;
@@ -60,9 +68,6 @@ public class LexerAnalyzer {
     public void vocabulario(){
         RegexConverter convert = new RegexConverter();
         
-        
-        
-        
         String regex = convert.infixToPostfix(ANY);
         AFNConstruct ThomsonAlgorithim = new AFNConstruct(regex);
         ThomsonAlgorithim.construct();
@@ -79,8 +84,9 @@ public class LexerAnalyzer {
         //letter_ = ThomsonAlgorithim.concatenacion(letter_, espacio_);
         //letter_ = ThomsonAlgorithim.concatenacion(espacio_, letter_);
         letter_.setTipo("Letra");
+       
         
-        regex = convert.infixToPostfix("("+" "+")*");
+        regex = convert.infixToPostfix(this.charAbrirParentesis+" "+this.charCerrarParentesis+this.charKleene);
         ThomsonAlgorithim.setRegex(regex);
         ThomsonAlgorithim.construct();
         espacio_  = ThomsonAlgorithim.getAfn();
@@ -105,8 +111,10 @@ public class LexerAnalyzer {
         //System.out.println(letterOrDigit);
         Automata letterOrDigitKleene = ThomsonAlgorithim.cerraduraKleene(letterOrDigit);
        // System.out.println(letterOrDigitKleene);
-        ident_ = ThomsonAlgorithim.concatenacion(letter_, letterOrDigitKleene);
+        ident_ = ThomsonAlgorithim.concatenacion(letterOrDigitKleene, letter_);
         ident_.setTipo("identificador");
+        
+       
        // System.out.println(ident_);
         Automata ap1 = ThomsonAlgorithim.afnSimple("\"");
         Automata ap2 = ThomsonAlgorithim.afnSimple("\"");
@@ -115,7 +123,7 @@ public class LexerAnalyzer {
         string_ = ThomsonAlgorithim.concatenacion(ap1, string_);
         string_ = ThomsonAlgorithim.concatenacion(string_,ap2);
         
-        regex = convert.infixToPostfix("\\|\"|\'");
+        regex = convert.infixToPostfix("\\"+this.charOr+"\""+this.charOr+"\'");
         ThomsonAlgorithim = new AFNConstruct(regex);
         ThomsonAlgorithim.construct();
         Automata specialChars = ThomsonAlgorithim.getAfn();
@@ -127,11 +135,12 @@ public class LexerAnalyzer {
          
         
         
-         Automata apch1 = ThomsonAlgorithim.afnSimple("\'");
+        Automata apch1 = ThomsonAlgorithim.afnSimple("\'");
         Automata apch2 = ThomsonAlgorithim.afnSimple("\'");
         character_ = ThomsonAlgorithim.union(number_, letter_);
-         character_ = ThomsonAlgorithim.concatenacion(apch1, character_);
+        character_ = ThomsonAlgorithim.concatenacion(apch1, character_);
         character_ = ThomsonAlgorithim.concatenacion(character_,apch2);
+         
         regex = convert.infixToPostfix("CHR(");
         ThomsonAlgorithim = new AFNConstruct(regex);
         ThomsonAlgorithim.construct();
@@ -145,6 +154,7 @@ public class LexerAnalyzer {
        
         character_ = ThomsonAlgorithim.union(character_,innerChar);
         character_.setTipo("character");
+      
        
         
        
@@ -163,7 +173,7 @@ public class LexerAnalyzer {
         basicSet_ = ThomsonAlgorithim.union(basicSet_, basicChar_);
         basicSet_.setTipo("Basic Set");
         
-        regex = convert.infixToPostfix("("+" " +")*"+"="+"("+" " +")*");
+        regex = convert.infixToPostfix(espacio+"="+espacio);
         ThomsonAlgorithim.setRegex(regex);
         ThomsonAlgorithim.construct();
         igual_  = ThomsonAlgorithim.getAfn();
@@ -241,7 +251,7 @@ public class LexerAnalyzer {
         
         //ParserSpecification
      
-        
+       
        
         //END File
         lineaActual = (int)scan.get(0);
@@ -254,7 +264,8 @@ public class LexerAnalyzer {
         //revisar identificadores
         if (!res4.isEmpty()&&!res2.isEmpty()){
             if (!res4.get(1).toString().trim().equals(res2.get(1).toString().trim())){
-                System.out.println("Error Linea " + lineaActual + ": los identificadores "+ res4.get(1).toString().trim()+ " y "+ res2.get(1).toString().trim() +" no coinciden");
+                LexerGeneratorMain.errores.SynErr(lineaActual, "Los identificadores no coinciden");
+                System.out.println( res4.get(1).toString().trim()+ " y "+ res2.get(1).toString().trim() +" no coinciden");
                 output=false;
             }
          
@@ -280,7 +291,7 @@ public class LexerAnalyzer {
         lineaActual = avanzarLinea(lineaActual);
        
         if (!this.cadena.get(lineaActual).contains("CHARACTERS")){
-            System.out.println("Error línea : "+lineaActual +" No contiene la palabra CHARACTERS");
+            LexerGeneratorMain.errores.SynErr(lineaActual, "No contiene la palabra CHARACTERS");
             return new ArrayList();
         }
         lineaActual = avanzarLinea(lineaActual);
@@ -297,7 +308,7 @@ public class LexerAnalyzer {
         //[KEYWRORDS]
         lineaActual = avanzarLinea(lineaActual);
          if (!this.cadena.get(lineaActual).contains("KEYWORDS")){
-            System.out.println("Error linea :" +lineaActual + " No contiene la palabra KEYWORDS");
+            LexerGeneratorMain.errores.SynErr(lineaActual, " No contiene la palabra KEYWORDS");
             return new ArrayList();
         }
         lineaActual = avanzarLinea(lineaActual);
@@ -312,7 +323,25 @@ public class LexerAnalyzer {
             
         }
         
-        //[TOKENS]
+         lineaActual = avanzarLinea(lineaActual);
+         if (!this.cadena.get(lineaActual).contains("TOKENS")){
+            LexerGeneratorMain.errores.SynErr(lineaActual, "NO Contiene la palabra TOKENS");
+            return new ArrayList();
+        }
+        
+        //[TOKEN DECLARATION]
+        
+        lineaActual = avanzarLinea(lineaActual);
+        while(true){
+            boolean token = tokenDeclaration(lineaActual);
+            if (token)
+                lineaActual = avanzarLinea(lineaActual);
+            else
+                break;
+        }
+        
+        
+        //[WHITESPACE DELCARATION]
         
         lineaActual = avanzarLinea(lineaActual);
         //whitespaceDecl
@@ -325,12 +354,280 @@ public class LexerAnalyzer {
             }
         }
         
+        
+        
+        
+        
       // lineaActual = avanzarLinea(lineaActual);
               
         ArrayList outputScan = new ArrayList();
         outputScan.add(lineaActual);
         outputScan.add(true);
        return outputScan;
+    }
+    
+    /**
+     * Método que revisar la sintaxis de token declaration
+     * @param lineaActual
+     * @return 
+     */
+    public boolean tokenDeclaration(int lineaActual){
+        
+        if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("IGNORE"))
+            return false;
+        
+          //revisr identificador y símbolo '='
+        try{
+            int indexSearch = this.cadena.get(lineaActual).indexOf("=")-1;
+             while (this.cadena.get(lineaActual).substring(0, indexSearch).contains(" "))
+                indexSearch--;
+           
+            boolean identifier = checkAutomata(this.ident_,this.cadena.get(lineaActual).substring(0,indexSearch));
+            ///  int index1  = returnArray(identifier);
+              if (!identifier){
+                   return false;
+              }
+           
+        }catch(Exception e){}
+        
+          //revisar string
+        try{
+            int indexSearch = this.cadena.get(lineaActual).indexOf("=")+1;
+            String cadenaRevisar = this.cadena.get(lineaActual).substring(indexSearch);
+            while(cadenaRevisar.startsWith(" "))
+                cadenaRevisar = this.cadena.get(lineaActual).substring(++indexSearch);
+            if (cadenaRevisar.substring(0, cadenaRevisar.length()).contains("."))
+                cadenaRevisar = cadenaRevisar.substring(0, cadenaRevisar.length()-1);
+            else{    
+               LexerGeneratorMain.errores.Warning(lineaActual, "NO contiene punto al final");
+                
+            }
+            if (cadenaRevisar.contains("EXCEPT"))
+                cadenaRevisar = cadenaRevisar.substring(0,cadenaRevisar.indexOf("EXCEPT")-1).trim();
+            boolean tkExpr = tokenExpr(lineaActual, cadenaRevisar);
+            
+            return tkExpr;
+         }catch(Exception e){
+              LexerGeneratorMain.errores.SemErr(lineaActual, this.cadena.get(lineaActual));
+             this.output=false;
+         }
+        return false;
+    }
+    
+    public boolean tokenExpr(int lineaActual,String cadenaRevisar){
+        String antesRevisar = cadenaRevisar;
+        cadenaRevisar = cadenaRevisar.replaceAll("\\{", this.charAbrirParentesis+"");
+        cadenaRevisar = cadenaRevisar.replaceAll("\\}", this.charCerrarParentesis+""+this.charKleene);
+        cadenaRevisar = cadenaRevisar.replaceAll("\\[", this.charAbrirParentesis+"");
+        cadenaRevisar = cadenaRevisar.replaceAll("\\]",this.charCerrarParentesis+"" +this.charInt);
+        cadenaRevisar = cadenaRevisar.replaceAll("\\|",this.charOr+"");
+        cadenaRevisar = cadenaRevisar.replaceAll("\\(",this.charAbrirParentesis+"");
+        cadenaRevisar = cadenaRevisar.replaceAll("\\)",this.charCerrarParentesis+"");
+        
+        
+       
+        String regex;
+        RegexConverter convert = new RegexConverter();
+        regex = convert.infixToPostfix(cadenaRevisar);
+       
+        if (regex.isEmpty()){
+            LexerGeneratorMain.errores.SynErr(lineaActual, "Expresión mal ingresada");
+            return false;
+        }    
+        
+     return true;   
+    }
+    /**
+     *  TokenTerm { '|' TokenTerm }.
+     * @param lineaActual
+     * @param cadenaRevisar
+     * @return 
+     */
+    
+    public boolean tokenExpr2(int lineaActual, String cadenaRevisar){
+        boolean tknExpr = false;
+        String subcadena = cadenaRevisar;
+        String subcadenaRevisar ="";
+        int lastIndex = cadenaRevisar.length();
+        if (cadenaRevisar.contains("EXCEPT")){
+            lastIndex = cadenaRevisar.indexOf("EXCEPT")-1;
+        }
+        String subCadena = cadenaRevisar;
+       while (subCadena.contains("{")){
+            subCadena= subCadena.substring(subCadena.indexOf("{")+1, subCadena.indexOf("}"));
+            System.out.println(subCadena.contains("|"));
+       }
+        ArrayList reslt=null;
+         boolean firstResult=false;
+        if (!subcadena.contains("|")){
+            reslt = tokenTerm(lineaActual, cadenaRevisar);
+            firstResult = (boolean)reslt.get(0);
+            cadenaRevisar =  (String)reslt.get(1);
+        }
+       
+        if (firstResult)
+             return true;
+        
+           
+        ArrayList<String> parts = new ArrayList();
+        for (int j = 0;j<cadenaRevisar.length();j++){
+            subCadena = cadenaRevisar;
+            while (subCadena.contains("[")){
+                subCadena= subCadena.substring(subCadena.indexOf("[")+1, subCadena.indexOf("]"));
+                System.out.println(subCadena.contains("|"));
+                parts.add(subcadena);
+                 
+            }
+            
+        }
+        
+        
+         for (String part : parts) {
+             //System.out.println(parts[i]);
+             tknExpr = (boolean)tokenTerm(lineaActual, part.trim()).get(0);
+             if (!tknExpr)
+                 return false;
+         }
+          
+            
+        
+        
+         return true;
+    }
+    
+    public ArrayList tokenTerm(int lineaActual, String cadenaRevisar){
+        int indexCortar = 0;
+        int indexActual=0;
+       
+        String sub ="";
+        Stack pilaTokens = new Stack();
+        pilaTokens.push(cadenaRevisar);
+        while(!pilaTokens.isEmpty()){
+             int indexFin = 0;
+            String actual = (String)pilaTokens.pop();
+            if (actual.isEmpty())
+                break;
+            if (actual.contains("{"))
+                indexCortar = actual.indexOf("{");
+            
+            else if (actual.contains("\"")){
+                indexCortar = actual.indexOf("\"");
+            }
+            else if (actual.contains("\'")){
+                indexCortar = actual.indexOf("\'");
+            }
+            else if (actual.contains("(")){
+                indexCortar = actual.indexOf("(");
+            }
+            else if (actual.contains("[")){
+                indexCortar = actual.indexOf("[");
+            }
+            
+            if (indexCortar != 0){
+                pilaTokens.push((actual.substring(indexCortar)));
+                actual = actual.substring(0,indexCortar);
+                
+            }
+            if (indexCortar == 0&&actual.contains("}")){
+                indexFin = actual.lastIndexOf("}");
+                
+            }
+            else if (indexCortar == 0&&actual.contains("\"")){
+                indexFin = actual.lastIndexOf("\"");
+                
+            }
+            else if (indexCortar == 0&&actual.contains(")")){
+                indexFin = actual.lastIndexOf(")");
+                
+            }
+            else if (indexCortar == 0&&actual.contains("]")){
+                indexFin = actual.lastIndexOf("]");
+                
+            }
+           
+            
+            
+            if (indexFin != 0 && indexCortar ==0){
+                pilaTokens.push(actual.substring(indexFin+1));
+                actual = actual.substring(indexCortar,indexFin+1);
+            }
+            
+            
+            
+            boolean res = tokenFactor(lineaActual,actual);
+            System.out.println(res);
+            if (!res){
+                ArrayList a= new ArrayList();
+                a.add(false);
+                a.add(cadenaRevisar);
+                return a;
+                
+            }
+                
+                
+                   
+        }
+        ArrayList a= new ArrayList();
+        a.add(true);
+        a.add("");
+       return  a;
+        
+    }
+    
+    public boolean tokenFactor(int lineaActual, String cadenaRevisar){
+       boolean symb = symbol(lineaActual, cadenaRevisar.trim());
+       
+       if (symb)
+           return true;
+       
+        int index1 = cadenaRevisar.indexOf("{");
+        int index2 = cadenaRevisar.indexOf("[");
+        int index3 = cadenaRevisar.indexOf("(");
+                
+       
+       if (index1>index2&&index1>index3){
+           cadenaRevisar = cadenaRevisar.substring(cadenaRevisar.indexOf("{"));
+           cadenaRevisar = cadenaRevisar.replaceFirst("\\{","");
+           cadenaRevisar = replaceLast(cadenaRevisar,"}","");
+           boolean tkFactor1 = tokenExpr(lineaActual,cadenaRevisar);
+           
+            if (tkFactor1)
+                return tkFactor1;
+       }
+       if (index2>index1&&index2>index3){
+           cadenaRevisar = cadenaRevisar.substring(cadenaRevisar.indexOf("{"));
+           cadenaRevisar = cadenaRevisar.replaceFirst("\\[","");
+           cadenaRevisar = replaceLast(cadenaRevisar,"]","");
+           boolean tkFactor1 = tokenExpr(lineaActual,cadenaRevisar);
+           
+            if (tkFactor1)
+                return tkFactor1;
+       }
+       if (index3>index1&&index3>index2){
+           cadenaRevisar = cadenaRevisar.substring(cadenaRevisar.indexOf("{"));
+           cadenaRevisar = cadenaRevisar.replaceFirst("\\(","");
+           cadenaRevisar = replaceLast(cadenaRevisar,")","");
+           boolean tkFactor1 = tokenExpr(lineaActual,cadenaRevisar);
+           
+            if (tkFactor1)
+                return tkFactor1;
+       }
+           
+      
+        return false;
+    }
+    
+    public boolean symbol(int lineaActual, String cadenaRevisar){
+        boolean idnt = checkAutomata(ident_,cadenaRevisar);
+        boolean str = checkAutomata(string_,cadenaRevisar);
+        boolean chr = checkAutomata(character_,cadenaRevisar);
+        
+         if (idnt||str||chr)
+            return true;
+         
+        
+        
+        return false;
     }
     
     /**
@@ -349,9 +646,9 @@ public class LexerAnalyzer {
      */
     public boolean keywordDeclaration(int lineaActual){
         
-        if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("CHARACTERS")
-                ||this.cadena.get(lineaActual).contains("IGNORE"))
+        if (this.cadena.get(lineaActual).contains("TOKENS") ||this.cadena.get(lineaActual).contains("IGNORE")){
             return false;
+        }
         
         //revisr identificador y símbolo '='
         try{
@@ -376,10 +673,12 @@ public class LexerAnalyzer {
                 cadenaRevisar = this.cadena.get(lineaActual).substring(++indexSearch);
             if (cadenaRevisar.substring(0, cadenaRevisar.length()).contains("."))
                 cadenaRevisar = cadenaRevisar.substring(0, cadenaRevisar.length()-1);
-            else    
-                System.out.println("No contiene punto al final, línea  " + lineaActual);
+            else{    
+               LexerGeneratorMain.errores.SynErr(lineaActual, "No contiene punto al final");
+            }
             boolean resSet = checkAutomata(this.string_,cadenaRevisar);
          }catch(Exception e){
+             LexerGeneratorMain.errores.SemErr(lineaActual, "expresión mal ingresada");
              this.output=false;
          }
         
@@ -413,7 +712,7 @@ public class LexerAnalyzer {
                   return false;
               }
         }catch(Exception e){
-            System.out.println("Error, no hay \"=\" en la línea " + lineaActual);
+            LexerGeneratorMain.errores.SynErr(lineaActual, "No contiene = ");
             this.output=false;
         }
         
@@ -430,7 +729,7 @@ public class LexerAnalyzer {
             if (!equals)
                 return false;
         }catch(Exception e){
-            System.out.println("Error, no hay \"=\" en la línea " + lineaActual);
+            LexerGeneratorMain.errores.SynErr(lineaActual, "No contiene = ");
             this.output=false;
         }
      
@@ -443,8 +742,10 @@ public class LexerAnalyzer {
                 cadenaRevisar = this.cadena.get(lineaActual).substring(++indexSearch);
             if (cadenaRevisar.substring(0, cadenaRevisar.length()).contains("."))
                 cadenaRevisar = cadenaRevisar.substring(0, cadenaRevisar.length()-1);
-            else
-                 System.out.println("No contiene punto al final, línea " + lineaActual);
+            else{
+                  LexerGeneratorMain.errores.Warning(lineaActual, "No contiene punto al final ");
+                
+            }
             boolean resSet = set(lineaActual,cadenaRevisar);
          }catch(Exception e){
              this.output=false;
@@ -503,7 +804,7 @@ public class LexerAnalyzer {
     
     public boolean revisarRecursive(String regex, int lineaActual){
         String revisar;
-         while(true){
+        while(true){
             if (regex.contains("+"))
                 revisar = regex.substring(regex.indexOf("+"),regex.indexOf("+")+1);
             else
@@ -548,7 +849,7 @@ public class LexerAnalyzer {
         }*/
         
        if (!resBasicSet)
-            System.out.println("Error línea archivo "+ lineaActual + regex + " no fue reconocido");
+             LexerGeneratorMain.errores.SynErr(lineaActual, "No fue reconocido " + regex);
         
        
         return resBasicSet;
@@ -878,9 +1179,21 @@ public class LexerAnalyzer {
           if (chars[i] == c) {
             count++;
           }
+        
+        
         }
         return count;
     }
+    public  String replaceLast(String string, String toReplace, String replacement) {
+        int pos = string.lastIndexOf(toReplace);
+        if (pos > -1) {
+            return string.substring(0, pos)
+                 + replacement
+                 + string.substring(pos + toReplace.length(), string.length());
+        } else {
+            return string;
+    }
+}
 }
 
 

@@ -20,6 +20,12 @@ public class AFNConstruct<T> {
    
     private Automata afn;
     private String regex;
+    private final char charKleene = '∞';
+    private final char charConcat = '•';
+    private final char charAbrirParentesis = '≤';
+    private final char charCerrarParentesis = '≥';
+    private final char charOr = '∫';
+    private final char charPlus = '∩';
    
     
     public AFNConstruct(String regex) {
@@ -38,12 +44,12 @@ public class AFNConstruct<T> {
         //Crea un automata por cada operacion
         for (Character c : this.regex.toCharArray()) {
             switch(c){
-                case '*':
+                case charKleene:
                      Automata kleene = cerraduraKleene((Automata) pilaAFN.pop());
                      pilaAFN.push(kleene);
                      this.afn=kleene;
                     break;
-                case '.':
+                case charConcat:
                     Automata concat_param1 = (Automata)pilaAFN.pop();
                     Automata concat_param2 = (Automata)pilaAFN.pop();
                     Automata concat_result = concatenacion(concat_param1,concat_param2);
@@ -52,7 +58,7 @@ public class AFNConstruct<T> {
                     this.afn=concat_result;
                     break;
                     
-                case '|':
+                case charOr:
                     
                     Automata union_param1 = (Automata)pilaAFN.pop();
                     Automata union_param2 = (Automata)pilaAFN.pop();
@@ -79,6 +85,7 @@ public class AFNConstruct<T> {
         
         }catch(Exception e){
             System.out.println("Expresión mal ingresada");
+            afn=null;
         }
     
                 
