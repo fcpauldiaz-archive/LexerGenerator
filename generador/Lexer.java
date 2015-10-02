@@ -139,7 +139,6 @@ public class Lexer {
 		ArrayList<Boolean> resultado = new ArrayList();
 		for (int j = 0;j<conjunto.size();j++){
 			resultado.add(sim.simular(regex, conjunto.get(j)));
-			System.out.println(ignoreSets.contains(conjunto.get(j).getTipo()));
 		}
 		ArrayList<Integer> posiciones = checkBoolean(resultado);
 		//resultado.clear();

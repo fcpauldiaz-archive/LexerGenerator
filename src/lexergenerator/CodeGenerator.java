@@ -20,18 +20,29 @@ public class CodeGenerator {
     
     private final HashMap<Integer,String> cadena;
     private String nombreArchivo;
-    private final HashMap<String, String> cadenaCompleta = new HashMap();
-    private final ArrayList<String> keywords = new ArrayList();
-    private final Stack pilaConcatenacion = new Stack();
-    private final ArrayList<String> ignoreSets = new ArrayList();
+    private final HashMap<String, String> cadenaCompleta;
+    private final HashMap<String, String> tokensExpr;
+    private final ArrayList<String> keywords;
+    private final Stack pilaConcatenacion;
+    private final ArrayList<String> ignoreSets;
     private final char charKleene = '∞';
     private final char charConcat = '•';
     private final char charAbrirParentesis = '≤';
     private final char charCerrarParentesis = '≥';
     private final char charOr = '∫';
     private final char charPlus = '∩';
+    private final char charInt = 'Ω';
     
+    /**
+     * Constructor
+     * @param cadena HashMap con la cadena del input
+     */
     public CodeGenerator(HashMap cadena){
+        this.ignoreSets = new ArrayList();
+        this.pilaConcatenacion = new Stack();
+        this.keywords = new ArrayList();
+        this.tokensExpr = new HashMap();
+        this.cadenaCompleta = new HashMap();
         this.cadena=cadena;
     }
     
@@ -164,7 +175,7 @@ public class CodeGenerator {
                 int lineaActual = entry.getKey();
                 while(true){
                     lineaActual = avanzarLinea(lineaActual);
-                    if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("IGNORE"))
+                    if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("TOKENS"))
                         break;
                     String valor = this.cadena.get(lineaActual);
                     valor = valor.trim();
@@ -190,6 +201,48 @@ public class CodeGenerator {
         }
         System.out.println(cadenaCompleta);
         
+    }
+    
+    /**
+     * Método que lee el archivo de Cocol/R y
+     * crea las expresionres de los tokens
+     */
+    public void generarTokens(){
+         for (Map.Entry<Integer, String> entry : cadena.entrySet()) {
+            String value = entry.getValue();
+            if (value.contains("TOKENS")){
+                int lineaActual = entry.getKey();
+                while(true){
+                    lineaActual = avanzarLinea(lineaActual);
+                    if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("IGNORE"))
+                        break;
+                    String valor = this.cadena.get(lineaActual);
+                    
+                    valor = valor.trim();
+                    int index = valor.indexOf("=");
+                    String ident = valor.substring(0,index);
+                    String revisar  = valor.substring(++index,valor.length()-1);
+                    revisar = revisar.trim();
+                    revisar = revisar.replaceAll("\\{", this.charAbrirParentesis+"");
+                    revisar = revisar.replaceAll("\\}", this.charCerrarParentesis+""+this.charKleene);
+                    revisar = revisar.replaceAll("\\[", this.charAbrirParentesis+"");
+                    revisar = revisar.replaceAll("\\]",this.charCerrarParentesis+"" +this.charInt);
+                    revisar = revisar.replaceAll("\\|",this.charOr+"");
+                    revisar = revisar.replaceAll("\\(",this.charAbrirParentesis+"");
+                    revisar = revisar.replaceAll("\\)",this.charCerrarParentesis+"");
+
+                  
+                           
+                    tokensExpr.put(ident.trim(), revisar);
+                    
+
+                    //System.out.println(cadenaCompleta);
+
+                }
+
+            }
+         }
+        System.out.println(tokensExpr);
     }
     
     /**
@@ -529,6 +582,9 @@ public class CodeGenerator {
         }
         return res;
      }
+    
+   
+    
     
     /**
      * Método para calcular el número de ocurrencias de un character
