@@ -2,7 +2,9 @@ COMPILER Lexer
 
 CHARACTERS
 
-tab           = CHR(09).
+tab           = CHR(09). 
+lf            = CHR(10). 
+cr            = CHR(13). 
 zero          = '0'.
 zeroToThree   = zero + "123" .
 octalDigit    = zero + "1234567" . 
@@ -12,7 +14,8 @@ hexDigit      = digit + "ABCDEFabcdef" .
 letter        = 'A' .. 'Z' + 'a' .. 'z' + '+' .
 some_chars 	  = CHR(33)..CHR(39).
 escape_chars  = some_chars + "\\".
-
+char          = ANY - "'" - '\\' - cr - lf.
+stringChar    = ANY - "\"" - '\\' - cr - lf.
 
 KEYWORDS
 
@@ -56,7 +59,9 @@ TOKENS
 
 letter = letter{letter} EXCEPT KEYWORDS.
 ident1 = letter {'_'} '*'.
-number = digit{digit}|digit{digit}'.'{digit}['E'['+'|'-']digit{digit}].
+number = digit {digit}
+         | digit {digit} '.' {digit} ['E' ['+'|'-'] digit {digit}].
+
 
 
 IGNORE " ".

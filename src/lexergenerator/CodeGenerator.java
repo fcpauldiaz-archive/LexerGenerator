@@ -25,6 +25,7 @@ public class CodeGenerator implements RegexConstants{
     private final ArrayList<String> keywords;
     private final Stack pilaConcatenacion;
     private final ArrayList<String> ignoreSets;
+    private final String ANY = "[ -.]"+charOr+"[@-z]";
    
     
     /**
@@ -138,6 +139,9 @@ public class CodeGenerator implements RegexConstants{
     */
     public void generarCharactersYKeywords(){
         ignoreSets();
+        RegexConverter convert = new RegexConverter();
+        cadenaCompleta.put("ANY", convert.abreviacionOr(ANY));
+        
         for (Map.Entry<Integer, String> entry : cadena.entrySet()) {
             String value = entry.getValue();
             if (value.contains("CHARACTERS")){
@@ -231,6 +235,7 @@ public class CodeGenerator implements RegexConstants{
                     }
                     System.out.println(revisar);
                     revisar = revisar.replaceAll("\'", "");
+                     revisar = revisar.replaceAll("\"", "");
                    
                     revisar = revisar.replaceAll("\\{", charAbrirParentesis+"");
                     revisar = revisar.replaceAll("\\}", charCerrarParentesis+""+charKleene);

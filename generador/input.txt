@@ -1,9 +1,13 @@
-while
-ifwhile
-A
+while2
+ifwhile while
+A 
 AB
++
 a *
 1.2
 1.0
 2.12342
 50.12E-12
+15
+0X1F
+032L
