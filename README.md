@@ -26,7 +26,7 @@ Cocol = "COMPILER" ident
 
 #####ScannerSpecification
 
-#####ParserSpecification
+#####ParserSpecification (este proyecto no lo incluye)
 
 "END" ident '.'.
 
@@ -65,7 +65,7 @@ Symbol = ident | string | char.
 
 WhiteSpaceDecl = "IGNORE" Set '.'.
 
-#####ParserSpecification = "PRODUCTIONS" { Production }.
+#####ParserSpecification = "PRODUCTIONS" { Production }. (no lo incluye)
 
 Production = ident [ Attributes ] [ SemAction ] '=' Expression '.'.
 
