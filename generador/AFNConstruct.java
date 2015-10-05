@@ -20,12 +20,13 @@ public class AFNConstruct<T> {
    
     private Automata afn;
     private String regex;
-    private final char charKleene = '∞';
-    private final char charConcat = '•';
-    private final char charAbrirParentesis = '≤';
-    private final char charCerrarParentesis = '≥';
-    private final char charOr = '∫';
-    private final char charPlus = '∩';
+    public final char charKleene = '∞';
+    public final char charConcat = '∆';
+    public final char charAbrirParentesis = '≤';
+    public final char charCerrarParentesis = '≥';
+    public final char charOr = '∫';
+    public final char charPlus = '∩';
+    public final char charInt = 'Ω';
     
 
 

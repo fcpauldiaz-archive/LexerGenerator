@@ -7,7 +7,7 @@
 package lexergenerator;
 
 /**
- *
+ * Clase para mostrar diferentes tipos de errores
  * @author Pablo
  */
 public class Errors {
@@ -45,8 +45,8 @@ public class Errors {
     }
     /**
      * Ocurre cuando se realiza un operación 
-     * @param line
-     * @param msg 
+     * @param line linea del archivo
+     * @param msg mensaje indicativo
      */
     public void SemErr(int line, String msg){
         System.out.println("");
@@ -59,8 +59,8 @@ public class Errors {
     }
    /**
     * Muestra advertencia de sintaxis que no conlleva a error semántico.
-    * @param line
-    * @param msg 
+    * @param line linea del archivo
+    * @param msg mensaje indicativo
     */
     public void Warning(int line, String msg){
         System.out.println("");
@@ -70,7 +70,10 @@ public class Errors {
         count++;
         
     }
-
+    /**
+     * Obtener contador de errores
+     * @return entero
+     */
     public int getCount() {
         return count;
     }

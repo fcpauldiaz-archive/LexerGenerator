@@ -15,17 +15,12 @@ import java.util.Stack;
  * @author Pablo
  * @param <T>
  */
-public class AFNConstruct<T> {
+public class AFNConstruct<T> implements RegexConstants {
     
    
     private Automata afn;
     private String regex;
-    private final char charKleene = '∞';
-    private final char charConcat = '•';
-    private final char charAbrirParentesis = '≤';
-    private final char charCerrarParentesis = '≥';
-    private final char charOr = '∫';
-    private final char charPlus = '∩';
+    
    
     
     public AFNConstruct(String regex) {

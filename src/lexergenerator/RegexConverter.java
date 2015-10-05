@@ -23,18 +23,12 @@ import java.util.Stack;
  * @since 29/07/2015
  * Includes abreviatures to reduce operators
  */
-public class RegexConverter {
+public class RegexConverter implements RegexConstants{
     
     /** Mapa de precedencia de los operadores. */
     private final Map<Character, Integer> precedenciaOperadores;
     private final String escapeChars = "\"" + "\'" +"\\";
-    private final char charKleene = '∞';
-    private final char charConcat = '•';
-    private final char charAbrirParentesis = '≤';
-    private final char charCerrarParentesis = '≥';
-    private final char charOr = '∫';
-    private final char charPlus = '∩';
-    private final char charInt = 'Ω';
+    
     
         //constructor
 	public RegexConverter()

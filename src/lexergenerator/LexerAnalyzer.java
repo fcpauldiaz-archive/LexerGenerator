@@ -15,22 +15,12 @@ import java.util.Stack;
  * Clase para revisar la estructura de un archivo de CocoL
  * @author Pablo
  */
-public class LexerAnalyzer {
+public class LexerAnalyzer implements RegexConstants{
     
     
     private final HashMap<Integer,String> cadena;
-    private final char charKleene = '∞';
-    private final char charConcat = '•';
-    private final char charAbrirParentesis = '≤';
-    private final char charCerrarParentesis = '≥';
-    private final char charOr = '∫';
-    private final char charPlus = '∩';
-    private final char charInt = 'Ω';
-   
-    
-  
-    private final String espacio = charAbrirParentesis  +" "+charCerrarParentesis+this.charKleene;
-    private final String ANY = this.espacio+"[ -.]"+this.charOr+"[@-z]"+this.espacio;
+    private final String espacio = charAbrirParentesis  +" "+charCerrarParentesis+charKleene;
+    private final String ANY = this.espacio+"[ -.]"+charOr+"[@-z]"+this.espacio;
     private boolean output = true;
     
     private Automata letter_;
@@ -86,7 +76,8 @@ public class LexerAnalyzer {
         letter_.setTipo("Letra");
        
         
-        regex = convert.infixToPostfix(this.charAbrirParentesis+" "+this.charCerrarParentesis+this.charKleene);
+        regex = convert.infixToPostfix(charAbrirParentesis+" "+
+                charCerrarParentesis+charKleene);
         ThomsonAlgorithim.setRegex(regex);
         ThomsonAlgorithim.construct();
         espacio_  = ThomsonAlgorithim.getAfn();
@@ -123,7 +114,7 @@ public class LexerAnalyzer {
         string_ = ThomsonAlgorithim.concatenacion(ap1, string_);
         string_ = ThomsonAlgorithim.concatenacion(string_,ap2);
         
-        regex = convert.infixToPostfix("\\"+this.charOr+"\""+this.charOr+"\'");
+        regex = convert.infixToPostfix("\\"+charOr+"\""+charOr+"\'");
         ThomsonAlgorithim = new AFNConstruct(regex);
         ThomsonAlgorithim.construct();
         Automata specialChars = ThomsonAlgorithim.getAfn();
@@ -423,13 +414,13 @@ public class LexerAnalyzer {
      */
     public boolean tokenExpr(int lineaActual,String cadenaRevisar){
         String antesRevisar = cadenaRevisar;
-        cadenaRevisar = cadenaRevisar.replaceAll("\\{", this.charAbrirParentesis+"");
-        cadenaRevisar = cadenaRevisar.replaceAll("\\}", this.charCerrarParentesis+""+this.charKleene);
-        cadenaRevisar = cadenaRevisar.replaceAll("\\[", this.charAbrirParentesis+"");
-        cadenaRevisar = cadenaRevisar.replaceAll("\\]",this.charCerrarParentesis+"" +this.charInt);
-        cadenaRevisar = cadenaRevisar.replaceAll("\\|",this.charOr+"");
-        cadenaRevisar = cadenaRevisar.replaceAll("\\(",this.charAbrirParentesis+"");
-        cadenaRevisar = cadenaRevisar.replaceAll("\\)",this.charCerrarParentesis+"");
+        cadenaRevisar = cadenaRevisar.replaceAll("\\{", charAbrirParentesis+"");
+        cadenaRevisar = cadenaRevisar.replaceAll("\\}", charCerrarParentesis+""+charKleene);
+        cadenaRevisar = cadenaRevisar.replaceAll("\\[", charAbrirParentesis+"");
+        cadenaRevisar = cadenaRevisar.replaceAll("\\]",charCerrarParentesis+"" +charInt);
+        cadenaRevisar = cadenaRevisar.replaceAll("\\|",charOr+"");
+        cadenaRevisar = cadenaRevisar.replaceAll("\\(",charAbrirParentesis+"");
+        cadenaRevisar = cadenaRevisar.replaceAll("\\)",charCerrarParentesis+"");
         
        
         String regex;

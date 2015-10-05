@@ -18,6 +18,8 @@ public class LexerGeneratorMain {
     public static String EPSILON = "ε";
     public static char EPSILON_CHAR = EPSILON.charAt(0);
     public static Errors errores = new Errors();
+  
+    
 
     /**
      * @param args the command line arguments
@@ -45,6 +47,7 @@ public class LexerGeneratorMain {
             generator.generarTokens();
             generator.generarClaseAnalizadora();
             generator.generarMain();
+            generator.generarSimulacion();
             System.out.println("");
             System.out.println("Ejecute el Main de la carpeta generador para probar el input");
         }

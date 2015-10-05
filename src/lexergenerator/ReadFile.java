@@ -51,8 +51,18 @@ public class ReadFile {
                     
                     
                     if (!sCurrentLine.equals("")){
-                        input+=sCurrentLine+"\r\n";
-                        detailString.put(cantidadLineas, sCurrentLine.trim());
+                        if (!sCurrentLine.contains(".")&&!(sCurrentLine.contains("COMPILER")
+                                ||sCurrentLine.contains("CHARACTERS")
+                                ||sCurrentLine.contains("KEYWRODS")
+                                ||sCurrentLine.contains("TOKENS")
+                                ||sCurrentLine.contains("IGNORE"))
+                            )
+                            input +=sCurrentLine;
+                        else{
+                            input+=sCurrentLine;
+                            detailString.put(cantidadLineas, input);
+                            input = "";
+                        }
                     }
                     cantidadLineas++;
                 

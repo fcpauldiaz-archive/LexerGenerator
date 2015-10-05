@@ -16,7 +16,7 @@ import java.util.Stack;
  * lenguaje de Java
  * @author Pablo
  */
-public class CodeGenerator {
+public class CodeGenerator implements RegexConstants{
     
     private final HashMap<Integer,String> cadena;
     private String nombreArchivo;
@@ -25,13 +25,7 @@ public class CodeGenerator {
     private final ArrayList<String> keywords;
     private final Stack pilaConcatenacion;
     private final ArrayList<String> ignoreSets;
-    private final char charKleene = '∞';
-    private final char charConcat = '•';
-    private final char charAbrirParentesis = '≤';
-    private final char charCerrarParentesis = '≥';
-    private final char charOr = '∫';
-    private final char charPlus = '∩';
-    private final char charInt = 'Ω';
+   
     
     /**
      * Constructor
@@ -114,7 +108,7 @@ public class CodeGenerator {
         scanner_total += generar();
         scanner_total += metodoRevisar();
         scanner_total += keyWords();
-        scanner_total += ignoreWords();
+       // scanner_total += ignoreWords();
         scanner_total+="\n"+"}";
         
         ReadFile fileCreator = new ReadFile();
@@ -136,7 +130,7 @@ public class CodeGenerator {
                }
         
         }
-        
+        System.out.println(ignoreSets);
     }
     
     /*
@@ -171,10 +165,10 @@ public class CodeGenerator {
                 }
 
             }
-            if (value.contains("KEYWORDS")){
+            if (value.contains("KEYWORDS")&&!value.contains("EXCEPT")){
                 int lineaActual = entry.getKey();
                 while(true){
-                    lineaActual = avanzarLinea(lineaActual);
+                    
                     if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("TOKENS"))
                         break;
                     String valor = this.cadena.get(lineaActual);
@@ -193,13 +187,13 @@ public class CodeGenerator {
                             
                         }
                     }
-                    
+                    lineaActual = avanzarLinea(lineaActual);
                     
                 }
             }
 
         }
-        System.out.println(cadenaCompleta);
+       // System.out.println(cadenaCompleta);
         
     }
     
@@ -218,31 +212,46 @@ public class CodeGenerator {
                         break;
                     String valor = this.cadena.get(lineaActual);
                     
+                     
+                    
                     valor = valor.trim();
                     int index = valor.indexOf("=");
                     String ident = valor.substring(0,index);
                     String revisar  = valor.substring(++index,valor.length()-1);
+                    if (revisar.contains("EXCEPT"))
+                        revisar = revisar.substring(0,revisar.indexOf("EXCEPT")).trim();
                     revisar = revisar.trim();
-                    revisar = revisar.replaceAll("\\{", this.charAbrirParentesis+"");
-                    revisar = revisar.replaceAll("\\}", this.charCerrarParentesis+""+this.charKleene);
-                    revisar = revisar.replaceAll("\\[", this.charAbrirParentesis+"");
-                    revisar = revisar.replaceAll("\\]",this.charCerrarParentesis+"" +this.charInt);
-                    revisar = revisar.replaceAll("\\|",this.charOr+"");
-                    revisar = revisar.replaceAll("\\(",this.charAbrirParentesis+"");
-                    revisar = revisar.replaceAll("\\)",this.charCerrarParentesis+"");
+                    //System.out.println(revisar);
+                    for (Map.Entry<String, String> entryRegex : cadenaCompleta.entrySet()) {
+                        
+                        if (revisar.contains(entryRegex.getKey())){
+                            revisar = revisar.replaceAll(entryRegex.getKey(), entryRegex.getValue());
+                        }
+                        
+                    }
+                    System.out.println(revisar);
+                    revisar = revisar.replaceAll("\'", "");
+                   
+                    revisar = revisar.replaceAll("\\{", charAbrirParentesis+"");
+                    revisar = revisar.replaceAll("\\}", charCerrarParentesis+""+charKleene);
+                    revisar = revisar.replaceAll("\\[", charAbrirParentesis+"");
+                    revisar = revisar.replaceAll("\\]",charCerrarParentesis+"" +charInt);
+                    revisar = revisar.replaceAll("\\|",charOr+"");
+                    revisar = revisar.replaceAll("\\(",charAbrirParentesis+"");
+                    revisar = revisar.replaceAll("\\)",charCerrarParentesis+"");
 
-                  
+                    
                            
                     tokensExpr.put(ident.trim(), revisar);
                     
 
-                    //System.out.println(cadenaCompleta);
+                    
 
                 }
 
             }
          }
-        System.out.println(tokensExpr);
+       // System.out.println(tokensExpr);
     }
     
     /**
@@ -261,7 +270,7 @@ public class CodeGenerator {
             //System.out.println(or);
             return or;
         }
-        if (cadena.equals("\'+\'")){
+        if (cadena.equals("'+'")){
             //System.out.println(cadena);
             return "+";
         }
@@ -335,11 +344,11 @@ public class CodeGenerator {
                 int lado = calcularConcatenacion(or);
                 if (lado == -1){
                     
-                    or = this.charAbrirParentesis+buscarExpr(or) +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ cadenaOr+this.charCerrarParentesis;
+                    or = charAbrirParentesis+buscarExpr(or) +charCerrarParentesis+charOr+charAbrirParentesis+ cadenaOr+charCerrarParentesis;
                 }
                 else if (lado == 1){
                     
-                    or = this.charAbrirParentesis+cadenaOr +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ buscarExpr(or)+this.charCerrarParentesis;
+                    or = charAbrirParentesis+cadenaOr +charCerrarParentesis+charOr+charAbrirParentesis+ buscarExpr(or)+charCerrarParentesis;
                 }
                 
                 while (!pilaConcatenacion.isEmpty()){
@@ -368,11 +377,11 @@ public class CodeGenerator {
                      int lado = calcularConcatenacion(or);
                 if (lado == -1){
                     
-                    or = this.charAbrirParentesis+ident1 +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ ident2+this.charCerrarParentesis;
+                    or = charAbrirParentesis+ident1 +charCerrarParentesis+charOr+charAbrirParentesis+ ident2+charCerrarParentesis;
                 }
                 else if (lado == 1){
                     
-                    or = this.charAbrirParentesis+ident2 +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ ident1+this.charCerrarParentesis;
+                    or = charAbrirParentesis+ident2 +charCerrarParentesis+charOr+charAbrirParentesis+ ident1+charCerrarParentesis;
                 }
                   while (!pilaConcatenacion.isEmpty()){
                     String faltante = (String)pilaConcatenacion.pop();
@@ -407,7 +416,7 @@ public class CodeGenerator {
                     if (list1.isEmpty())
                         list1 = crearCadenasOr(subcadena);
                     if (list2.isEmpty())
-                        list2 = crearCadenasOr(subcadena2);
+                        list2 = crearCadenasOr(subcadena2.trim());
                     or = list1+charOr+list2; 
                       while (!pilaConcatenacion.isEmpty()){
                     String faltante = (String)pilaConcatenacion.pop();
@@ -419,11 +428,11 @@ public class CodeGenerator {
                     }
                     else
                          faltante = (faltante.substring(faltante.indexOf("+")+1));
-                    or =  or +this.charOr+crearCadenasOr(faltante.trim());
+                    or =  or +charOr+crearCadenasOr(faltante.trim());
                     
                 }
                     
-                    return or;
+                    return charAbrirParentesis+or+charCerrarParentesis;
                 }
             }else if (cadena.contains("-")){
                if ((cadena.contains("\"")||cadena.contains("\'"))&&!cadena.contains("..")){
@@ -457,7 +466,7 @@ public class CodeGenerator {
             
         }
         
-        return this.charAbrirParentesis+or+this.charCerrarParentesis+this.charPlus;
+        return charAbrirParentesis+or+charCerrarParentesis;
      }
     
     public String cadenasOrLista(String cadena){
@@ -484,7 +493,7 @@ public class CodeGenerator {
         return or;
     }
         public String concatenacionIdent(String anterior, String actual){
-        return anterior + this.charOr + buscarExpr(actual);
+        return anterior + charOr + buscarExpr(actual);
     }
     
     /**
@@ -504,11 +513,11 @@ public class CodeGenerator {
             int lado = calcularConcatenacion(actual);
             if (lado == -1){
 
-                resultado = this.charAbrirParentesis+buscarExpr(actual) +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ cadenaOr+this.charCerrarParentesis;
+                resultado = charAbrirParentesis+buscarExpr(actual) +charCerrarParentesis+charOr+charAbrirParentesis+ cadenaOr+charCerrarParentesis;
             }
             else if (lado == 1){
 
-                resultado = this.charAbrirParentesis+cadenaOr +this.charCerrarParentesis+this.charOr+this.charAbrirParentesis+ buscarExpr(actual)+this.charCerrarParentesis;
+                resultado = charAbrirParentesis+cadenaOr +charCerrarParentesis+charOr+charAbrirParentesis+ buscarExpr(actual)+charCerrarParentesis;
             }
         return resultado;
      }
@@ -617,7 +626,7 @@ public class CodeGenerator {
        afn += "\tpublic void automatas(){";
        afn += "\n";
        int counter = 0;
-       for (Map.Entry<String, String> entry : cadenaCompleta.entrySet()) {
+       for (Map.Entry<String, String> entry : tokensExpr.entrySet()) {
             String value = entry.getValue();
             String key = entry.getKey();
             if (value.length()>1)
@@ -711,7 +720,7 @@ public class CodeGenerator {
             "\t"+"\t"+"\t"+"for (int j = 0;j<value.length();j++){"+"\n"+
                
                         "\t"+"\t"+"\t"+"\t"+"if (!keywords.contains(value))"+"\n"+
-                    "\t"+"\t"+"\t"+"\t"+"\t"+"this.checkIndividualAutomata(value.charAt(j)+\"\", automatas,key);"+"\n"+
+                    "\t"+"\t"+"\t"+"\t"+"\t"+"this.checkIndividualAutomata(value+\"\", automatas,key);"+"\n"+
                        
             "\t"+"\t"+"\t"+"}"+"\n"+
                "\t"+"\t"+"\t"+ "if (keywords.contains(value))"+"\n"+
@@ -782,7 +791,6 @@ public class CodeGenerator {
         "\t"+this.nombreArchivo+" resGenerator = new "+this.nombreArchivo+"(input);"+"\n"+
         "\t"+"resGenerator.automatas();"+"\n"+
         "\t"+"resGenerator.keyWords();"+ "\n"+
-        "\t"+"resGenerator.ignoreWords();"+ "\n"+
         "\t"+"resGenerator.revisar();"+"\n"+
         
      
@@ -795,6 +803,175 @@ public class CodeGenerator {
         
         ReadFile fileCreator = new ReadFile();
         fileCreator.crearArchivo(res, "resultadoGeneradorMain");
+        
+    }
+    
+    
+    public void generarSimulacion(){
+        String simulacion = "";
+        simulacion += "\n"+
+            " /**" + "\n"+
+            "* Universidad Del Valle de Guatemala"+
+            "* 07-ago-2015" + "\n"+
+            "* Pablo Díaz 13203" +"\n"+
+            "*/" +"\n"+
+
+
+
+            "import java.io.File;"+"\n"+
+            "import java.io.FileWriter;"+"\n"+
+            "import java.io.IOException;"+"\n"+
+            "import java.util.ArrayList;"+"\n"+
+            "import java.util.HashSet;"+"\n"+
+            "import java.util.Iterator;"+"\n"+
+            "import java.util.Stack;"+"\n"+
+
+            "/**"+"\n"+
+            " * Clase para utilizar el metodo de move, e-closure y simulacion de"+"\n"+
+            " * un automata"+"\n"+
+            " * Incluye también un método para generar archivos DOT"+"\n"+
+            " * @author Pablo"+"\n"+
+            " */"+"\n"+
+            "public class Simulacion {"+"\n"+
+
+                "\t"+"private String resultado;"+"\n"+
+               "\t"+"private ArrayList caracteresIgnorar = new ArrayList();"+"\n"+
+               "\t"+"public Simulacion(){"+"\n"+
+               "\t"+"\t"+"caracteresIgnorar.add(resultadoGeneradorMain.EPSILON);"+"\n";
+                for (int i =0;i<this.ignoreSets.size();i++){
+                        simulacion +="\t"+"\t"+ "caracteresIgnorar.add("+ignoreSets.get(i)+");"+"\n";
+
+                }
+                simulacion+="\t"+"}"+"\n"+
+    
+            "\t"+"public Simulacion(Automata afn_simulacion, String regex){"+"\n"+
+                "\t"+"\t"+"simular(regex,afn_simulacion);"+"\n"+
+                
+            "\t"+"}"+"\n"+
+                
+            "\t"+"public HashSet<Estado> eClosure(Estado eClosureEstado){"+"\n"+
+                "\t"+"\t"+"Stack<Estado> pilaClosure = new Stack();"+"\n"+
+                "\t"+"\t"+"Estado actual = eClosureEstado;"+"\n"+
+                "\t"+"\t"+"actual.getTransiciones();"+"\n"+
+                "\t"+"\t"+"HashSet<Estado> resultado = new HashSet();"+"\n"+
+
+                "\t"+"\t"+"pilaClosure.push(actual);"+"\n"+
+                "\t"+"\t"+"while(!pilaClosure.isEmpty()){"+"\n"+
+                    "\t"+"\t"+"\t"+"actual = pilaClosure.pop();"+"\n"+
+
+                    "\t"+"\t"+"\t"+"for (Transicion t: (ArrayList<Transicion>)actual.getTransiciones()){"+"\n"+
+
+                        "\t"+"\t"+"\t"+"\t"+"if ((caracteresIgnorar.contains(t.getSimbolo()))&&!resultado.contains(t.getFin())){"+"\n"+
+                            "\t"+"\t"+"\t"+"\t"+"\t"+"resultado.add(t.getFin());"+"\n"+
+                            "\t"+"\t"+"\t"+"\t"+"\t"+"pilaClosure.push(t.getFin());"+"\n"+
+                        "\t"+"\t"+"\t"+"\t"+"}"+"\n"+
+                    "\t"+"\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+"resultado.add(eClosureEstado); //la operacion e-Closure debe tener el estado aplicado"+"\n"+
+                "\t"+"\t"+"return resultado;"+"\n"+
+            "\t"+"}"+"\n"+
+
+            "\t"+"public HashSet<Estado> move(HashSet<Estado> estados, String simbolo){"+"\n"+
+
+                "\t"+"\t"+"HashSet<Estado> alcanzados = new HashSet();"+"\n"+
+                "\t"+"\t"+"Iterator<Estado> iterador = estados.iterator();"+"\n"+
+                "\t"+"\t"+"while (iterador.hasNext()){"+"\n"+
+
+                    "\t"+"\t"+"\t"+"for (Transicion t: (ArrayList<Transicion>)iterador.next().getTransiciones()){"+"\n"+
+                        "\t"+"\t"+"\t"+"Estado siguiente = t.getFin();"+"\n"+
+                        "\t"+"\t"+"\t"+"String simb = (String) t.getSimbolo();"+"\n"+
+                       "\t"+"\t"+"\t"+"\t"+ "if (simb.equals(simbolo)){"+"\n"+
+                            "\t"+"\t"+"\t"+"\t"+"alcanzados.add(siguiente);"+"\n"+
+                        "\t"+"\t"+"\t"+"\t"+"}"+"\n"+
+
+                    "\t"+"\t"+"\t"+"}"+"\n"+
+
+                "\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+"return alcanzados;"+"\n"+
+
+            "\t"+"}"+"\n"+
+
+            "\t"+"public Estado move(Estado estado, String simbolo){"+"\n"+
+               "\t"+"\t"+ "ArrayList<Estado> alcanzados = new ArrayList();"+"\n"+
+
+               "\t"+"\t"+ "for (Transicion t: (ArrayList<Transicion>)estado.getTransiciones()){"+"\n"+
+                    "\t"+"\t"+"\t"+"Estado siguiente = t.getFin();"+"\n"+
+                    "\t"+"\t"+"\t"+"String simb = (String) t.getSimbolo();"+"\n"+
+
+                    "\t"+"\t"+"\t"+"if (simb.equals(simbolo)&&!alcanzados.contains(siguiente)){"+"\n"+
+                        "\t"+"\t"+"\t"+"\t"+"alcanzados.add(siguiente);"+"\n"+
+                    "\t"+"\t"+"\t"+"}"+"\n"+
+
+                "\t"+"\t"+"}"+"\n"+
+
+                "\t"+"\t"+"return alcanzados.get(0);"+"\n"+
+            "\t"+"}"+"\n"+
+
+            "\t"+"/**"+"\n"+
+            "\t"+" * Método para simular un automata sin importar si es determinista o no deterministas"+"\n"+
+            "\t"+" * "+"\n"+
+            "\t"+" * @param regex recibe la cadena a simular "+"\n"+
+            "\t"+" * @param automata recibe el automata a ser simulado"+"\n"+
+            "\t"+" */"+"\n"+
+            "\t"+"public boolean simular(String regex, Automata automata)"+"\n"+
+            "\t"+"{"+"\n"+
+                "\t"+"\t"+"Estado inicial = automata.getEstadoInicial();"+"\n"+
+                "\t"+"\t"+"ArrayList<Estado> estados = automata.getEstados();"+"\n"+
+                "\t"+"\t"+"ArrayList<Estado> aceptacion = new ArrayList(automata.getEstadosAceptacion());"+"\n"+
+
+                "\t"+"\t"+"HashSet<Estado> conjunto = eClosure(inicial);"+"\n"+
+                "\t"+"\t"+"for (Character ch: regex.toCharArray()){"+"\n"+
+                    "\t"+"\t"+"\t"+"conjunto = move(conjunto,ch.toString());"+"\n"+
+                    "\t"+"\t"+"\t"+"HashSet<Estado> temp = new HashSet();"+"\n"+
+                    "\t"+"\t"+"\t"+"Iterator<Estado> iter = conjunto.iterator();"+"\n"+
+
+                    "\t"+"\t"+"\t"+"while (iter.hasNext()){"+"\n"+
+                       "\t"+"\t"+"\t"+"\t"+"Estado siguiente = iter.next();"+"\n"+
+                       "\t"+"\t"+"\t"+"\t"+"/**"+"\n"+
+                       "\t"+"\t"+"\t"+"\t"+" * En esta parte es muy importante el metodo addAll"+"\n"+
+                       "\t"+"\t"+"\t"+"\t"+" * porque se tiene que agregar el eClosure de todo el conjunto"+"\n"+
+                       "\t"+"\t"+"\t"+"\t"+" * resultante del move y se utiliza un hashSet temporal porque"+"\n"+
+                       "\t"+"\t"+"\t"+"\t"+" * no se permite la mutacion mientras se itera"+"\n"+
+                       "\t"+"\t"+"\t"+"\t"+" */"+"\n"+
+                        "\t"+"\t"+"\t"+"\t"+"\t"+"temp.addAll(eClosure(siguiente)); "+"\n"+
+
+                    "\t"+"\t"+"\t"+"}"+"\n"+
+                    "\t"+"\t"+"\t"+"conjunto=temp;"+"\n"+
+
+
+                "\t"+"\t"+"}"+"\n"+
+
+
+                "\t"+"\t"+"boolean res = false;"+"\n"+
+
+                "\t"+"\t"+"for (Estado estado_aceptacion : aceptacion){"+"\n"+
+                    "\t"+"\t"+"\t"+"if (conjunto.contains(estado_aceptacion)){"+"\n"+
+
+                        "\t"+"\t"+"\t"+"\t"+"res = true;"+"\n"+
+                    "\t"+"\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+"if (res){"+"\n"+
+                    //System.out.println("Aceptado");
+                    //this.resultado = "Aceptado";
+                    "\t"+"\t"+"\t"+"return true;"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+"else{"+"\n"+
+                    //System.out.println("NO Aceptado");
+                    // this.resultado = "No Aceptado";
+                    "\t"+"\t"+"\t"+"return false;"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+            "\t"+"}"+"\n"+
+
+            "\t"+"public String getResultado() {"+"\n"+
+                    "\t"+"\t"+"return resultado;"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+            "\t"+"}";
+
+
+
+         ReadFile fileCreator = new ReadFile();
+        fileCreator.crearArchivo(simulacion, "Simulacion");
+        
         
     }
 }

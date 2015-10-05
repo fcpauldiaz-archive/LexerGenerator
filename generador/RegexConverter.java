@@ -27,12 +27,13 @@ public class RegexConverter {
     
     /** Mapa de precedencia de los operadores. */
 	private final Map<Character, Integer> precedenciaOperadores;
-    private final char charKleene = '∞';
-    private final char charConcat = '•';
-    private final char charAbrirParentesis = '≤';
-    private final char charCerrarParentesis = '≥';
-    private final char charOr = '∫';
-    private final char charPlus = '∩';
+    public final char charKleene = '∞';
+    public final char charConcat = '∆';
+    public final char charAbrirParentesis = '≤';
+    public final char charCerrarParentesis = '≥';
+    public final char charOr = '∫';
+    public final char charPlus = '∩';
+    public final char charInt = 'Ω';
     
         //constructor
 	public RegexConverter()
@@ -83,7 +84,7 @@ public class RegexConverter {
             
         }
         
-        /**
+         /**
          * Metodo para abreviar el operador ? 
          * equivalente a |€
          * @param regex expresion regular
@@ -94,11 +95,11 @@ public class RegexConverter {
             for (int i = 0; i<regex.length();i++){
                 Character ch = regex.charAt(i);
                  
-                if (ch.equals('?'))
+                if (ch.equals(charInt))
                 {
                     if (regex.charAt(i-1) == charCerrarParentesis)
                     {
-                        regex = insertCharAt(regex,i,charOr+resultadoGeneradorMain.EPSILON+charCerrarParentesis);
+                        regex = insertCharAt(regex,i,charOr+""+resultadoGeneradorMain.EPSILON+charCerrarParentesis);
                         
                         int j =i;
                         while (j!=0)
@@ -118,13 +119,14 @@ public class RegexConverter {
                     else
                     {
                         regex = insertCharAt(regex,i,charOr+resultadoGeneradorMain.EPSILON+charCerrarParentesis);
-                        regex = insertCharAt(regex,i-1,charAbrirParentesis+regex.charAt(i-1));
+                        regex = insertCharAt(regex,i-1,charAbrirParentesis+""+regex.charAt(i-1));
                     }
                 }
             }
             //regex = balancearParentesis(regex);
             return regex;
         }
+      
         
         /**
          * Método para contar los parentesis izquierdos '('
@@ -252,6 +254,7 @@ public class RegexConverter {
 	public  String formatRegEx(String regex) {
         regex = regex.trim();
         regex = abreviaturaCerraduraPositiva(regex);
+        regex = abreviaturaInterrogacion(regex);
 		String  regexExplicit = new String();
 		List<Character> operadores = Arrays.asList(charOr, charPlus, charKleene);
 		List<Character> operadoresBinarios = Arrays.asList(charOr);
