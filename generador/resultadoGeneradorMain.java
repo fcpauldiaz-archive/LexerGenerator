@@ -16,11 +16,7 @@ public static void main(String[] args) {
 	// TODO code application logic here
 	ReadFile read = new ReadFile();
 	File file = new File("input"+".txt");
-	JFileChooser chooser = new JFileChooser();
-	int returnVal = chooser.showOpenDialog(null);
-	if(returnVal == JFileChooser.APPROVE_OPTION) {
-		file = chooser.getSelectedFile();
-	}
+	
 	HashMap input = read.leerArchivo(file);
 	Lexer resGenerator = new Lexer(input);
 	resGenerator.automatas();

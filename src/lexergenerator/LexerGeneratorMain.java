@@ -48,6 +48,7 @@ public class LexerGeneratorMain {
             generator.generarClaseAnalizadora();
             generator.generarMain();
             generator.generarSimulacion();
+            generator.generarClaseToken();
             System.out.println("");
             System.out.println("Ejecute el Main de la carpeta generador para probar el input");
         }

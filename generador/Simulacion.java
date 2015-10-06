@@ -19,12 +19,10 @@ import java.util.Stack;
 public class Simulacion {
 	private String resultado;
 	private ArrayList caracteresIgnorar = new ArrayList();
+	private Estado inicial_;
 	public Simulacion(){
 		caracteresIgnorar.add(resultadoGeneradorMain.EPSILON);
 		caracteresIgnorar.add( " ");
-	}
-	public Simulacion(Automata afn_simulacion, String regex){
-		simular(regex,afn_simulacion);
 	}
 	public HashSet<Estado> eClosure(Estado eClosureEstado){
 		Stack<Estado> pilaClosure = new Stack();
@@ -51,9 +49,9 @@ public class Simulacion {
 			for (Transicion t: (ArrayList<Transicion>)iterador.next().getTransiciones()){
 			Estado siguiente = t.getFin();
 			String simb = (String) t.getSimbolo();
-				if (simb.equals(simbolo)){
+			if (simb.equals(simbolo)){
 				alcanzados.add(siguiente);
-				}
+			}
 			}
 		}
 		return alcanzados;
@@ -75,13 +73,25 @@ public class Simulacion {
 	 * @param regex recibe la cadena a simular 
 	 * @param automata recibe el automata a ser simulado
 	 */
-	public boolean simular(String regex, Automata automata)
+	public ArrayList simular(String regex, Automata automata)
 	{
+		 String returnString = "";
+		 String returnString2 = "";
+		 ArrayList returnArray = new ArrayList();
+		 Estado final_ = null;
 		Estado inicial = automata.getEstadoInicial();
 		ArrayList<Estado> estados = automata.getEstados();
 		ArrayList<Estado> aceptacion = new ArrayList(automata.getEstadosAceptacion());
 		HashSet<Estado> conjunto = eClosure(inicial);
+		char last = ' ';
+		int currentState = 0;
+		int finalState = 0;
+		int init = 0;
 		for (Character ch: regex.toCharArray()){
+			if (ch == ' '){
+				currentState++;
+			 break;
+			}
 			conjunto = move(conjunto,ch.toString());
 			HashSet<Estado> temp = new HashSet();
 			Iterator<Estado> iter = conjunto.iterator();
@@ -95,22 +105,19 @@ public class Simulacion {
 				 */
 					temp.addAll(eClosure(siguiente)); 
 			}
+			if (conjunto.isEmpty())
+				returnString = (regex.substring(init,finalState));
+			 if (temp.contains(aceptacion.get(0))){
+				finalState++;
+			}
+			currentState++;
 			conjunto=temp;
 		}
-		boolean res = false;
-		for (Estado estado_aceptacion : aceptacion){
-			if (conjunto.contains(estado_aceptacion)){
-				res = true;
-			}
-		}
-		if (res){
-			return true;
-		}
-		else{
-			return false;
-		}
+		if (returnString.isEmpty())
+			returnString = (regex.substring(init,finalState));
+		 returnString2 = regex.substring(currentState);
+		 returnArray.add(returnString);
+		returnArray.add(returnString2);
+		 return returnArray;
 	}
-	public String getResultado() {
-		return resultado;
-		}
 	}

@@ -72,18 +72,13 @@ public class CodeGenerator implements RegexConstants{
             " * Descripción: Segundo proyecto. Generador de analizador léxico"+"\n"+
             "**/"+"\n"+
             ""+"\n"+
-            "import java.io.BufferedReader;"+"\n"+
-            "import java.io.File;"+"\n"+
-            "import java.io.FileOutputStream;"+"\n"+
-            "import java.io.FileWriter;"+"\n"+
-            "import java.io.PrintWriter;"+"\n"+
             "import java.util.Map;"+"\n"+
-            "import java.util.Scanner;"+"\n"+
+            "import java.util.HashSet;"+"\n"+
             "import javax.swing.JFileChooser;"+"\n"+
             "import java.util.Collections;"+"\n"+
             "import java.util.Comparator;"+"\n"+
             "import java.util.ArrayList;"+"\n"+
-            "import java.util.List;"+"\n"+
+            "import java.util.TreeMap;"+"\n"+
             "import java.util.HashMap;"+"\n"+
             "import java.util.Iterator;"+"\n"+
            
@@ -94,8 +89,9 @@ public class CodeGenerator implements RegexConstants{
             "\t"+"private Simulacion sim = new Simulacion();"+"\n"+
             "\t"+"private ArrayList<Automata> automatas = new ArrayList();"+"\n"+
             "\t"+"private HashMap<Integer,String> input;"+"\n"+   
-             "\t"+"private ArrayList keywords = new ArrayList();"+"\n"+
-            "\t"+"private ArrayList ignoreSets = new ArrayList();" +"\n"+
+            "\t"+"private ArrayList keywords = new ArrayList();"+"\n"+
+            "\t"+"private String ignoreSets = \" \";" +"\n"+
+            "\t"+"private HashSet<Token> tokens = new HashSet();"+"\n"+
                 
             "\t"+"public " + this.nombreArchivo+"(HashMap input){"+"\n"+
              "\t"+"\t"+"this.input=input;"+"\n"+
@@ -736,14 +732,28 @@ public class CodeGenerator implements RegexConstants{
     "\t"+"public void checkIndividualAutomata(String regex, ArrayList<Automata> conjunto,int lineaActual){"+"\n"+
         
         "\t"+"\t"+"ArrayList<Boolean> resultado = new ArrayList();"+"\n"+
-       
+        "\t"+"\t"+"TreeMap aceptados = new TreeMap(new Comparator<String>() {"+"\n"+
+        "\t"+"\t"+"@Override"+"\n"+
+        "\t"+"\t"+"public int compare(String o1, String o2) {"+"\n"+
+        "\t"+"\t"+"\t"+"Integer a1 = o1.length();"+"\n"+
+        "\t"+"\t"+"\t"+"Integer a2 = o2.length();"+"\n"+
+        "\t"+"\t"+"\t"+"return a2-a1;"+"\n"+
+        "\t"+"\t"+"}"+"\n"+
+        "\t"+"\t"+"});"+"\n"+
             
             "\t"+"\t"+"for (int j = 0;j<conjunto.size();j++){"+"\n"+
-                "\t"+"\t"+"\t"+"resultado.add(sim.simular(regex, conjunto.get(j)));"+"\n"+
+                "\t"+"\t"+"\t"+"ArrayList returnArray = (sim.simular(regex, conjunto.get(j)));"+"\n"+
+                "\t"+"\t"+"\t"+"String returnString = (String)returnArray.get(0);"+"\n"+
+                "\t"+"\t"+"\t"+"if (!returnString.isEmpty())"+"\n"+
+                "\t"+"\t"+"\t"+"\t"+" aceptados.put(returnString, conjunto.get(j).getTipo());"+"\n"+
+                 
                
            "\t"+ "\t"+"}"+"\n"+
+                
+                "\t"+"\t"+"if (!aceptados.isEmpty()) "+"\n"+
+                "\t"+"\t"+"\t"+"tokens.add(new Token(aceptados.firstEntry().getValue(),aceptados.firstKey()));"+"\n"+
            
-            "\t"+"\t"+"ArrayList<Integer> posiciones = checkBoolean(resultado);"+"\n"+
+            /*"\t"+"\t"+"ArrayList<Integer> posiciones = checkBoolean(resultado);"+"\n"+
             "\t"+"\t"+"//resultado.clear();"+"\n"+
             
            
@@ -753,7 +763,7 @@ public class CodeGenerator implements RegexConstants{
             "\t"+"\t"+"}"+"\n"+
             "\t"+"\t"+"if (posiciones.isEmpty()){"+"\n"+
                "\t"+"\t"+"\t"+"System.out.println(\"Error línea archivo \" + lineaActual +\" : \"+regex+ \" no fue reconocido\");"+"\n"+
-            "\t"+"\t"+"}"+"\n"+
+            "\t"+"\t"+"}"+"\n"+*/
         
     "\t"+"}"+"\n"+
     
@@ -783,16 +793,19 @@ public class CodeGenerator implements RegexConstants{
         "\t"+"\t"+"for (Map.Entry<Integer, String> entry : input.entrySet()) {"+"\n"+
             "\t"+ "\t"+"\t"+"Integer key = entry.getKey();"+"\n"+
             "\t"+"\t"+"\t"+"String value = entry.getValue();"+"\n"+
-            "\t"+"\t"+"\t"+"String[] parts = value.split(\" \");"+"\n"+
-            "\t"+"\t"+"\t"+"for (int j = 0;j<value.length();j++){"+"\n"+
+            "\t"+"\t"+"\t"+"String[] parts = value.split(ignoreSets);"+"\n"+
+            "\t"+"\t"+"\t"+"for (String part : parts) {"+"\n"+
                
-                        "\t"+"\t"+"\t"+"\t"+"if (!keywords.contains(value))"+"\n"+
-                    "\t"+"\t"+"\t"+"\t"+"\t"+"this.checkIndividualAutomata(value+\"\", automatas,key);"+"\n"+
-                       
+                        "\t"+"\t"+"\t"+"\t"+"if (!keywords.contains(part))"+"\n"+
+                    "\t"+"\t"+"\t"+"\t"+"\t"+" this.checkIndividualAutomata(part + \"\", automatas, key);"+"\n"+
+                        "\t"+"\t"+"\t"+ "if (keywords.contains(parts))"+"\n"+
+                 "\t"+"\t"+"\t"+"\t"+"\t"+"tokens.add(new Token(part,part));"+"\n"+
             "\t"+"\t"+"\t"+"}"+"\n"+
-               "\t"+"\t"+"\t"+ "if (keywords.contains(value))"+"\n"+
-                 "\t"+"\t"+"\t"+"\t"+"\t"+"System.out.println(\"<\"+value +\",\" +\"\\\"\"+ value+\"\\\"\"+\">\");"+"\n"+
+              
         "\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+" for (Token tk: tokens){"+"\n"+
+                "\t"+"\t"+"\t"+ "System.out.println(tk);"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
     "\t"+"}"+"\n";
         return res;
     }
@@ -903,6 +916,7 @@ public class CodeGenerator implements RegexConstants{
 
                 "\t"+"private String resultado;"+"\n"+
                "\t"+"private ArrayList caracteresIgnorar = new ArrayList();"+"\n"+
+                "\t"+"private Estado inicial_;"+"\n"+
                "\t"+"public Simulacion(){"+"\n"+
                "\t"+"\t"+"caracteresIgnorar.add(resultadoGeneradorMain.EPSILON);"+"\n";
                 for (int i =0;i<this.ignoreSets.size();i++){
@@ -911,10 +925,7 @@ public class CodeGenerator implements RegexConstants{
                 }
                 simulacion+="\t"+"}"+"\n"+
     
-            "\t"+"public Simulacion(Automata afn_simulacion, String regex){"+"\n"+
-                "\t"+"\t"+"simular(regex,afn_simulacion);"+"\n"+
-                
-            "\t"+"}"+"\n"+
+           
                 
             "\t"+"public HashSet<Estado> eClosure(Estado eClosureEstado){"+"\n"+
                 "\t"+"\t"+"Stack<Estado> pilaClosure = new Stack();"+"\n"+
@@ -947,9 +958,9 @@ public class CodeGenerator implements RegexConstants{
                     "\t"+"\t"+"\t"+"for (Transicion t: (ArrayList<Transicion>)iterador.next().getTransiciones()){"+"\n"+
                         "\t"+"\t"+"\t"+"Estado siguiente = t.getFin();"+"\n"+
                         "\t"+"\t"+"\t"+"String simb = (String) t.getSimbolo();"+"\n"+
-                       "\t"+"\t"+"\t"+"\t"+ "if (simb.equals(simbolo)){"+"\n"+
-                            "\t"+"\t"+"\t"+"\t"+"alcanzados.add(siguiente);"+"\n"+
-                        "\t"+"\t"+"\t"+"\t"+"}"+"\n"+
+                        "\t"+"\t"+"\t"+ "if (simb.equals(simbolo)){"+"\n"+
+                        "\t"+"\t"+"\t"+"\t"+"alcanzados.add(siguiente);"+"\n"+
+                        "\t"+"\t"+"\t"+"}"+"\n"+
 
                     "\t"+"\t"+"\t"+"}"+"\n"+
 
@@ -980,14 +991,26 @@ public class CodeGenerator implements RegexConstants{
             "\t"+" * @param regex recibe la cadena a simular "+"\n"+
             "\t"+" * @param automata recibe el automata a ser simulado"+"\n"+
             "\t"+" */"+"\n"+
-            "\t"+"public boolean simular(String regex, Automata automata)"+"\n"+
+            "\t"+"public ArrayList simular(String regex, Automata automata)"+"\n"+
             "\t"+"{"+"\n"+
+                "\t"+"\t"+ " String returnString = \"\";"+"\n"+
+                "\t"+"\t"+" String returnString2 = \"\";"+"\n"+
+                "\t"+"\t"+" ArrayList returnArray = new ArrayList();"+"\n"+
+                "\t"+"\t"+" Estado final_ = null;"+"\n"+
                 "\t"+"\t"+"Estado inicial = automata.getEstadoInicial();"+"\n"+
                 "\t"+"\t"+"ArrayList<Estado> estados = automata.getEstados();"+"\n"+
                 "\t"+"\t"+"ArrayList<Estado> aceptacion = new ArrayList(automata.getEstadosAceptacion());"+"\n"+
 
                 "\t"+"\t"+"HashSet<Estado> conjunto = eClosure(inicial);"+"\n"+
+                "\t"+"\t"+"char last = ' ';\n" +
+                "\t"+"\t"+"int currentState = 0;\n" +
+                "\t"+"\t"+"int finalState = 0;\n" +
+                "\t"+"\t"+"int init = 0;"+"\n"+
                 "\t"+"\t"+"for (Character ch: regex.toCharArray()){"+"\n"+
+                        "\t"+"\t"+"\t"+"if (ch == ' '){"+"\n"+
+                        "\t"+"\t"+"\t"+"\t"+"currentState++;"+"\n"+
+                        "\t"+"\t"+"\t"+" break;"+"\n"+
+                        "\t"+"\t"+"\t"+"}"+"\n"+
                     "\t"+"\t"+"\t"+"conjunto = move(conjunto,ch.toString());"+"\n"+
                     "\t"+"\t"+"\t"+"HashSet<Estado> temp = new HashSet();"+"\n"+
                     "\t"+"\t"+"\t"+"Iterator<Estado> iter = conjunto.iterator();"+"\n"+
@@ -1003,13 +1026,26 @@ public class CodeGenerator implements RegexConstants{
                         "\t"+"\t"+"\t"+"\t"+"\t"+"temp.addAll(eClosure(siguiente)); "+"\n"+
 
                     "\t"+"\t"+"\t"+"}"+"\n"+
+                    "\t"+"\t"+"\t"+"if (conjunto.isEmpty())"+"\n"+
+                    "\t"+"\t"+"\t"+"\t"+"returnString = (regex.substring(init,finalState));"+"\n"+
+                    "\t"+"\t"+"\t"+" if (temp.contains(aceptacion.get(0))){"+"\n"+
+                    "\t"+"\t"+"\t"+"\t"+"finalState++;"+"\n"+
+                    "\t"+"\t"+"\t"+"}"+"\n"+
+                    "\t"+"\t"+"\t"+"currentState++;"+"\n"+
                     "\t"+"\t"+"\t"+"conjunto=temp;"+"\n"+
 
 
                 "\t"+"\t"+"}"+"\n"+
+                        
+                "\t"+"\t"+"if (returnString.isEmpty())"+"\n"+
+                "\t"+"\t"+"\t"+"returnString = (regex.substring(init,finalState));"+"\n"+
+                "\t"+"\t"+" returnString2 = regex.substring(currentState);"+"\n"+
+                "\t"+"\t"+" returnArray.add(returnString);"+"\n"+
+                "\t"+"\t"+"returnArray.add(returnString2);"+"\n"+
+               "\t"+"\t"+ " return returnArray;"+"\n"+
 
 
-                "\t"+"\t"+"boolean res = false;"+"\n"+
+               /* "\t"+"\t"+"boolean res = false;"+"\n"+
 
                 "\t"+"\t"+"for (Estado estado_aceptacion : aceptacion){"+"\n"+
                     "\t"+"\t"+"\t"+"if (conjunto.contains(estado_aceptacion)){"+"\n"+
@@ -1031,14 +1067,122 @@ public class CodeGenerator implements RegexConstants{
 
             "\t"+"public String getResultado() {"+"\n"+
                     "\t"+"\t"+"return resultado;"+"\n"+
-                "\t"+"\t"+"}"+"\n"+
-            "\t"+"}";
+                "\t"+"\t"+"}"+"\n"+*/
+            "\t"+"}"+"\n"+"\t"+"}";
 
 
 
-         ReadFile fileCreator = new ReadFile();
+        ReadFile fileCreator = new ReadFile();
         fileCreator.crearArchivo(simulacion, "Simulacion");
         
         
     }
+    
+    public void generarClaseToken(){
+        String token =""+
+      
+        "/**"+"\n"+
+        "* Universidad Del Valle de Guatemala"+"\n"+
+        "* 05-oct-2015"+"\n"+
+        "* Pablo Díaz 13203"+"\n"+
+        "*/"+"\n"+
+
+        
+        "import java.util.ArrayList;"+"\n"+
+        "import java.util.HashSet;"+"\n"+
+        "import java.util.Objects;"+"\n"+
+
+        "/**"+"\n"+
+        " *"+"\n"+
+        " * @author Pablo"+"\n"+
+        " * @param <T>"+"\n"+
+        " */"+"\n"+
+        "public class Token<T> {"+"\n"+
+
+            "\t"+"private T id;"+"\n"+
+            "\t"+"private T lexema;"+"\n"+
+            "\t"+"private ArrayList keywords = new ArrayList();"+"\n"+
+            "\t"+"private HashSet<Token> tokens = new HashSet();"+"\n"+
+
+            "\t"+"public Token(T id, T lexema) {"+"\n"+
+                "\t"+"\t"+"keyWords();"+"\n"+
+                "\t"+"\t"+"ArrayList var = revisarKeywords(id,lexema);"+"\n"+
+                "\t"+"\t"+"this.id = (T) var.get(0);"+"\n"+
+                "\t"+"\t"+"this.lexema = (T) var.get(1);"+"\n"+
+            "\t"+"}"+"\n"+
+
+            "\t"+"public T getId() {"+"\n"+
+                "\t"+"\t"+"return id;"+"\n"+
+            "\t"+"}"+"\n"+
+
+            "\t"+"public void setId(T id) {"+"\n"+
+                "\t"+"\t"+"this.id = id;"+"\n"+
+            "\t"+"}"+"\n"+
+
+            "\t"+"public T getLexema() {"+"\n"+
+                "\t"+"\t"+"return lexema;"+"\n"+
+            "\t"+"}"+"\n"+
+
+            "\t"+"public void setLexema(T lexema) {"+"\n"+
+                "\t"+"\t"+"this.lexema = lexema;"+"\n"+
+            "\t"+"}"+"\n"+
+
+            "\t"+"public ArrayList revisarKeywords(T id, T lexema){"+"\n"+
+                "\t"+"\t"+"ArrayList returnArray = new ArrayList();"+"\n"+
+
+                "\t"+"\t"+"if (keywords.contains(lexema)){"+"\n"+
+                    "\t"+"\t"+"\t"+"returnArray.add(lexema);"+"\n"+
+                    "\t"+"\t"+"\t"+"returnArray.add(lexema);"+"\n"+
+                    "\t"+"\t"+"\t"+"return returnArray;"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+
+                "\t"+"\t"+"returnArray.add(id);"+"\n"+
+                "\t"+"\t"+"returnArray.add(lexema);"+"\n"+
+                "\t"+"\t"+"return returnArray;"+"\n"+
+            "\t"+"}"+"\n"+
+
+           "\t"+ "public void keyWords(){"+"\n";
+                 for (int i = 0;i<keywords.size();i++){
+                     token+= "\t"+"\t"+"keywords.add("+keywords.get(i).trim()+");"+"\n";
+               
+            }
+            token+="\t"+"}"+"\n";
+            token+="\t"+"@Override"+"\n"+
+            "\t"+"public String toString() {"+"\n"+
+                "\t"+"\t"+"return \"<\" + id + \", \\\"\" + lexema + \"\\\">\";"+"\n"+
+           "\t"+ "}"+"\n"+
+
+            "\t"+"@Override"+"\n"+
+            "\t"+"public int hashCode() {"+"\n"+
+                "\t"+"\t"+"int hash = 3;"+"\n"+
+                "return hash;"+"\n"+
+            "\t"+"}"+"\n"+
+
+            "\t"+"@Override"+"\n"+
+            "\t"+"public boolean equals(Object obj) {"+"\n"+
+                "\t"+"\t"+"if (obj == null) {"+"\n"+
+                   "\t"+"\t"+"\t"+ "return false;"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+"if (getClass() != obj.getClass()) {"+"\n"+
+                    "\t"+"\t"+"\t"+"return false;"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+"final Token<?> other = (Token<?>) obj;"+"\n"+
+                "\t"+"\t"+"if (!Objects.equals(this.id, other.id)) {"+"\n"+
+                    "\t"+"\t"+"\t"+"return false;"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+"if (!Objects.equals(this.lexema, other.lexema)) {"+"\n"+
+                    "\t"+"\t"+"\t"+"return false;"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+"\t"+"return false;"+"\n"+
+            "\t"+"}"+"\n"+
+
+
+
+        "}"+"\n";
+        ReadFile fileCreator = new ReadFile();
+        fileCreator.crearArchivo(token, "Token");
+            
+            
+    }
+    
 }

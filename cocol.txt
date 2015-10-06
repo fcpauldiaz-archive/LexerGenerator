@@ -11,7 +11,7 @@ octalDigit    = zero + "1234567" .
 nonZeroDigit  = "123456789".
 digit         = '0' + nonZeroDigit .
 hexDigit      = digit + "ABCDEFabcdef" .
-letter        = 'A' .. 'Z' + 'a' .. 'z' + '+' + '=' .
+letter        = 'A' .. 'Z' + 'a' .. 'z' + '+'.
 some_chars 	  = CHR(33)..CHR(39).
 escape_chars  = some_chars + "\\".
 char          = ANY - "'" - '\\' - cr - lf.
@@ -54,6 +54,7 @@ rbrace  = "}".
 rbrack  = "]".
 rpar    = ")".
 tilde   = "~".
+igual   = "=".
 
 TOKENS
 
@@ -61,6 +62,11 @@ letter = letter{letter} EXCEPT KEYWORDS.
 ident1 = letter {'_'} '*'.
 number = digit {digit}
          | digit {digit} '.' {digit} ['E' ['+'|'-'] digit {digit}].
+ intLit = 
+  (  zero | nonZeroDigit { digit }
+  | ( "0x" | "0X" ) hexDigit { hexDigit }
+  | '0' octalDigit { octalDigit }
+  ) [ "l" | "L" ].
 
 
 
