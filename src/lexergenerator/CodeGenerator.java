@@ -197,7 +197,7 @@ public class CodeGenerator implements RegexConstants{
             }
 
         }
-       // System.out.println(cadenaCompleta);
+        System.out.println(cadenaCompleta);
         
     }
     
@@ -440,33 +440,84 @@ public class CodeGenerator implements RegexConstants{
                     return charAbrirParentesis+or+charCerrarParentesis;
                 }
             }else if (cadena.contains("-")){
-               if ((cadena.contains("\"")||cadena.contains("\'"))&&!cadena.contains("..")){
-                int cantidadConcatenaciones = count(cadena,'-');
-                if (cantidadConcatenaciones>1){
-                   // System.out.println(cadena.lastIndexOf("+"));
-                    //System.out.println(cadena.substring(0, cadena.indexOf("+", cadena.indexOf("+") + 1)));
-                    pilaConcatenacion.push(cadena.substring(cadena.indexOf("-", cadena.indexOf("-") + 1)));
-                   // System.out.println(pilaConcatenacion);
-                }
-               // System.out.println(cantidadConcatenaciones);
-                int preIndex=0;
-                if (cadena.contains("\""))
-                     preIndex = cadena.indexOf(("\""));
-                 if (cadena.contains("\'"))
-                     preIndex = cadena.indexOf(("\'"));
-                String w = cadena.substring(preIndex+1);
-                int postIndex = w.length()-1;
-                if (w.contains("\""))
-                    postIndex = w.indexOf(("\""));
-                if (w.contains("\'"))
-                    postIndex = w.indexOf(("\'"));
-                String wFinal = cadena.substring(preIndex,preIndex+postIndex+2);
-                String cadenaOr = crearCadenasOr(wFinal);
-                String subcadena = cadena.substring(0,cadena.indexOf("-"));
-                String tiene =  buscarExpr(subcadena);
-                String quitar = cadenaOr;
-                or = buscarExpr(subcadena);
-               } 
+                if ((cadena.contains("\"")||cadena.contains("\'"))&&!cadena.contains("..")){
+                   
+                    int cantidadConcatenaciones = count(cadena,'-');
+                    String subcadena2="";
+                    if (cantidadConcatenaciones>1){
+                       // System.out.println(cadena.lastIndexOf("+"));
+                        //System.out.println(cadena.substring(0, cadena.indexOf("+", cadena.indexOf("+") + 1)));
+                        pilaConcatenacion.push(cadena.substring(cadena.indexOf("-", cadena.indexOf("-") + 1)));
+                       // System.out.println(pilaConcatenacion);
+                         subcadena2 = cadena.substring(cadena.indexOf("-")+1,cadena.indexOf("-", cadena.indexOf("-") + 1));
+                    }
+                     else
+                            subcadena2 = cadena.substring(cadena.indexOf("-")+1);
+                    String subcadena = cadena.substring(0,cadena.indexOf("-"));
+                   // System.out.println(cantidadConcatenaciones);
+                    int preIndex=0;
+                    String expr  =  buscarExpr(subcadena2);
+                    subcadena2 = subcadena2.trim();
+                        
+                    if (!expr.isEmpty()){
+                        expr = expr.replaceAll(charAbrirParentesis+"", "");
+                        expr = expr.replaceAll(charCerrarParentesis+"", "");
+                        subcadena2 = expr;
+                    }
+                    if (subcadena2.startsWith("\""))
+                        subcadena2 = subcadena2.substring(1);
+                    if (subcadena2.endsWith("\""))
+                        subcadena2 =subcadena2.substring(0,subcadena2.length()-1);
+                    else if (subcadena2.startsWith("\'")){
+                        subcadena2 = subcadena2.substring(1);
+                    if (subcadena2.endsWith("\'"))
+                        subcadena2 =subcadena2.substring(0,subcadena2.length()-1);
+                    }
+                    /*String tiene =  buscarExpr(subcadena);
+                    String quitar = cadenaOr;*/
+                    or = buscarExpr(subcadena);
+                    int indexQuitar=0;
+                    if (or.contains(subcadena2)){
+                       or = or.replaceAll(subcadena2, "");
+                    }
+                    or = balancear(or);
+                    while (!pilaConcatenacion.isEmpty()){
+                        String faltante = (String)pilaConcatenacion.pop();
+                        cantidadConcatenaciones = count(faltante,'-');
+                        if (cantidadConcatenaciones>1){
+                            pilaConcatenacion.push(faltante.substring(faltante.indexOf("-", faltante.indexOf("-") + 1)));
+                            faltante = (faltante.substring(faltante.indexOf("-")+1, faltante.indexOf("-", faltante.indexOf("-") + 1)));
+
+                        }  else
+                             faltante = (faltante.substring(faltante.indexOf("-")+1));
+                        expr  =  buscarExpr(faltante);
+                        faltante = faltante.trim();
+                        
+                        if (!expr.isEmpty()){
+                            expr = expr.replaceAll(charAbrirParentesis+"", "");
+                            expr = expr.replaceAll(charCerrarParentesis+"", "");
+                            faltante = expr;
+                        }
+                       
+                        if (faltante.startsWith("\'"))
+                            faltante = faltante.substring(1);
+                        
+                        if (faltante.endsWith("\'"))
+                            faltante =faltante.substring(0,faltante.length()-1);
+                        
+                        else if (faltante.startsWith("\"")){
+                            faltante = faltante.substring(1);
+                            if (faltante.endsWith("\""))
+                                faltante =faltante.substring(0,faltante.length()-1);
+                        }
+                        if (or.contains((faltante))){
+                            or = or.replaceAll(faltante,"");
+                           // or = or.replaceAll(faltante,"");
+                           
+                        }
+                        or = balancear(or);
+                    }
+                } 
             }
             
         }
@@ -597,7 +648,18 @@ public class CodeGenerator implements RegexConstants{
         return res;
      }
     
-   
+    public String balancear(String subcadena){
+        String subcadenaBal = "";
+        for (int i = 0;i<subcadena.length();i++){
+            Character ch = subcadena.charAt(i);
+            if (i+1<subcadena.length()){
+                if (ch != subcadena.charAt(i+1)){
+                    subcadenaBal += ch;
+                }
+            }
+        }
+        return subcadenaBal;
+    }
     
     
     /**

@@ -21,9 +21,7 @@ public class Simulacion {
 	private ArrayList caracteresIgnorar = new ArrayList();
 	public Simulacion(){
 		caracteresIgnorar.add(resultadoGeneradorMain.EPSILON);
-		caracteresIgnorar.add(" ");
-        caracteresIgnorar.add("   ");
-        System.out.println(caracteresIgnorar);
+		caracteresIgnorar.add( " ");
 	}
 	public Simulacion(Automata afn_simulacion, String regex){
 		simular(regex,afn_simulacion);

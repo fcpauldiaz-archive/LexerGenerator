@@ -50,20 +50,12 @@ public class Lexer {
 		automatas.add(temp_1);
 
 		RegexConverter convert_2= new RegexConverter();
-		String regex_2 = convert_2.infixToPostfix("≤  ≤0≥ ∫ ≤1∫2∫3∫4∫5∫6∫7∫8∫9≥ ≤ ≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7∫8∫9≥≥≥ ≥∞  ∫ ≤ 0x ∫ 0X ≥ ≤≤≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7∫8∫9≥≥≥≥∫≤≤A∫B∫C∫D∫E∫F∫a∫b∫c∫d∫e∫f≥≥≥ ≤ ≤≤≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7∫8∫9≥≥≥≥∫≤≤A∫B∫C∫D∫E∫F∫a∫b∫c∫d∫e∫f≥≥≥ ≥∞  ∫ 0 ≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7≥≥≥ ≤ ≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7≥≥≥ ≥∞  ≥ ≤ l ∫ L ≥Ω");
+		String regex_2 = convert_2.infixToPostfix("≤≤A∫B∫C∫D∫E∫F∫G∫H∫I∫J∫K∫L∫M∫N∫O∫P∫Q∫R∫S∫T∫U∫V∫W∫X∫Y∫Z≥∫≤a∫b∫c∫d∫e∫f∫g∫h∫i∫j∫k∫l∫m∫n∫o∫p∫q∫r∫s∫t∫u∫v∫w∫x∫y∫z≥∫+≥ ≤_≥∞ *");
 		AFNConstruct ThomsonAlgorithim_2 = new AFNConstruct(regex_2);
 		ThomsonAlgorithim_2.construct();
 		Automata temp_2 = ThomsonAlgorithim_2.getAfn();
-		temp_2.setTipo("intLit");
+		temp_2.setTipo("ident1");
 		automatas.add(temp_2);
-
-		RegexConverter convert_3= new RegexConverter();
-		String regex_3 = convert_3.infixToPostfix("≤≤A∫B∫C∫D∫E∫F∫G∫H∫I∫J∫K∫L∫M∫N∫O∫P∫Q∫R∫S∫T∫U∫V∫W∫X∫Y∫Z≥∫≤a∫b∫c∫d∫e∫f∫g∫h∫i∫j∫k∫l∫m∫n∫o∫p∫q∫r∫s∫t∫u∫v∫w∫x∫y∫z≥∫+≥ ≤_≥∞ *");
-		AFNConstruct ThomsonAlgorithim_3 = new AFNConstruct(regex_3);
-		ThomsonAlgorithim_3.construct();
-		Automata temp_3 = ThomsonAlgorithim_3.getAfn();
-		temp_3.setTipo("ident1");
-		automatas.add(temp_3);
 	}
 	 /**
  	* Método para revisar que tipo de sub autómata es aceptado por una 
