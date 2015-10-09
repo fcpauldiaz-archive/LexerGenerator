@@ -189,8 +189,11 @@ public class LexerAnalyzer implements RegexConstants{
         end_ = ThomsonAlgorithim.getAfn();
         end_.setTipo("\"END\"");
        
+    
+          
         
-        
+      
+
     }
     
    /**
@@ -226,12 +229,15 @@ public class LexerAnalyzer implements RegexConstants{
         int index = 0;
        // ArrayList res = checkExpression("Cocol = \"COMPILER\""+this.espacio,lineaActual,index);
       
-        ArrayList res_1 = checkAutomata(this.compiler_,lineaActual,index);
+        //ArrayList res_1 = checkAutomata(this.compiler_,lineaActual,index);
         
-        int index2  = returnArray(res_1);
+        //int index2  = returnArray(res_1);
+        if (!this.cadena.get(lineaActual).contains("COMPILER"))
+            System.out.println("No tiene la palabra COMPILER");
+        else
+            index = this.cadena.get(lineaActual).indexOf("R")+1;
         
-        
-        ArrayList res2 = checkAutomata(this.ident_,lineaActual,index2);
+        ArrayList res2 = checkAutomata(this.ident_,lineaActual,index);
         //System.out.println(res2.get(1));
         
         //ScannerSpecification
@@ -246,12 +252,15 @@ public class LexerAnalyzer implements RegexConstants{
        
         //END File
         lineaActual = (int)scan.get(0);
-       
-        ArrayList res3 = checkAutomata(this.end_,lineaActual,0);
-        int index4 = returnArray(res3);
+       int index4 = 0;
+       if (!this.cadena.get(lineaActual).contains("END"))
+            System.out.println("No tiene la palabra END");
+        else
+            index4 = this.cadena.get(lineaActual).indexOf("D")+1;
+        
         
         ArrayList res4 = checkAutomata(this.ident_,lineaActual,index4);
-        
+      
         //revisar identificadores
         if (!res4.isEmpty()&&!res2.isEmpty()){
             if (!res4.get(1).toString().trim().equals(res2.get(1).toString().trim())){
@@ -393,8 +402,9 @@ public class LexerAnalyzer implements RegexConstants{
                LexerGeneratorMain.errores.Warning(lineaActual, "NO contiene punto al final");
                 
             }
+           
             if (cadenaRevisar.contains("EXCEPT"))
-                cadenaRevisar = cadenaRevisar.substring(0,cadenaRevisar.indexOf("EXCEPT")-1).trim();
+                cadenaRevisar = cadenaRevisar.substring(0,cadenaRevisar.indexOf("EXCEPT")).trim();
             boolean tkExpr = tokenExpr(lineaActual, cadenaRevisar);
             
             return tkExpr;
@@ -424,6 +434,7 @@ public class LexerAnalyzer implements RegexConstants{
         
        
         String regex;
+        
         RegexConverter convert = new RegexConverter();
         regex = convert.infixToPostfix(cadenaRevisar);
        
@@ -431,7 +442,7 @@ public class LexerAnalyzer implements RegexConstants{
             LexerGeneratorMain.errores.SynErr(lineaActual, "Expresión mal ingresada"+"\n" + antesRevisar);
             return false;
         }    
-        
+         
      return true;   
     }
     /**

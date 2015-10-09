@@ -22,7 +22,6 @@ public class Simulacion {
 	private Estado inicial_;
 	public Simulacion(){
 		caracteresIgnorar.add(resultadoGeneradorMain.EPSILON);
-		caracteresIgnorar.add( " ");
 	}
 	public HashSet<Estado> eClosure(Estado eClosureEstado){
 		Stack<Estado> pilaClosure = new Stack();
@@ -88,10 +87,6 @@ public class Simulacion {
 		int finalState = 0;
 		int init = 0;
 		for (Character ch: regex.toCharArray()){
-			if (ch == ' '){
-				currentState++;
-			 break;
-			}
 			conjunto = move(conjunto,ch.toString());
 			HashSet<Estado> temp = new HashSet();
 			Iterator<Estado> iter = conjunto.iterator();

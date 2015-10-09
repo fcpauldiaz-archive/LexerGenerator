@@ -364,7 +364,10 @@ public class RegexConverter {
 	 * @return notacion postfix 
 	 */
 	public  String infixToPostfix(String regex) {
-         
+        
+         if (regex.length()<=2)
+            return regex;
+
 		String postfix = new String();
         //regex = abreviacionOr(regex);
         //regex = abreviacionAnd(regex);

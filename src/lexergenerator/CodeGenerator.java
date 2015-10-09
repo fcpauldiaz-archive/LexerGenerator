@@ -26,6 +26,7 @@ public class CodeGenerator implements RegexConstants{
     private final Stack pilaConcatenacion;
     private final ArrayList<String> ignoreSets;
     private final String ANY = "[ -.]"+charOr+"[@-z]";
+    private final HashMap<String, Boolean> verKeywords;
    
     
     /**
@@ -33,6 +34,7 @@ public class CodeGenerator implements RegexConstants{
      * @param cadena HashMap con la cadena del input
      */
     public CodeGenerator(HashMap cadena){
+        this.verKeywords = new HashMap();
         this.ignoreSets = new ArrayList();
         this.pilaConcatenacion = new Stack();
         this.keywords = new ArrayList();
@@ -104,7 +106,7 @@ public class CodeGenerator implements RegexConstants{
         scanner_total += crearAutomatasTexto();
         scanner_total += generar();
         scanner_total += metodoRevisar();
-        scanner_total += keyWords();
+       // scanner_total += keyWords();
        // scanner_total += ignoreWords();
         scanner_total+="\n"+"}";
         
@@ -118,11 +120,21 @@ public class CodeGenerator implements RegexConstants{
                String value = entry.getValue();
                int lineaActual = entry.getKey();
                if (this.cadena.get(lineaActual).contains("IGNORE")){
-                    if (value.contains("\'"))
+                    if (value.contains("\'")){
                         value = value.replaceAll("\'", "");
-                   
-                    
-                   ignoreSets.add(value.substring(6,value.indexOf(".")));
+                    }else if (value.contains("\"")){
+                        value = value.replaceAll("\"","");
+                    }
+                    /*String whitespace = "\n"+
+                            
+                            "String regex_1 = "+  value.substring(6,value.indexOf("."))+";"+;
+		AFNConstruct ThomsonAlgorithim_1 = new AFNConstruct(regex_1);
+		
+		Automata temp_1 = ThomsonAlgorithim_1.afnSimple(regex_1);
+		temp_1.setTipo("WHITESPACE");
+		automatas.add(temp_1);*/
+                    tokensExpr.put("WHITESPACE", value.substring(6,value.indexOf(".")));
+                   //ignoreSets.add(value.substring(6,value.indexOf(".")));
                    
                }
         
@@ -167,6 +179,7 @@ public class CodeGenerator implements RegexConstants{
             }
             if (value.contains("KEYWORDS")&&!value.contains("EXCEPT")){
                 int lineaActual = entry.getKey();
+                lineaActual = avanzarLinea(lineaActual);
                 while(true){
                     
                     if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("TOKENS"))
@@ -178,15 +191,14 @@ public class CodeGenerator implements RegexConstants{
                     String revisar  = valor.substring(++index,valor.length()-1);
                     revisar = revisar.trim();
                     //revisar = crearCadenasOr(revisar);
-                    
-                    for (int j = 0;j<ignoreSets.size();j++){
-                      
-                        if (!ignoreSets.get(j).contains(ident.trim())){
+                    revisar = revisar.replaceAll("\"", "");
+                   //tokensExpr.put(ident.trim(), revisar);
+                   
                            
-                           keywords.add(revisar);
+                    keywords.add(revisar);
+                    tokensExpr.put(ident.trim(),revisar);
                             
-                        }
-                    }
+                      
                     lineaActual = avanzarLinea(lineaActual);
                     
                 }
@@ -218,10 +230,12 @@ public class CodeGenerator implements RegexConstants{
                     int index = valor.indexOf("=");
                     String ident = valor.substring(0,index);
                     String revisar  = valor.substring(++index,valor.length()-1);
-                    if (revisar.contains("EXCEPT"))
+                    if (revisar.contains("EXCEPT")){
                         revisar = revisar.substring(0,revisar.indexOf("EXCEPT")).trim();
+                        verKeywords.put(ident, Boolean.TRUE);
+                    }
                     revisar = revisar.trim();
-                    //System.out.println(revisar);
+                  
                     for (Map.Entry<String, String> entryRegex : cadenaCompleta.entrySet()) {
                         
                         if (revisar.contains(entryRegex.getKey())){
@@ -230,22 +244,24 @@ public class CodeGenerator implements RegexConstants{
                         
                     }
                     System.out.println(revisar);
-                    revisar = revisar.replaceAll("\'", "");
-                     revisar = revisar.replaceAll("\"", "");
+                    
                    
                     revisar = revisar.replaceAll("\\{", charAbrirParentesis+"");
                     revisar = revisar.replaceAll("\\}", charCerrarParentesis+""+charKleene);
                     revisar = revisar.replaceAll("\\[", charAbrirParentesis+"");
                     revisar = revisar.replaceAll("\\]",charCerrarParentesis+"" +charInt);
                     revisar = revisar.replaceAll("\\|",charOr+"");
-                    revisar = revisar.replaceAll("\\(",charAbrirParentesis+"");
-                    revisar = revisar.replaceAll("\\)",charCerrarParentesis+"");
-
-                    
-                           
+                    revisar = revisar.replaceAll("\\((?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charAbrirParentesis+"");
+                     revisar = revisar.replaceAll("\\)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charCerrarParentesis+"");
+                    revisar = revisar.replaceAll("\'", "");
+                    revisar = revisar.replaceAll("\"", "");
+                  
+                    revisar = revisar.replaceAll("\\s","");
+                    System.out.println(ident);
+                    System.out.println(revisar);
                     tokensExpr.put(ident.trim(), revisar);
                     
-
+                    System.out.println("");
                     
 
                 }
@@ -253,6 +269,17 @@ public class CodeGenerator implements RegexConstants{
             }
          }
        // System.out.println(tokensExpr);
+    }
+    
+    public String replaceCharacter(String str, String replacement){
+        String result = "";
+        for (int i =0;i<str.length();i++){
+            Character ch = str.charAt(i);
+            
+        
+        }
+        
+        return result;
     }
     
     /**
@@ -624,6 +651,23 @@ public class CodeGenerator implements RegexConstants{
         
     }
     
+    public boolean buscarIdentKey(String search){
+       
+        for (Map.Entry<String, Boolean> entry : verKeywords.entrySet()) {
+            String value = entry.getKey();
+            if (value.contains(search)){
+                return true;
+                // res = entry.getValue();
+                
+                
+            }
+
+        }
+      
+        return false;
+        
+    }
+    
     /**
      * Método para buscar un identificador en el archivo
      * @param search identificador a buscar
@@ -692,19 +736,25 @@ public class CodeGenerator implements RegexConstants{
        for (Map.Entry<String, String> entry : tokensExpr.entrySet()) {
             String value = entry.getValue();
             String key = entry.getKey();
-            if (value.length()>1)
+            if (value.length()>1&&!value.trim().isEmpty()){
                 afn += "\n"+
                      "\t"+"\t" + "RegexConverter convert_"+counter+"= new RegexConverter();"+"\n"+
                      "\t"+"\t" +"String regex_"+counter+" = convert_"+counter+".infixToPostfix("+"\""+value+"\""+");"+"\n"+
                      "\t"+"\t" +"AFNConstruct ThomsonAlgorithim_"+counter+" = new AFNConstruct(regex_"+counter+");"+"\n"+
                      "\t"+"\t" +"ThomsonAlgorithim_"+counter+".construct();"+"\n"+
                      "\t"+"\t" +"Automata temp_"+counter+ " = ThomsonAlgorithim_"+counter+".getAfn();"+"\n"+
-                     "\t"+ "\t" +"temp_"+counter+".setTipo("+"\""+key+"\""+");"+"\n"+
-                     "\t"+"\t" +"automatas.add(temp_"+counter+ ");"+"\n";
-            else{
+                     "\t"+ "\t" +"temp_"+counter+".setTipo("+"\""+key+"\""+");"+"\n";
+                       
+                      if (buscarIdentKey(key)){
+                          afn += "\t"+ "\t"+"temp_"+counter+".setExceptKeywords(true);"+"\n";
+                      }
+                     afn+="\t"+"\t" +"automatas.add(temp_"+counter+ ");"+"\n";
+                     
+              
+            }else{
                  afn += "\n"+
                      
-                    
+                      "\t"+"\t" +"AFNConstruct ThomsonAlgorithim_"+counter+" = new AFNConstruct();"+"\n"+
                      "\t"+"\t" +"Automata temp_"+counter+ " ="+"ThomsonAlgorithim_0"+".afnSimple("+"\""+value+"\""+");"+"\n"+
                      "\t"+ "\t" +"temp_"+counter+".setTipo("+"\""+key+"\""+");"+"\n"+
                      "\t"+"\t" +"automatas.add(temp_"+counter+ ");"+"\n";
@@ -814,7 +864,7 @@ public class CodeGenerator implements RegexConstants{
         String words = "\n"+
         "\t"+"public void keyWords(){"+"\n";
          for (int i =0;i<keywords.size();i++){
-            words +="\t"+"\t"+ "keywords.add("+keywords.get(i)+");"+"\n";
+            words +="\t"+"\t"+ "keywords.add(\""+keywords.get(i)+"\");"+"\n";
          
          }
          words+="\t"+"\t"+"}"+"\n";
@@ -830,6 +880,7 @@ public class CodeGenerator implements RegexConstants{
          
          }
          words+="\t"+"\t"+"}"+"\n";
+        
          
         return words;
     }
@@ -1007,10 +1058,10 @@ public class CodeGenerator implements RegexConstants{
                 "\t"+"\t"+"int finalState = 0;\n" +
                 "\t"+"\t"+"int init = 0;"+"\n"+
                 "\t"+"\t"+"for (Character ch: regex.toCharArray()){"+"\n"+
-                        "\t"+"\t"+"\t"+"if (ch == ' '){"+"\n"+
+                       /* "\t"+"\t"+"\t"+"if (ch == ' '){"+"\n"+
                         "\t"+"\t"+"\t"+"\t"+"currentState++;"+"\n"+
                         "\t"+"\t"+"\t"+" break;"+"\n"+
-                        "\t"+"\t"+"\t"+"}"+"\n"+
+                        "\t"+"\t"+"\t"+"}"+"\n"+*/
                     "\t"+"\t"+"\t"+"conjunto = move(conjunto,ch.toString());"+"\n"+
                     "\t"+"\t"+"\t"+"HashSet<Estado> temp = new HashSet();"+"\n"+
                     "\t"+"\t"+"\t"+"Iterator<Estado> iter = conjunto.iterator();"+"\n"+
