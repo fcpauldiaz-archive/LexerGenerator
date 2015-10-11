@@ -7,9 +7,11 @@
 package lexergenerator;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.TreeMap;
 
 /**
  * Clase que genera el analizador léxico en el 
@@ -22,8 +24,9 @@ public class CodeGenerator implements RegexConstants{
     private String nombreArchivo;
     private final HashMap<String, String> cadenaCompleta;
     private final HashMap<String, String> tokensExpr;
-    private final ArrayList<String> keywords;
+    private final TreeMap<String,String> keyMap;
     private final Stack pilaConcatenacion;
+    private final Stack pilaAvanzada;
     private final ArrayList<String> ignoreSets;
     private final String ANY = "[ -.]"+charOr+"[@-z]";
     private final HashMap<String, Boolean> verKeywords;
@@ -37,9 +40,10 @@ public class CodeGenerator implements RegexConstants{
         this.verKeywords = new HashMap();
         this.ignoreSets = new ArrayList();
         this.pilaConcatenacion = new Stack();
-        this.keywords = new ArrayList();
+        this.keyMap = new TreeMap();
         this.tokensExpr = new HashMap();
         this.cadenaCompleta = new HashMap();
+        this.pilaAvanzada = new Stack();
         this.cadena=cadena;
     }
     
@@ -76,13 +80,11 @@ public class CodeGenerator implements RegexConstants{
             ""+"\n"+
             "import java.util.Map;"+"\n"+
             "import java.util.HashSet;"+"\n"+
-            "import javax.swing.JFileChooser;"+"\n"+
-            "import java.util.Collections;"+"\n"+
             "import java.util.Comparator;"+"\n"+
             "import java.util.ArrayList;"+"\n"+
             "import java.util.TreeMap;"+"\n"+
             "import java.util.HashMap;"+"\n"+
-            "import java.util.Iterator;"+"\n"+
+          
            
           
             ""+"\n"+
@@ -93,10 +95,13 @@ public class CodeGenerator implements RegexConstants{
             "\t"+"private HashMap<Integer,String> input;"+"\n"+   
             "\t"+"private ArrayList keywords = new ArrayList();"+"\n"+
             "\t"+"private String ignoreSets = \" \";" +"\n"+
-            "\t"+"private HashSet<Token> tokens = new HashSet();"+"\n"+
+            "\t"+"private ArrayList<Token> tokensAcumulados = new ArrayList();"+"\n"+    
+            "\t"+"private ArrayList<Token> tokens = new ArrayList();"+"\n"+
+            "\t"+"private String tk  = \"\";"+"\n"+
+            "\t"+"private Errors errores = new Errors();"+"\n"+"\n"+
                 
             "\t"+"public " + this.nombreArchivo+"(HashMap input){"+"\n"+
-             "\t"+"\t"+"this.input=input;"+"\n"+
+            "\t"+"\t"+"this.input=input;"+"\n"+
             "\t"+"\n"+
              
            "\t" + "}"    
@@ -195,7 +200,7 @@ public class CodeGenerator implements RegexConstants{
                    //tokensExpr.put(ident.trim(), revisar);
                    
                            
-                    keywords.add(revisar);
+                    keyMap.put(ident.trim(),revisar);
                     tokensExpr.put(ident.trim(),revisar);
                             
                       
@@ -243,7 +248,7 @@ public class CodeGenerator implements RegexConstants{
                         }
                         
                     }
-                    System.out.println(revisar);
+                    //System.out.println(revisar);
                     
                    
                     revisar = revisar.replaceAll("\\{", charAbrirParentesis+"");
@@ -257,8 +262,8 @@ public class CodeGenerator implements RegexConstants{
                     revisar = revisar.replaceAll("\"", "");
                   
                     revisar = revisar.replaceAll("\\s","");
-                    System.out.println(ident);
-                    System.out.println(revisar);
+                    //System.out.println(ident);
+                   // System.out.println(revisar);
                     tokensExpr.put(ident.trim(), revisar);
                     
                     System.out.println("");
@@ -269,17 +274,6 @@ public class CodeGenerator implements RegexConstants{
             }
          }
        // System.out.println(tokensExpr);
-    }
-    
-    public String replaceCharacter(String str, String replacement){
-        String result = "";
-        for (int i =0;i<str.length();i++){
-            Character ch = str.charAt(i);
-            
-        
-        }
-        
-        return result;
     }
     
     /**
@@ -301,6 +295,10 @@ public class CodeGenerator implements RegexConstants{
         if (cadena.equals("'+'")){
             //System.out.println(cadena);
             return "+";
+        }
+        if (cadena.equals("'-'")){
+            //System.out.println(cadena);
+            return "-";
         }
         if ((cadena.startsWith("\"")||cadena.startsWith("\'"))&&(!cadena.contains("+"))){
              
@@ -343,7 +341,7 @@ public class CodeGenerator implements RegexConstants{
         }
         else {
             or = cadena;
-            if(cadena.contains("+")){
+            if(cadena.contains("+")&&!cadena.contains("-")){
                 if ((cadena.contains("\"")||cadena.contains("\'"))&&!cadena.contains("..")){
                 int cantidadConcatenaciones = count(cadena,'+');
                 if (cantidadConcatenaciones>1){
@@ -425,7 +423,7 @@ public class CodeGenerator implements RegexConstants{
                 }
                     
                 }
-                else{
+                else {
                     int cantidadConcatenaciones = count(cadena,'+');
                      String subcadena2="";
                     if (cantidadConcatenaciones>1){
@@ -462,7 +460,7 @@ public class CodeGenerator implements RegexConstants{
                     
                     return charAbrirParentesis+or+charCerrarParentesis;
                 }
-            }else if (cadena.contains("-")){
+            }else if (cadena.contains("-")&&!cadena.contains("+")){
                 if ((cadena.contains("\"")||cadena.contains("\'"))&&!cadena.contains("..")){
                    
                     int cantidadConcatenaciones = count(cadena,'-');
@@ -541,6 +539,25 @@ public class CodeGenerator implements RegexConstants{
                         or = balancear(or);
                     }
                 } 
+            }else if (cadena.contains("+")&&cadena.contains("-")){
+             String mutador="";
+             String original="";
+              int indexOperadoresPlus = cadena.indexOf("+");
+              int indexOperadoresMin  =  cadena.indexOf("-");
+              if (indexOperadoresPlus<indexOperadoresMin){
+                  mutador = cadena.substring(0,indexOperadoresPlus);
+                  original = cadena.substring(indexOperadoresPlus);
+              }
+              else{
+                  mutador = cadena.substring(0,indexOperadoresMin);
+                  original = cadena.substring(indexOperadoresMin);
+              }
+              pilaAvanzada.push(original);
+              while (!pilaAvanzada.isEmpty()){
+                  String actual = (String)pilaAvanzada.pop();
+                  
+              }
+              
             }
             
         }
@@ -754,7 +771,7 @@ public class CodeGenerator implements RegexConstants{
             }else{
                  afn += "\n"+
                      
-                      "\t"+"\t" +"AFNConstruct ThomsonAlgorithim_"+counter+" = new AFNConstruct();"+"\n"+
+                     "\t"+"\t" +"AFNConstruct ThomsonAlgorithim_"+counter+" = new AFNConstruct();"+"\n"+
                      "\t"+"\t" +"Automata temp_"+counter+ " ="+"ThomsonAlgorithim_0"+".afnSimple("+"\""+value+"\""+");"+"\n"+
                      "\t"+ "\t" +"temp_"+counter+".setTipo("+"\""+key+"\""+");"+"\n"+
                      "\t"+"\t" +"automatas.add(temp_"+counter+ ");"+"\n";
@@ -772,7 +789,7 @@ public class CodeGenerator implements RegexConstants{
      * @return string con los métodos
      */
     public String generar(){
-        String metodoVer= "\n"+
+      String metodoVer= "\n"+
      "\t"+" /**" +"\n "+
      "\t"+"* Método para revisar que tipo de sub autómata es aceptado por una "+"\n"+
      "\t"+"* expresión regular"+"\n"+
@@ -781,40 +798,13 @@ public class CodeGenerator implements RegexConstants{
      "\t"+"*/"+"\n"+
     "\t"+"public void checkIndividualAutomata(String regex, ArrayList<Automata> conjunto,int lineaActual){"+"\n"+
         
-        "\t"+"\t"+"ArrayList<Boolean> resultado = new ArrayList();"+"\n"+
-        "\t"+"\t"+"TreeMap aceptados = new TreeMap(new Comparator<String>() {"+"\n"+
-        "\t"+"\t"+"@Override"+"\n"+
-        "\t"+"\t"+"public int compare(String o1, String o2) {"+"\n"+
-        "\t"+"\t"+"\t"+"Integer a1 = o1.length();"+"\n"+
-        "\t"+"\t"+"\t"+"Integer a2 = o2.length();"+"\n"+
-        "\t"+"\t"+"\t"+"return a2-a1;"+"\n"+
-        "\t"+"\t"+"}"+"\n"+
-        "\t"+"\t"+"});"+"\n"+
-            
-            "\t"+"\t"+"for (int j = 0;j<conjunto.size();j++){"+"\n"+
-                "\t"+"\t"+"\t"+"ArrayList returnArray = (sim.simular(regex, conjunto.get(j)));"+"\n"+
-                "\t"+"\t"+"\t"+"String returnString = (String)returnArray.get(0);"+"\n"+
-                "\t"+"\t"+"\t"+"if (!returnString.isEmpty())"+"\n"+
-                "\t"+"\t"+"\t"+"\t"+" aceptados.put(returnString, conjunto.get(j).getTipo());"+"\n"+
-                 
+            "\t"+"\t"+"ArrayList<Boolean> resultado = new ArrayList();"+"\n"+
                
-           "\t"+ "\t"+"}"+"\n"+
-                
-                "\t"+"\t"+"if (!aceptados.isEmpty()) "+"\n"+
-                "\t"+"\t"+"\t"+"tokens.add(new Token(aceptados.firstEntry().getValue(),aceptados.firstKey()));"+"\n"+
-           
-            /*"\t"+"\t"+"ArrayList<Integer> posiciones = checkBoolean(resultado);"+"\n"+
-            "\t"+"\t"+"//resultado.clear();"+"\n"+
-            
-           
-            "\t"+"\t"+"for (int k = 0;k<posiciones.size();k++){"+"\n"+
-                
-                "\t"+"\t"+"\t"+"System.out.println(\"<\"+conjunto.get(posiciones.get(k)).getTipo()+ \", \" +\"\\\"\"+regex +\"\\\"\"+\">\");"+"\n"+
+            "\t"+"\t"+"ArrayList tks = tokenMasLargo(regex, conjunto, lineaActual);"+"\n"+
+            "\t"+"\t"+"if (!(Boolean)tks.get(0)){"+"\n"+
+                "\t"+"\t"+"\t"+"errores.LexErr(lineaActual,regex.indexOf((String)tks.get(1)),regex,(String)tks.get(1));"+"\n"+
             "\t"+"\t"+"}"+"\n"+
-            "\t"+"\t"+"if (posiciones.isEmpty()){"+"\n"+
-               "\t"+"\t"+"\t"+"System.out.println(\"Error línea archivo \" + lineaActual +\" : \"+regex+ \" no fue reconocido\");"+"\n"+
-            "\t"+"\t"+"}"+"\n"+*/
-        
+              
     "\t"+"}"+"\n"+
     
     "\t"+"/**"+"\n"+
@@ -844,35 +834,123 @@ public class CodeGenerator implements RegexConstants{
             "\t"+ "\t"+"\t"+"Integer key = entry.getKey();"+"\n"+
             "\t"+"\t"+"\t"+"String value = entry.getValue();"+"\n"+
             "\t"+"\t"+"\t"+"String[] parts = value.split(ignoreSets);"+"\n"+
+            "\t"+"\t"+"\t"+"tokens.clear();"+"\n"+ 
+             "\t"+"\t"+"\t"+"tk=\"\";"+"\n"+    
             "\t"+"\t"+"\t"+"for (String part : parts) {"+"\n"+
                
-                        "\t"+"\t"+"\t"+"\t"+"if (!keywords.contains(part))"+"\n"+
-                    "\t"+"\t"+"\t"+"\t"+"\t"+" this.checkIndividualAutomata(part + \"\", automatas, key);"+"\n"+
-                        "\t"+"\t"+"\t"+ "if (keywords.contains(parts))"+"\n"+
-                 "\t"+"\t"+"\t"+"\t"+"\t"+"tokens.add(new Token(part,part));"+"\n"+
+                        
+                    "\t"+"\t"+"\t"+" this.checkIndividualAutomata(part + \"\", automatas, key);"+"\n"+
+                       
             "\t"+"\t"+"\t"+"}"+"\n"+
-              
+               "\t"+"\t"+"System.out.println(tokens);"+"\n"+
+                 "\t"+"\t"+"tokensAcumulados.addAll(tokens);"+"\n"+
         "\t"+"\t"+"}"+"\n"+
-                "\t"+"\t"+" for (Token tk: tokens){"+"\n"+
-                "\t"+"\t"+"\t"+ "System.out.println(tk);"+"\n"+
+                
+               
+              
+    "\t"+"}"+"\n"+"\n"+"\n";
+        
+        res+=
+        "\t"+ "/**"+"\n"+
+        "\t"+" * Método para reconocer los tokens más simples"+"\n"+
+        "\t"+" * @param regex"+"\n"+
+        "\t"+" * @param conjuntoAut"+"\n"+
+        "\t"+" * @return boolean true si se crea un token, false si no es aceptado por ninguno."+"\n"+
+        "\t"+" */"+"\n"+
+        "\t"+"public boolean tokenSimple(String regex,ArrayList<Automata> conjuntoAut){"+"\n"+
+                "\t"+"\t"+"TreeMap<String,Automata> aceptados = new TreeMap(new Comparator<String>() {"+"\n"+
+                "\t"+"\t"+"@Override"+"\n"+
+                "\t"+"\t"+"public int compare(String o1, String o2) {"+"\n"+
+                    "\t"+"\t"+"\t"+"Integer a1 = o1.length();"+"\n"+
+                    "\t"+"\t"+"\t"+"Integer a2 = o2.length();"+"\n"+
+                    "\t"+"\t"+"\t"+"return a2-a1;"+"\n"+
                 "\t"+"\t"+"}"+"\n"+
-    "\t"+"}"+"\n";
+            "\t"+"\t"+"});"+"\n"+"\n"+   
+        
+            "\t"+"\t"+"for (Automata automata: conjuntoAut){"+"\n"+
+                    "\t"+"\t"+"\t"+"if (sim.simular(regex,automata)){"+"\n"+
+                     "\t"+"\t"+"\t"+"\t"+"aceptados.put(regex, automata);"+"\n"+"\n"+
+                       
+                    "\t"+"\t"+"\t"+"}"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+            "\t"+"\t"+"if (!aceptados.isEmpty()){" +"\n"+
+                    "\t"+"\t"+"\t"+"tokens.add(new Token(aceptados.firstEntry().getValue().getTipo(),aceptados.firstKey(),aceptados.firstEntry().getValue().isExceptKeywords()));"+"\n"+"\n"+
+                  
+                    "\t"+"\t"+"\t"+"return true;"+"\n"+
+            "\t"+"\t"+"}"+"\n"+"\n"+
+            
+            
+            "\t"+"\t"+"return false;"+"\n"+
+        "\t"+"}"+"\n"+"\n";
+                
+        res+=
+        "\t"+"/**"+"\n"+
+	"\t"+"* Método para simular y reconocer el caracter más largo"+"\n"+
+	"\t"+"* "+"\n"+
+	"\t"+"* @param regex recibe la cadena a simular"+"\n"+
+        "\t"+"* @param conjuntoAut "+"\n"+
+        "\t"+"* @param lineaActual linea del regex en el archivo "+"\n"+       
+        "\t"+"* @return boolean si es falso no fue reconocido nada"+"\n"+
+	"\t"+"*/"+"\n"+
+	"\t"+"public ArrayList tokenMasLargo(String regex, ArrayList<Automata> conjuntoAut, int lineaActual)"+"\n"+
+	"\t"+"{   "+"\n"+
+               "\t"+"\t"+"boolean tokenSimple = tokenSimple(regex,conjuntoAut);"+"\n"+"\n"+
+               "\t"+"\t"+"if (tokenSimple){"+"\n"+
+                "\t"+"\t"+"\t"+"ArrayList casoBase = new ArrayList();"+"\n"+
+                "\t"+"\t"+"\t"+"casoBase.add(true);"+"\n"+
+                "\t"+"\t"+"\t"+"casoBase.add(regex);"+"\n"+
+               "\t"+"\t"+ "\t"+"return casoBase;" +"\n"+"\n" +
+                "\t"+"\t"+"}"+"\n"+
+                
+               "\t"+"\t"+"while (tokens.isEmpty()||!regex.isEmpty()){"+"\n"+"\n"+
+               
+               "\t"+ "\t"+"\t"+"if (!tokenSimple(regex,conjuntoAut)){"+"\n"+"\n"+
+                    "\t"+"\t"+"\t"+"\t"+"try{"+"\n"+
+
+                       "\t"+"\t"+"\t"+"\t"+"\t"+"tk = regex.substring(regex.length()-1)+tk;"+"\n"+"\n"+
+
+                       "\t"+"\t"+"\t"+"\t"+"\t"+"ArrayList returnBool = tokenMasLargo(regex.substring(0,regex.length()-1),conjuntoAut, lineaActual);"+"\n"+"\n"+
+
+                       "\t"+"\t"+"\t"+"\t"+"\t"+"if (!(Boolean)returnBool.get(0)){"+"\n"+
+                          "\t"+"\t"+ "\t"+"\t"+"\t"+"\t"+"ArrayList casoRecursivo = new ArrayList();"+"\n"+
+                         "\t"+"\t"+ "\t"+"\t"+"\t"+"\t"+"casoRecursivo.add(false);"+"\n"+
+                         "\t"+"\t"+ "\t"+"\t"+"\t"+"\t"+"casoRecursivo.add((String)returnBool.get(1));"+"\n"+
+                          "\t"+"\t"+ "\t"+"\t"+"\t"+"\t"+"return casoRecursivo;"+"\n"+
+                        "\t"+"\t"+ "\t"+"\t"+"\t"+"}"+"\n"+
+                       "\t"+"\t"+"\t"+"\t"+"\t"+"if ((Boolean)returnBool.get(0)){"+"\n"+
+                           "\t"+"\t"+"\t"+"\t"+"\t"+"\t"+"regex = tk;"+"\n"+
+                           "\t"+"\t"+"\t"+"\t"+"\t"+"\t"+"tk = \"\";"+"\n"+
+                       "\t"+"\t"+"\t"+"\t"+"\t"+"}"+"\n"+
+                    "\t"+"\t"+"\t"+"\t"+"}catch(Exception e){"+"\n"+"\n"+
+                         "\t"+"\t"+"\t"+"\t"+"\t"+"ArrayList casoRecursivo = new ArrayList();"+"\n"+
+                    "\t"+"\t"+"\t"+"\t"+"\t"+"casoRecursivo.add(false);"+"\n"+
+                    "\t"+"\t"+"\t"+"\t"+"\t"+"casoRecursivo.add(tk);"+"\n"+
+                        "\t"+"\t"+"\t"+"\t"+"\t"+"return casoRecursivo;"+"\n"+
+                    "\t"+"\t"+"\t"+"\t"+"}//cierra catch"+"\n"+
+                "\t"+"\t"+"\t"+"}//cierra !if"+"\n"+
+                   "\t"+"\t"+"\t"+"else{"+"\n"+
+               "\t"+"\t"+"\t"+" ArrayList casoRecusivo = new ArrayList();"+"\n"+
+                "\t"+"\t"+"\t"+"casoRecusivo.add(true);"+"\n"+
+                "\t"+"\t"+"\t"+"return casoRecusivo;"+"\n"+
+                "\t"+"\t"+"}"+"\n"+
+                
+            "\t"+"\t"+"}//cierra while"+"\n"+"\n"+
+            "\t"+"\t"+ "if (regex.isEmpty()&&!tk.isEmpty()){"+"\n"+
+                "\t"+"\t"+"\t"+" ArrayList casoRecusivo = new ArrayList();"+"\n"+
+                "\t"+"\t"+"\t"+"  casoRecusivo.add(false);"+"\n"+
+                "\t"+"\t"+"\t"+"casoRecusivo.add(tk);"+"\n"+
+                "\t"+"\t"+"\t"+" return casoRecusivo;"+"\n"+
+            "\t"+"\t"+"}"+"\n"+"\n"+ 
+         "\t"+"\t"+"ArrayList casoRecusivo = new ArrayList();"+"\n"+"\n"+
+        "\t"+"\t"+"casoRecusivo.add(false);"+"\n"+"\n"+
+        "\t"+"\t"+"casoRecusivo.add(regex);"+"\n"+"\n"+
+        "\t"+"\t"+"return  casoRecusivo;"+"\n"+"\n"+
+	"\t"+"}";
         return res;
     }
     
-    public String keyWords(){
-        String words = "\n"+
-        "\t"+"public void keyWords(){"+"\n";
-         for (int i =0;i<keywords.size();i++){
-            words +="\t"+"\t"+ "keywords.add(\""+keywords.get(i)+"\");"+"\n";
-         
-         }
-         words+="\t"+"\t"+"}"+"\n";
-         
-        return words;
-    }
     
-     public String ignoreWords(){
+    public String ignoreWords(){
         String words = "\n"+
         "\t"+"public void ignoreWords(){"+"\n";
          for (int i =0;i<this.ignoreSets.size();i++){
@@ -921,7 +999,7 @@ public class CodeGenerator implements RegexConstants{
                 
         "\t"+this.nombreArchivo+" resGenerator = new "+this.nombreArchivo+"(input);"+"\n"+
         "\t"+"resGenerator.automatas();"+"\n"+
-        "\t"+"resGenerator.keyWords();"+ "\n"+
+      
         "\t"+"resGenerator.revisar();"+"\n"+
         
      
@@ -936,7 +1014,6 @@ public class CodeGenerator implements RegexConstants{
         fileCreator.crearArchivo(res, "resultadoGeneradorMain");
         
     }
-    
     
     public void generarSimulacion(){
         String simulacion = "";
@@ -1142,6 +1219,7 @@ public class CodeGenerator implements RegexConstants{
         "import java.util.ArrayList;"+"\n"+
         "import java.util.HashSet;"+"\n"+
         "import java.util.Objects;"+"\n"+
+        "import java.util.TreeMap;"+"\n"+
 
         "/**"+"\n"+
         " *"+"\n"+
@@ -1154,9 +1232,11 @@ public class CodeGenerator implements RegexConstants{
             "\t"+"private T lexema;"+"\n"+
             "\t"+"private ArrayList keywords = new ArrayList();"+"\n"+
             "\t"+"private HashSet<Token> tokens = new HashSet();"+"\n"+
+            "\t"+"private TreeMap<String,String> keyMap = new TreeMap();"+"\n"+
 
-            "\t"+"public Token(T id, T lexema) {"+"\n"+
-                "\t"+"\t"+"keyWords();"+"\n"+
+            "\t"+"public Token(T id, T lexema,boolean revisarKey) {"+"\n"+
+                "\t"+"\t"+"if (revisarKey)"+"\n"+
+                "\t"+"\t"+"\t"+"keyWords();"+"\n"+
                 "\t"+"\t"+"ArrayList var = revisarKeywords(id,lexema);"+"\n"+
                 "\t"+"\t"+"this.id = (T) var.get(0);"+"\n"+
                 "\t"+"\t"+"this.lexema = (T) var.get(1);"+"\n"+
@@ -1181,8 +1261,8 @@ public class CodeGenerator implements RegexConstants{
             "\t"+"public ArrayList revisarKeywords(T id, T lexema){"+"\n"+
                 "\t"+"\t"+"ArrayList returnArray = new ArrayList();"+"\n"+
 
-                "\t"+"\t"+"if (keywords.contains(lexema)){"+"\n"+
-                    "\t"+"\t"+"\t"+"returnArray.add(lexema);"+"\n"+
+                "\t"+"\t"+"if (keyMap.containsKey((String)lexema)){"+"\n"+
+                    "\t"+"\t"+"\t"+"returnArray.add(keyMap.get((String)lexema));"+"\n"+
                     "\t"+"\t"+"\t"+"returnArray.add(lexema);"+"\n"+
                     "\t"+"\t"+"\t"+"return returnArray;"+"\n"+
                 "\t"+"\t"+"}"+"\n"+
@@ -1193,14 +1273,15 @@ public class CodeGenerator implements RegexConstants{
             "\t"+"}"+"\n"+
 
            "\t"+ "public void keyWords(){"+"\n";
-                 for (int i = 0;i<keywords.size();i++){
-                     token+= "\t"+"\t"+"keywords.add("+keywords.get(i).trim()+");"+"\n";
+                for (Map.Entry<String, String> entry : keyMap.entrySet()) {
+                     token+= "\t"+"\t"+"keyMap.put(\""+entry.getValue()+"\",\""+entry.getKey()+"\");"+"\n";
                
             }
             token+="\t"+"}"+"\n";
             token+="\t"+"@Override"+"\n"+
             "\t"+"public String toString() {"+"\n"+
-                "\t"+"\t"+"return \"<\" + id + \", \\\"\" + lexema + \"\\\">\";"+"\n"+
+                  "\t"+"\t"+"return \"<\" +id +\">\";"+"\n"+
+                /*"\t"+"\t"+"return \"<\" + id + \", \\\"\" + lexema + \"\\\">\";"+"\n"+*/
            "\t"+ "}"+"\n"+
 
             "\t"+"@Override"+"\n"+

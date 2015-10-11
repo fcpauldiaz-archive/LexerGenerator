@@ -62,7 +62,7 @@ letter = letter{letter} EXCEPT KEYWORDS.
 ident1 = letter {'_'} '*'.
 number = digit {digit}
          | digit {digit} '.' {digit} ['E' ['+'|'-'] digit {digit}].
- intLit = 
+intLit = 
   (  zero | nonZeroDigit { digit }
   | ( "0x" | "0X" ) hexDigit { hexDigit }
   | '0' octalDigit { octalDigit }

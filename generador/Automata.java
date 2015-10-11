@@ -9,6 +9,7 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 
+
 /**
  * Clase para modelar un automata finito determinista o no determnista
  * @author Pablo
@@ -30,6 +31,7 @@ public class Automata {
     //atributo para saber el lenguaje r, la cadena w y el resultado de la simulacion
     private String[] resultadoRegex;
     private String lenguajeR;
+    private boolean exceptKeywords = false;
      /**
      * Constructor vacio
      */
@@ -109,7 +111,8 @@ public class Automata {
     public void createAlfabeto(String regex) {
         for (Character ch: regex.toCharArray()){
            
-            if (ch != '|' && ch != '.' && ch != '*' && ch != resultadoGeneradorMain.EPSILON_CHAR)
+             if (ch != '∞' && ch != '∆' && ch != '∫' && ch != resultadoGeneradorMain.EPSILON_CHAR && 
+                    ch!='∩'&& ch != 'Ω')
                 this.alfabeto.add(Character.toString(ch));
         }
     }
@@ -174,6 +177,13 @@ public class Automata {
         this.lenguajeR = lenguajeR;
     }
     
+    public boolean isExceptKeywords() {
+        return exceptKeywords;
+    }
+
+    public void setExceptKeywords(boolean exceptKeywords) {
+        this.exceptKeywords = exceptKeywords;
+    }
    
 
 }

@@ -34,6 +34,11 @@ public class AFNConstruct<T> {
         this.regex = regex;
         
     }
+
+    public AFNConstruct() {  
+        
+    }
+
     
    
     /**

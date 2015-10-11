@@ -6,6 +6,7 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.TreeMap;
 /**
  *
  * @author Pablo
@@ -16,8 +17,10 @@ public class Token<T> {
 	private T lexema;
 	private ArrayList keywords = new ArrayList();
 	private HashSet<Token> tokens = new HashSet();
-	public Token(T id, T lexema) {
-		keyWords();
+	private TreeMap<String,String> keyMap = new TreeMap();
+	public Token(T id, T lexema,boolean revisarKey) {
+		if (revisarKey)
+			keyWords();
 		ArrayList var = revisarKeywords(id,lexema);
 		this.id = (T) var.get(0);
 		this.lexema = (T) var.get(1);
@@ -36,8 +39,8 @@ public class Token<T> {
 	}
 	public ArrayList revisarKeywords(T id, T lexema){
 		ArrayList returnArray = new ArrayList();
-		if (keywords.contains(lexema)){
-			returnArray.add(lexema);
+		if (keyMap.containsKey((String)lexema)){
+			returnArray.add(keyMap.get((String)lexema));
 			returnArray.add(lexema);
 			return returnArray;
 		}
@@ -46,46 +49,46 @@ public class Token<T> {
 		return returnArray;
 	}
 	public void keyWords(){
-		keywords.add(if);
-		keywords.add(while);
-		keywords.add(boolean);
-		keywords.add(byte);
-		keywords.add(char);
-		keywords.add(class);
-		keywords.add(double);
-		keywords.add(false);
-		keywords.add(final);
-		keywords.add(float);
-		keywords.add(int);
-		keywords.add(long);
-		keywords.add(new);
-		keywords.add(null);
-		keywords.add(short);
-		keywords.add(static);
-		keywords.add(super);
-		keywords.add(this);
-		keywords.add(true);
-		keywords.add(void);
-		keywords.add(:);
-		keywords.add(,);
-		keywords.add(--);
-		keywords.add(.);
-		keywords.add(++);
-		keywords.add({);
-		keywords.add([);
-		keywords.add(();
-		keywords.add(-);
-		keywords.add(!);
-		keywords.add(+);
-		keywords.add(});
-		keywords.add(]);
-		keywords.add());
-		keywords.add(~);
-		keywords.add(=);
+		keyMap.put("boolean","boolean");
+		keyMap.put("byte","byte");
+		keyMap.put("char","char");
+		keyMap.put("class","class");
+		keyMap.put(":","colon");
+		keyMap.put(",","comma");
+		keyMap.put("--","dec");
+		keyMap.put(".","dot");
+		keyMap.put("double","double");
+		keyMap.put("false","false");
+		keyMap.put("final","final");
+		keyMap.put("float","float");
+		keyMap.put("if","if");
+		keyMap.put("=","igual");
+		keyMap.put("++","inc");
+		keyMap.put("int","int");
+		keyMap.put("{","lbrace");
+		keyMap.put("[","lbrack");
+		keyMap.put("long","long");
+		keyMap.put("(","lpar");
+		keyMap.put("-","minus");
+		keyMap.put("new","new");
+		keyMap.put("!","not");
+		keyMap.put("null","null");
+		keyMap.put("+","plus");
+		keyMap.put("}","rbrace");
+		keyMap.put("]","rbrack");
+		keyMap.put(")","rpar");
+		keyMap.put("short","short");
+		keyMap.put("static","static");
+		keyMap.put("super","super");
+		keyMap.put("this","this");
+		keyMap.put("~","tilde");
+		keyMap.put("true","true");
+		keyMap.put("void","void");
+		keyMap.put("while","while");
 	}
 	@Override
 	public String toString() {
-		return "<" + id + ", \"" + lexema + "\">";
+		return "<" +id +">";
 	}
 	@Override
 	public int hashCode() {

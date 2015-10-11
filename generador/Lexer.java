@@ -7,13 +7,10 @@
 
 import java.util.Map;
 import java.util.HashSet;
-import javax.swing.JFileChooser;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public class Lexer {
 
@@ -22,7 +19,11 @@ public class Lexer {
 	private HashMap<Integer,String> input;
 	private ArrayList keywords = new ArrayList();
 	private String ignoreSets = " ";
-	private HashSet<Token> tokens = new HashSet();
+	private ArrayList<Token> tokensAcumulados = new ArrayList();
+	private ArrayList<Token> tokens = new ArrayList();
+	private String tk  = "";
+	private Errors errores = new Errors();
+
 	public Lexer(HashMap input){
 		this.input=input;
 	
@@ -321,22 +322,10 @@ public class Lexer {
 	*/
 	public void checkIndividualAutomata(String regex, ArrayList<Automata> conjunto,int lineaActual){
 		ArrayList<Boolean> resultado = new ArrayList();
-		TreeMap aceptados = new TreeMap(new Comparator<String>() {
-		@Override
-		public int compare(String o1, String o2) {
-			Integer a1 = o1.length();
-			Integer a2 = o2.length();
-			return a2-a1;
+		ArrayList tks = tokenMasLargo(regex, conjunto, lineaActual);
+		if (!(Boolean)tks.get(0)){
+			errores.LexErr(lineaActual,regex.indexOf((String)tks.get(1)),regex,(String)tks.get(1));
 		}
-		});
-		for (int j = 0;j<conjunto.size();j++){
-			ArrayList returnArray = (sim.simular(regex, conjunto.get(j)));
-			String returnString = (String)returnArray.get(0);
-			if (!returnString.isEmpty())
-				 aceptados.put(returnString, conjunto.get(j).getTipo());
-		}
-		if (!aceptados.isEmpty()) 
-			tokens.add(new Token(aceptados.firstEntry().getValue(),aceptados.firstKey()));
 	}
 	/**
 	 * Método que devuelve las posiciones en las que el valor que tiene 
@@ -358,16 +347,115 @@ public class Lexer {
 			Integer key = entry.getKey();
 			String value = entry.getValue();
 			String[] parts = value.split(ignoreSets);
+			tokens.clear();
+			tk="";
 			for (String part : parts) {
-				if (!keywords.contains(part))
-					 this.checkIndividualAutomata(part + "", automatas, key);
-			if (keywords.contains(parts))
-					tokens.add(new Token(part,part));
+			 this.checkIndividualAutomata(part + "", automatas, key);
 			}
-		}
-		 for (Token tk: tokens){
-			System.out.println(tk);
+		System.out.println(tokens);
+		tokensAcumulados.addAll(tokens);
 		}
 	}
 
+
+	/**
+	 * Método para reconocer los tokens más simples
+	 * @param regex
+	 * @param conjuntoAut
+	 * @return boolean true si se crea un token, false si no es aceptado por ninguno.
+	 */
+	public boolean tokenSimple(String regex,ArrayList<Automata> conjuntoAut){
+		TreeMap<String,Automata> aceptados = new TreeMap(new Comparator<String>() {
+		@Override
+		public int compare(String o1, String o2) {
+			Integer a1 = o1.length();
+			Integer a2 = o2.length();
+			return a2-a1;
+		}
+		});
+
+		for (Automata automata: conjuntoAut){
+			if (sim.simular(regex,automata)){
+				aceptados.put(regex, automata);
+
+			}
+		}
+		if (!aceptados.isEmpty()){
+			tokens.add(new Token(aceptados.firstEntry().getValue().getTipo(),aceptados.firstKey(),aceptados.firstEntry().getValue().isExceptKeywords()));
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	* Método para simular y reconocer el caracter más largo
+	* 
+	* @param regex recibe la cadena a simular
+	* @param conjuntoAut 
+	* @param lineaActual linea del regex en el archivo 
+	* @return boolean si es falso no fue reconocido nada
+	*/
+	public ArrayList tokenMasLargo(String regex, ArrayList<Automata> conjuntoAut, int lineaActual)
+	{   
+		boolean tokenSimple = tokenSimple(regex,conjuntoAut);
+
+		if (tokenSimple){
+			ArrayList casoBase = new ArrayList();
+			casoBase.add(true);
+			casoBase.add(regex);
+			return casoBase;
+
+		}
+		while (tokens.isEmpty()||!regex.isEmpty()){
+
+			if (!tokenSimple(regex,conjuntoAut)){
+
+				try{
+					tk = regex.substring(regex.length()-1)+tk;
+
+					ArrayList returnBool = tokenMasLargo(regex.substring(0,regex.length()-1),conjuntoAut, lineaActual);
+
+					if (!(Boolean)returnBool.get(0)){
+						ArrayList casoRecursivo = new ArrayList();
+						casoRecursivo.add(false);
+						casoRecursivo.add((String)returnBool.get(1));
+						return casoRecursivo;
+					}
+					if ((Boolean)returnBool.get(0)){
+						regex = tk;
+						tk = "";
+					}
+				}catch(Exception e){
+
+					ArrayList casoRecursivo = new ArrayList();
+					casoRecursivo.add(false);
+					casoRecursivo.add(tk);
+					return casoRecursivo;
+				}//cierra catch
+			}//cierra !if
+			else{
+			 ArrayList casoRecusivo = new ArrayList();
+			casoRecusivo.add(true);
+			return casoRecusivo;
+		}
+		}//cierra while
+
+		if (regex.isEmpty()&&!tk.isEmpty()){
+			 ArrayList casoRecusivo = new ArrayList();
+			  casoRecusivo.add(false);
+			casoRecusivo.add(tk);
+			 return casoRecusivo;
+		}
+
+		ArrayList casoRecusivo = new ArrayList();
+
+		casoRecusivo.add(false);
+
+		casoRecusivo.add(regex);
+
+		return  casoRecusivo;
+
+	}
 }
