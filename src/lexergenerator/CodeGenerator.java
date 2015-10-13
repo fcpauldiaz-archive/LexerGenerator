@@ -93,8 +93,10 @@ public class CodeGenerator implements RegexConstants{
             "\t"+"private Simulacion sim = new Simulacion();"+"\n"+
             "\t"+"private ArrayList<Automata> automatas = new ArrayList();"+"\n"+
             "\t"+"private HashMap<Integer,String> input;"+"\n"+   
-            "\t"+"private ArrayList keywords = new ArrayList();"+"\n"+
-            "\t"+"private String ignoreSets = \" \";" +"\n"+
+            "\t"+"private ArrayList keywords = new ArrayList();"+"\n");
+           
+            scanner_total +=
+            "\t"+"private String ignoreSets = \""+ignoreSets.get(0) +"\";"+"\n"+
             "\t"+"private ArrayList<Token> tokensAcumulados = new ArrayList();"+"\n"+    
             "\t"+"private ArrayList<Token> tokens = new ArrayList();"+"\n"+
             "\t"+"private String tk  = \"\";"+"\n"+
@@ -106,7 +108,7 @@ public class CodeGenerator implements RegexConstants{
              
            "\t" + "}"    
                 
-        );
+        ;
 
         scanner_total += crearAutomatasTexto();
         scanner_total += generar();
@@ -139,7 +141,8 @@ public class CodeGenerator implements RegexConstants{
 		temp_1.setTipo("WHITESPACE");
 		automatas.add(temp_1);*/
                     tokensExpr.put("WHITESPACE", value.substring(6,value.indexOf(".")));
-                   //ignoreSets.add(value.substring(6,value.indexOf(".")));
+                    
+                   ignoreSets.add(value.substring(6,value.indexOf(".")));
                    
                }
         
@@ -826,7 +829,7 @@ public class CodeGenerator implements RegexConstants{
         return metodoVer;
     }
     
-    public String metodoRevisar(){
+    public String metodoRevisar() {
         String res = "\n"+
         "\t"+"public void revisar(){"+"\n"+
 

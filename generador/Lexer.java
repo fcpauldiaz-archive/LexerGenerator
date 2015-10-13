@@ -18,7 +18,7 @@ public class Lexer {
 	private ArrayList<Automata> automatas = new ArrayList();
 	private HashMap<Integer,String> input;
 	private ArrayList keywords = new ArrayList();
-	private String ignoreSets = " ";
+	private String ignoreSets = "  ";
 	private ArrayList<Token> tokensAcumulados = new ArrayList();
 	private ArrayList<Token> tokens = new ArrayList();
 	private String tk  = "";
