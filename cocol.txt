@@ -14,8 +14,8 @@ hexDigit      = digit + "ABCDEFabcdef" .
 letter        = 'A' .. 'Z' + 'a' .. 'z' + '+'.
 some_chars 	  = CHR(33)..CHR(39).
 escape_chars  = some_chars + "\\".
-char          = ANY - "'" - '\\' - cr - lf.
-stringChar    = ANY - "\"" - '\\' - cr - lf.
+char          = ANY - "'" - cr - lf.
+stringChar    = ANY - "\"" - cr - lf.
 
 KEYWORDS
 
@@ -67,6 +67,15 @@ intLit =
   | ( "0x" | "0X" ) hexDigit { hexDigit }
   | '0' octalDigit { octalDigit }
   ) [ "l" | "L" ].
+charLit = 
+"'" ( char
+    | "\\" ( "b" | "t" | "n" | "f" | "r" | "\"" | "\'" | "\\"
+           | "u" { "u" } hexDigit hexDigit hexDigit hexDigit
+           | zeroToThree [ octalDigit ] [ octalDigit ]
+           | octalDigit [ octalDigit ]
+           )
+    ) 
+"'".
 
 
 

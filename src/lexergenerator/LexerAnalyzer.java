@@ -342,18 +342,18 @@ public class LexerAnalyzer implements RegexConstants{
         
         
         //[WHITESPACE DELCARATION]
-        
-        lineaActual = avanzarLinea(lineaActual);
-        //whitespaceDecl
-        while (true){
-        boolean space = whiteSpaceDeclaration(lineaActual);
-            if (space)
-                lineaActual = avanzarLinea(lineaActual);
-            else{
-                break;
+        if (cadena.get(lineaActual).contains("IGNORE")){
+            lineaActual = avanzarLinea(lineaActual);
+            //whitespaceDecl
+            while (true){
+            boolean space = whiteSpaceDeclaration(lineaActual);
+                if (space)
+                    lineaActual = avanzarLinea(lineaActual);
+                else{
+                    break;
+                }
             }
         }
-        
         
         
         

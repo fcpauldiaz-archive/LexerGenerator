@@ -70,6 +70,14 @@ public class Errors {
         count++;
         
     }
+     public void WarningIdent(String msg){
+        System.out.println("");
+        System.out.println("Advertencia ");
+        System.out.println(">>>   " + msg );
+        System.out.println("");
+        count++;
+        
+    }
     /**
      * Obtener contador de errores
      * @return entero

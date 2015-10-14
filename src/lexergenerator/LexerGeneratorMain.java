@@ -31,7 +31,7 @@ public class LexerGeneratorMain {
         
           HashMap cocol = read.leerArchivo(file);
         
-        
+        System.out.println("ddd");
         LexerAnalyzer lexer = new LexerAnalyzer(cocol);
         lexer.vocabulario();
         lexer.construct(cocol);

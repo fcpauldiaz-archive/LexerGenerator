@@ -27,8 +27,8 @@ public class CodeGenerator implements RegexConstants{
     private final TreeMap<String,String> keyMap;
     private final Stack pilaConcatenacion;
     private final Stack pilaAvanzada;
-    private final ArrayList<String> ignoreSets;
-    private final String ANY = "[ -.]"+charOr+"[@-z]";
+    private String ignoreSets = " ";
+    private final String ANY = /*"[!-#]"+charOr+"[%-']"+charOr+"[*-.]"+charOr+*/"[@-Z]"+charOr+"[^-z]";
     private final HashMap<String, Boolean> verKeywords;
    
     
@@ -38,7 +38,6 @@ public class CodeGenerator implements RegexConstants{
      */
     public CodeGenerator(HashMap cadena){
         this.verKeywords = new HashMap();
-        this.ignoreSets = new ArrayList();
         this.pilaConcatenacion = new Stack();
         this.keyMap = new TreeMap();
         this.tokensExpr = new HashMap();
@@ -96,7 +95,7 @@ public class CodeGenerator implements RegexConstants{
             "\t"+"private ArrayList keywords = new ArrayList();"+"\n");
            
             scanner_total +=
-            "\t"+"private String ignoreSets = \""+ignoreSets.get(0) +"\";"+"\n"+
+            "\t"+"private String ignoreSets = \""+ignoreSets.substring(0, ignoreSets.length()-1)+"\";"+"\n"+
             "\t"+"private ArrayList<Token> tokensAcumulados = new ArrayList();"+"\n"+    
             "\t"+"private ArrayList<Token> tokens = new ArrayList();"+"\n"+
             "\t"+"private String tk  = \"\";"+"\n"+
@@ -142,7 +141,7 @@ public class CodeGenerator implements RegexConstants{
 		automatas.add(temp_1);*/
                     tokensExpr.put("WHITESPACE", value.substring(6,value.indexOf(".")));
                     
-                   ignoreSets.add(value.substring(6,value.indexOf(".")));
+                   ignoreSets = (value.substring(6,value.indexOf(".")));
                    
                }
         
@@ -174,9 +173,12 @@ public class CodeGenerator implements RegexConstants{
                     String revisar  = valor.substring(++index,valor.length()-1);
                     revisar = revisar.trim();
                     revisar = crearCadenasOr(revisar);
-                    
-                  
+                    System.out.println(ident);
+                    System.out.println(revisar);
                            
+                    if (ident.trim().equals("char"))
+                        revisar +=charCerrarParentesis;
+                    
                     cadenaCompleta.put(ident.trim(), revisar);
                     
 
@@ -243,33 +245,60 @@ public class CodeGenerator implements RegexConstants{
                         verKeywords.put(ident, Boolean.TRUE);
                     }
                     revisar = revisar.trim();
-                  
+                    
+                    System.out.println("");
+                           
+                    
                     for (Map.Entry<String, String> entryRegex : cadenaCompleta.entrySet()) {
                         
                         if (revisar.contains(entryRegex.getKey())){
-                            revisar = revisar.replaceAll(entryRegex.getKey(), entryRegex.getValue());
+                            revisar = revisar.replaceAll(entryRegex.getKey().trim(), entryRegex.getValue());
                         }
                         
                     }
+                    System.out.println(ident);
+                     System.out.println(revisar);
                     //System.out.println(revisar);
                     
-                   
                     revisar = revisar.replaceAll("\\{", charAbrirParentesis+"");
                     revisar = revisar.replaceAll("\\}", charCerrarParentesis+""+charKleene);
-                    revisar = revisar.replaceAll("\\[", charAbrirParentesis+"");
-                    revisar = revisar.replaceAll("\\]",charCerrarParentesis+"" +charInt);
+                    revisar = revisar.replaceAll("(\\[)(?=(?:[^\"']|[\"|'][^\"']*\")*)", charAbrirParentesis+"");
+                    revisar = revisar.replaceAll("(\\])(?=(?:[^\"']|[\"|'][^\"']*\")*)",charCerrarParentesis+"" +charInt);
                     revisar = revisar.replaceAll("\\|",charOr+"");
-                    revisar = revisar.replaceAll("\\((?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charAbrirParentesis+"");
-                     revisar = revisar.replaceAll("\\)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charCerrarParentesis+"");
-                    revisar = revisar.replaceAll("\'", "");
-                    revisar = revisar.replaceAll("\"", "");
+                    //revisar = revisar.replaceAll("\\((?=(?:[^\"']|[\"|'][^\"']*\")*$)","");
+                    
+                     if (revisar.startsWith("\"")||revisar.startsWith("\\")||revisar.startsWith("\'")){
+                        revisar = revisar.replaceAll("\\((?!(?:[^\"]*\"[^\"]*\")*[^\"]*$)", charAbrirParentesis+"");
+                        revisar = revisar.replaceAll("\\)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", charCerrarParentesis+"");
+                     }
+                     else{
+                        revisar = revisar.replaceAll("\\((?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charAbrirParentesis+"");
+                        revisar = revisar.replaceAll("\\)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charCerrarParentesis+"");
+                     }            
+                    // revisar = revisar.replaceAll("\\)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charCerrarParentesis+"");
+                    //revisar = revisar.replaceAll("\\((?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charAbrirParentesis+"");
+                    //revisar = revisar.replaceAll("\\)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charCerrarParentesis+"");
+                    
+                    //revisar = revisar.replaceAll("'(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)","");
+                    //revisar = revisar.replaceAll("\"", "");
+                   // revisar = revisar.replaceAll("(\")(?=(?:[^\"']|[\"|'][^\"']*\")*$)","");
+                   // revisar = revisar.replaceAll("\'", "");
+                    //revisar = revisar.replaceAll("\\\"", "");
+                    System.out.println(revisar);
+                    revisar = poner(revisar);
+                    System.out.println(revisar);
+                    System.out.println("quitando");
+                    revisar = quitar(revisar);
+                    revisar = poner2(revisar);
+                    revisar = quitar2(revisar);
+                 
                   
                     revisar = revisar.replaceAll("\\s","");
                     //System.out.println(ident);
                    // System.out.println(revisar);
                     tokensExpr.put(ident.trim(), revisar);
                     
-                    System.out.println("");
+                    System.out.println(revisar);
                     
 
                 }
@@ -278,7 +307,108 @@ public class CodeGenerator implements RegexConstants{
          }
        // System.out.println(tokensExpr);
     }
-    
+     public String quitar2(String eval){
+       String returnString ="";
+        char[] charArray = eval.toCharArray();
+        for (int i=0;i<charArray.length;i++){
+           
+          
+            if (i>1 && i<eval.length()-3){
+                if (charArray[i]=='\''&&(((charArray[i-1]!='\\')))&&charArray[i+1]!='\'')
+                    continue;
+                
+            }
+            if (i<=1){
+                if (charArray[i]=='\\'&&charArray[i+1]!='\'')
+                    continue;
+            }
+            if (i>=charArray.length-3){
+                if (charArray[i]=='\''&&charArray[i-1]!='\\')
+                    continue;
+            }
+            returnString +=charArray[i];
+        }
+        
+        return returnString;
+    }
+    public String quitar(String eval){
+        String returnString ="";
+        char[] charArray = eval.toCharArray();
+        for (int i=0;i<charArray.length;i++){
+           
+          
+            if (i>1 && i<eval.length()-3){
+                if (charArray[i]=='"'&&(((charArray[i-1]=='\\')||charArray[i+1]!='\"'||charArray[i+1]=='\''))&&charArray[i+1]!='"')
+                    continue;
+               
+            }
+            
+            
+            if (i<=1){
+                if (charArray[i+1]=='\''&&eval.charAt(i)=='\"')
+                    continue;
+            }
+            if (i>=charArray.length-3){
+                if (charArray[i]=='"'&&charArray[i-1]!='\\')
+                    continue;
+            }
+            returnString +=charArray[i];
+        }
+        
+        return returnString;
+    }
+    public String poner(String eval){
+        String returnString ="";
+        for (int i =0;i<eval.length();i++){
+            Character ch = eval.charAt(i);
+            String pos ="";
+            String pos2 = "";
+            String pos1 = "";
+            if (i>0){
+                if ((ch=='\''||ch=='\\'||ch=='"')&&eval.charAt(i-1)==charOr&&eval.charAt(i+1)==charOr){
+                    pos="\\";
+                    pos1="\"";
+                    pos2=pos1;
+                }
+            }
+            returnString += pos1+pos+ch+pos2;
+        }
+        return returnString;
+    }
+       public String poner2(String eval){
+        String returnString ="";
+        for (int i =0;i<eval.length();i++){
+            Character ch = eval.charAt(i);
+            String pos ="";
+            String pos2 = "";
+            String pos1 = "";
+            if (i>0&&i<eval.length()-2){
+                if ((ch=='\''||ch=='\"')&&eval.charAt(i-1)!='\\'&&!(eval.charAt(i+2)=='\''||eval.charAt(i-2)=='\'')){
+                    pos="\\";
+                   // pos1="\"";
+                   // pos2=pos1;
+                }
+            }
+            if (i==0){
+                if (eval.charAt(i+1)!='\\'&&(ch=='\''||ch=='\"')){
+                    pos="\\";
+                    /*pos1="\"";
+                    pos2=pos1;*/
+                }
+            }
+            if (i>=eval.length()-2){
+                if (eval.charAt(i-1)!='\\'&&ch=='\''&&eval.charAt(i-1)!='*'){
+                    pos="\\";
+                    /*pos1="\"";
+                    pos2=pos1;*/
+                }
+            }
+        
+          returnString += pos+ch;
+        }
+        return returnString;
+        
+    }
     /**
      * Crea una cadena con operaciones or en cada caracter
      * En caso de haber concatenaciones calcula si tiene que
@@ -666,7 +796,9 @@ public class CodeGenerator implements RegexConstants{
             }
 
         }
-        System.out.println("Identificador no declarado "+ "\n");
+        Errors errores = new Errors();
+        errores.WarningIdent("identificador no declarado");
+        //System.out.println("Identificador no declarado "+ "\n");
         return res;
         
     }
@@ -956,10 +1088,7 @@ public class CodeGenerator implements RegexConstants{
     public String ignoreWords(){
         String words = "\n"+
         "\t"+"public void ignoreWords(){"+"\n";
-         for (int i =0;i<this.ignoreSets.size();i++){
-            words +="\t"+"\t"+ "ignoreSets.add(\""+ignoreSets.get(i).trim()+"\");"+"\n";
-         
-         }
+        
          words+="\t"+"\t"+"}"+"\n";
         
          
@@ -991,12 +1120,12 @@ public class CodeGenerator implements RegexConstants{
         "\t"+ "// TODO code application logic here"+"\n"+
         "\t"+"ReadFile read = new ReadFile();"+"\n"+
         "\t"+"File file = new File(\"input\"+\".txt\");"+"\n"+
-        "\t"+"JFileChooser chooser = new JFileChooser();"+"\n"+
-        "\t"+"int returnVal = chooser.showOpenDialog(null);"+"\n"+
-        "\t"+"if(returnVal == JFileChooser.APPROVE_OPTION) {"+"\n"+
+       // "\t"+"JFileChooser chooser = new JFileChooser();"+"\n"+
+       // "\t"+"int returnVal = chooser.showOpenDialog(null);"+"\n"+
+        //"\t"+"if(returnVal == JFileChooser.APPROVE_OPTION) {"+"\n"+
         
-                "\t"+"\t"+"file = chooser.getSelectedFile();"+"\n"+
-        "\t"+"}"+"\n"+
+          //      "\t"+"\t"+"file = chooser.getSelectedFile();"+"\n"+
+        //"\t"+"}"+"\n"+
             
          "\t"+"HashMap input = read.leerArchivo(file);"+"\n"+
                 
@@ -1050,10 +1179,7 @@ public class CodeGenerator implements RegexConstants{
                 "\t"+"private Estado inicial_;"+"\n"+
                "\t"+"public Simulacion(){"+"\n"+
                "\t"+"\t"+"caracteresIgnorar.add(resultadoGeneradorMain.EPSILON);"+"\n";
-                for (int i =0;i<this.ignoreSets.size();i++){
-                        simulacion +="\t"+"\t"+ "caracteresIgnorar.add("+ignoreSets.get(i)+");"+"\n";
-
-                }
+              
                 simulacion+="\t"+"}"+"\n"+
     
            

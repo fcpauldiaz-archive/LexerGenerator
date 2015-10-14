@@ -18,7 +18,7 @@ public class Lexer {
 	private ArrayList<Automata> automatas = new ArrayList();
 	private HashMap<Integer,String> input;
 	private ArrayList keywords = new ArrayList();
-	private String ignoreSets = "  ";
+	private String ignoreSets = " ";
 	private ArrayList<Token> tokensAcumulados = new ArrayList();
 	private ArrayList<Token> tokens = new ArrayList();
 	private String tk  = "";
@@ -222,97 +222,105 @@ public class Lexer {
 		automatas.add(temp_27);
 
 		RegexConverter convert_28= new RegexConverter();
-		String regex_28 = convert_28.infixToPostfix("int");
+		String regex_28 = convert_28.infixToPostfix("\'≤≤≤@∫A∫B∫C∫D∫E∫F∫G∫H∫I∫J∫K∫L∫M∫N∫O∫P∫Q∫R∫S∫T∫U∫V∫W∫X∫Y∫Z≥∫≤^∫_∫`∫a∫b∫c∫d∫e∫f∫g∫h∫i∫j∫k∫l∫m∫n∫o∫p∫q∫r∫s∫t∫u∫v∫w∫x∫y≥≥∫\\≤b∫t∫n∫f∫r∫\"∫\'∫\\∫u≤u≥∞≤≤≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7∫8∫9≥≥≥≥∫≤≤A∫B∫C∫D∫E∫F∫a∫b∫c∫d∫e∫f≥≥≥≤≤≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7∫8∫9≥≥≥≥∫≤≤A∫B∫C∫D∫E∫F∫a∫b∫c∫d∫e∫f≥≥≥≤≤≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7∫8∫9≥≥≥≥∫≤≤A∫B∫C∫D∫E∫F∫a∫b∫c∫d∫e∫f≥≥≥≤≤≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7∫8∫9≥≥≥≥∫≤≤A∫B∫C∫D∫E∫F∫a∫b∫c∫d∫e∫f≥≥≥∫≤≤≤0≥≥∫≤≤1∫2∫3≥≥≥≤≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7≥≥≥≥Ω≤≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7≥≥≥≥Ω∫≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7≥≥≥≤≤≤≤0≥≥∫≤≤1∫2∫3∫4∫5∫6∫7≥≥≥≥Ω≥≥\'");
 		AFNConstruct ThomsonAlgorithim_28 = new AFNConstruct(regex_28);
 		ThomsonAlgorithim_28.construct();
 		Automata temp_28 = ThomsonAlgorithim_28.getAfn();
-		temp_28.setTipo("int");
+		temp_28.setTipo("charLit");
 		automatas.add(temp_28);
 
-		AFNConstruct ThomsonAlgorithim_29 = new AFNConstruct();
-		Automata temp_29 =ThomsonAlgorithim_0.afnSimple("+");
-		temp_29.setTipo("plus");
+		RegexConverter convert_29= new RegexConverter();
+		String regex_29 = convert_29.infixToPostfix("int");
+		AFNConstruct ThomsonAlgorithim_29 = new AFNConstruct(regex_29);
+		ThomsonAlgorithim_29.construct();
+		Automata temp_29 = ThomsonAlgorithim_29.getAfn();
+		temp_29.setTipo("int");
 		automatas.add(temp_29);
 
-		RegexConverter convert_30= new RegexConverter();
-		String regex_30 = convert_30.infixToPostfix("super");
-		AFNConstruct ThomsonAlgorithim_30 = new AFNConstruct(regex_30);
-		ThomsonAlgorithim_30.construct();
-		Automata temp_30 = ThomsonAlgorithim_30.getAfn();
-		temp_30.setTipo("super");
+		AFNConstruct ThomsonAlgorithim_30 = new AFNConstruct();
+		Automata temp_30 =ThomsonAlgorithim_0.afnSimple("+");
+		temp_30.setTipo("plus");
 		automatas.add(temp_30);
 
-		AFNConstruct ThomsonAlgorithim_31 = new AFNConstruct();
-		Automata temp_31 =ThomsonAlgorithim_0.afnSimple(",");
-		temp_31.setTipo("comma");
+		RegexConverter convert_31= new RegexConverter();
+		String regex_31 = convert_31.infixToPostfix("super");
+		AFNConstruct ThomsonAlgorithim_31 = new AFNConstruct(regex_31);
+		ThomsonAlgorithim_31.construct();
+		Automata temp_31 = ThomsonAlgorithim_31.getAfn();
+		temp_31.setTipo("super");
 		automatas.add(temp_31);
 
-		RegexConverter convert_32= new RegexConverter();
-		String regex_32 = convert_32.infixToPostfix("boolean");
-		AFNConstruct ThomsonAlgorithim_32 = new AFNConstruct(regex_32);
-		ThomsonAlgorithim_32.construct();
-		Automata temp_32 = ThomsonAlgorithim_32.getAfn();
-		temp_32.setTipo("boolean");
+		AFNConstruct ThomsonAlgorithim_32 = new AFNConstruct();
+		Automata temp_32 =ThomsonAlgorithim_0.afnSimple(",");
+		temp_32.setTipo("comma");
 		automatas.add(temp_32);
 
 		RegexConverter convert_33= new RegexConverter();
-		String regex_33 = convert_33.infixToPostfix("null");
+		String regex_33 = convert_33.infixToPostfix("boolean");
 		AFNConstruct ThomsonAlgorithim_33 = new AFNConstruct(regex_33);
 		ThomsonAlgorithim_33.construct();
 		Automata temp_33 = ThomsonAlgorithim_33.getAfn();
-		temp_33.setTipo("null");
+		temp_33.setTipo("boolean");
 		automatas.add(temp_33);
 
 		RegexConverter convert_34= new RegexConverter();
-		String regex_34 = convert_34.infixToPostfix("≤≤A∫B∫C∫D∫E∫F∫G∫H∫I∫J∫K∫L∫M∫N∫O∫P∫Q∫R∫S∫T∫U∫V∫W∫X∫Y∫Z≥∫≤a∫b∫c∫d∫e∫f∫g∫h∫i∫j∫k∫l∫m∫n∫o∫p∫q∫r∫s∫t∫u∫v∫w∫x∫y∫z≥∫+≥≤≤≤A∫B∫C∫D∫E∫F∫G∫H∫I∫J∫K∫L∫M∫N∫O∫P∫Q∫R∫S∫T∫U∫V∫W∫X∫Y∫Z≥∫≤a∫b∫c∫d∫e∫f∫g∫h∫i∫j∫k∫l∫m∫n∫o∫p∫q∫r∫s∫t∫u∫v∫w∫x∫y∫z≥∫+≥≥∞");
+		String regex_34 = convert_34.infixToPostfix("null");
 		AFNConstruct ThomsonAlgorithim_34 = new AFNConstruct(regex_34);
 		ThomsonAlgorithim_34.construct();
 		Automata temp_34 = ThomsonAlgorithim_34.getAfn();
-		temp_34.setTipo("letter");
-		temp_34.setExceptKeywords(true);
+		temp_34.setTipo("null");
 		automatas.add(temp_34);
 
 		RegexConverter convert_35= new RegexConverter();
-		String regex_35 = convert_35.infixToPostfix("char");
+		String regex_35 = convert_35.infixToPostfix("≤≤A∫B∫C∫D∫E∫F∫G∫H∫I∫J∫K∫L∫M∫N∫O∫P∫Q∫R∫S∫T∫U∫V∫W∫X∫Y∫Z≥∫≤a∫b∫c∫d∫e∫f∫g∫h∫i∫j∫k∫l∫m∫n∫o∫p∫q∫r∫s∫t∫u∫v∫w∫x∫y∫z≥∫+≥≤≤≤A∫B∫C∫D∫E∫F∫G∫H∫I∫J∫K∫L∫M∫N∫O∫P∫Q∫R∫S∫T∫U∫V∫W∫X∫Y∫Z≥∫≤a∫b∫c∫d∫e∫f∫g∫h∫i∫j∫k∫l∫m∫n∫o∫p∫q∫r∫s∫t∫u∫v∫w∫x∫y∫z≥∫+≥≥∞");
 		AFNConstruct ThomsonAlgorithim_35 = new AFNConstruct(regex_35);
 		ThomsonAlgorithim_35.construct();
 		Automata temp_35 = ThomsonAlgorithim_35.getAfn();
-		temp_35.setTipo("char");
+		temp_35.setTipo("letter");
+		temp_35.setExceptKeywords(true);
 		automatas.add(temp_35);
 
 		RegexConverter convert_36= new RegexConverter();
-		String regex_36 = convert_36.infixToPostfix("final");
+		String regex_36 = convert_36.infixToPostfix("char");
 		AFNConstruct ThomsonAlgorithim_36 = new AFNConstruct(regex_36);
 		ThomsonAlgorithim_36.construct();
 		Automata temp_36 = ThomsonAlgorithim_36.getAfn();
-		temp_36.setTipo("final");
+		temp_36.setTipo("char");
 		automatas.add(temp_36);
 
 		RegexConverter convert_37= new RegexConverter();
-		String regex_37 = convert_37.infixToPostfix("true");
+		String regex_37 = convert_37.infixToPostfix("final");
 		AFNConstruct ThomsonAlgorithim_37 = new AFNConstruct(regex_37);
 		ThomsonAlgorithim_37.construct();
 		Automata temp_37 = ThomsonAlgorithim_37.getAfn();
-		temp_37.setTipo("true");
+		temp_37.setTipo("final");
 		automatas.add(temp_37);
 
-		AFNConstruct ThomsonAlgorithim_38 = new AFNConstruct();
-		Automata temp_38 =ThomsonAlgorithim_0.afnSimple(":");
-		temp_38.setTipo("colon");
+		RegexConverter convert_38= new RegexConverter();
+		String regex_38 = convert_38.infixToPostfix("true");
+		AFNConstruct ThomsonAlgorithim_38 = new AFNConstruct(regex_38);
+		ThomsonAlgorithim_38.construct();
+		Automata temp_38 = ThomsonAlgorithim_38.getAfn();
+		temp_38.setTipo("true");
 		automatas.add(temp_38);
 
-		RegexConverter convert_39= new RegexConverter();
-		String regex_39 = convert_39.infixToPostfix("short");
-		AFNConstruct ThomsonAlgorithim_39 = new AFNConstruct(regex_39);
-		ThomsonAlgorithim_39.construct();
-		Automata temp_39 = ThomsonAlgorithim_39.getAfn();
-		temp_39.setTipo("short");
+		AFNConstruct ThomsonAlgorithim_39 = new AFNConstruct();
+		Automata temp_39 =ThomsonAlgorithim_0.afnSimple(":");
+		temp_39.setTipo("colon");
 		automatas.add(temp_39);
 
-		AFNConstruct ThomsonAlgorithim_40 = new AFNConstruct();
-		Automata temp_40 =ThomsonAlgorithim_0.afnSimple("=");
-		temp_40.setTipo("igual");
+		RegexConverter convert_40= new RegexConverter();
+		String regex_40 = convert_40.infixToPostfix("short");
+		AFNConstruct ThomsonAlgorithim_40 = new AFNConstruct(regex_40);
+		ThomsonAlgorithim_40.construct();
+		Automata temp_40 = ThomsonAlgorithim_40.getAfn();
+		temp_40.setTipo("short");
 		automatas.add(temp_40);
+
+		AFNConstruct ThomsonAlgorithim_41 = new AFNConstruct();
+		Automata temp_41 =ThomsonAlgorithim_0.afnSimple("=");
+		temp_41.setTipo("igual");
+		automatas.add(temp_41);
 	}
 	 /**
  	* Método para revisar que tipo de sub autómata es aceptado por una 
