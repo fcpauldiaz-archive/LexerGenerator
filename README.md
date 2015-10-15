@@ -6,6 +6,13 @@ el lenguaje de elección del programador, el cual implementará el scanner basad
 especificación léxica ingresada. Este archivo será compilado y ejecutado para determinar
 su validez.
 
+##Instruccciones de uso
+
+1. Clonar repositorio
+2. Ejecutar LexerGeneratorMain.java
+3. Se generará otro archivo dependiendo de la gramática ingresada
+4. Ejecutar el archivo generado
+
 ##Vocabulario de Cocol (predeclarado)
 
 ident = letter {letter | digit}.
