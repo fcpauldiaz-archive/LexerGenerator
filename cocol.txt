@@ -1,4 +1,4 @@
-COMPILER Lexer
+COMPILER LexerAnalyzer
 
 CHARACTERS
 
@@ -103,4 +103,4 @@ stringLit =
 
 IGNORE " ".
 
-END Lexer.
+END LexerAnalyzer.

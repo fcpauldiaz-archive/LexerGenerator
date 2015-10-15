@@ -15,7 +15,7 @@ import java.util.Stack;
  * Clase para revisar la estructura de un archivo de CocoL
  * @author Pablo
  */
-public class LexerAnalyzer implements RegexConstants{
+public class LexerSyntax implements RegexConstants{
     
     
     private final HashMap<Integer,String> cadena;
@@ -46,7 +46,7 @@ public class LexerAnalyzer implements RegexConstants{
     
     
  
-    public LexerAnalyzer(HashMap cadena){
+    public LexerSyntax(HashMap cadena){
         this.sim = new Simulacion();
         this.cadena=cadena;
     }

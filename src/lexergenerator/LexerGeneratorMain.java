@@ -1,13 +1,17 @@
 /**
 * Universidad del Valle de Guatemala
 * Pablo Diaz 13203d
+* Se utilizaron las siguientes herramientas y referencias para probar expresiones 
+* regulares en  el método de replaceAll
+* http://www.regexplanet.com/advanced/java/index.html
+* https://regex101.com/r/vW2pQ7/30
+* http://stackoverflow.com/questions/632475/regex-to-pick-commas-outside-of-quotes
 */
 
 package lexergenerator;
 
 import java.io.File;
 import java.util.HashMap;
-import javax.swing.JFileChooser;
 
 /**
  *
@@ -32,7 +36,7 @@ public class LexerGeneratorMain {
           HashMap cocol = read.leerArchivo(file);
         
         System.out.println("ddd");
-        LexerAnalyzer lexer = new LexerAnalyzer(cocol);
+        LexerSyntax lexer = new LexerSyntax(cocol);
         lexer.vocabulario();
         lexer.construct(cocol);
         
@@ -41,7 +45,7 @@ public class LexerGeneratorMain {
         if (lexer.getOutput()){
             System.out.println("");
             System.out.println("Generando Analizador Léxico....");
-            CodeGenerator generator = new CodeGenerator(cocol);
+            LexerGenerator generator = new LexerGenerator(cocol);
             generator.encontrarNombre();
             generator.generarCharactersYKeywords();
             generator.generarTokens();

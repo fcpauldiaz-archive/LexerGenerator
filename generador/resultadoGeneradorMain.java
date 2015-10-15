@@ -17,7 +17,7 @@ public static void main(String[] args) {
 	ReadFile read = new ReadFile();
 	File file = new File("input"+".txt");
 	HashMap input = read.leerArchivo(file);
-	Lexer resGenerator = new Lexer(input);
+	LexerAnalyzer resGenerator = new LexerAnalyzer(input);
 	resGenerator.automatas();
 	resGenerator.revisar();
 	}

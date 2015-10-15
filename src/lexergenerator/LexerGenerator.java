@@ -6,8 +6,7 @@
 
 package lexergenerator;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -18,7 +17,7 @@ import java.util.TreeMap;
  * lenguaje de Java
  * @author Pablo
  */
-public class CodeGenerator implements RegexConstants{
+public class LexerGenerator implements RegexConstants{
     
     private final HashMap<Integer,String> cadena;
     private String nombreArchivo;
@@ -28,7 +27,7 @@ public class CodeGenerator implements RegexConstants{
     private final Stack pilaConcatenacion;
     private final Stack pilaAvanzada;
     private String ignoreSets = " ";
-    private final String ANY = /*"[!-#]"+charOr+"[%-']"+charOr+"[*-.]"+charOr+*/"[@-Z]"+charOr+"[^-z]";
+    private final String ANY = "[!-#]"+charOr+"[%-&]"+charOr+"[(-.]"+charOr+"[@-Z]"+charOr+"[^-z]";
     private final HashMap<String, Boolean> verKeywords;
    
     
@@ -36,7 +35,7 @@ public class CodeGenerator implements RegexConstants{
      * Constructor
      * @param cadena HashMap con la cadena del input
      */
-    public CodeGenerator(HashMap cadena){
+    public LexerGenerator(HashMap cadena){
         this.verKeywords = new HashMap();
         this.pilaConcatenacion = new Stack();
         this.keyMap = new TreeMap();
@@ -121,6 +120,9 @@ public class CodeGenerator implements RegexConstants{
         
     }
     
+    /**
+     * Obtiene los sets a ignorar
+     */
     public void ignoreSets(){
         for (Map.Entry<Integer, String> entry : cadena.entrySet()) {
                String value = entry.getValue();
@@ -175,7 +177,6 @@ public class CodeGenerator implements RegexConstants{
                     revisar = crearCadenasOr(revisar);
                   //  System.out.println(ident);
                   //  System.out.println(revisar);
-                           
                     
                     
                     cadenaCompleta.put(ident.trim(), revisar);
@@ -248,7 +249,13 @@ public class CodeGenerator implements RegexConstants{
                     System.out.println("");
                       System.out.println(ident);
                      System.out.println(revisar);      
-                    
+                    revisar = revisar.replaceAll("\\{", charAbrirParentesis+"");
+                    revisar = revisar.replaceAll("\\}", charCerrarParentesis+""+charKleene);
+                    revisar = revisar.replaceAll("(\\[)(?=(?:[^\"']|[\"|'][^\"']*\")*)", charAbrirParentesis+"");
+                    revisar = revisar.replaceAll("(\\])(?=(?:[^\"']|[\"|'][^\"']*\")*)",charCerrarParentesis+"" +charInt);
+                    revisar = revisar.replaceAll("\\|",charOr+"");
+                     revisar = formatRegex(revisar);
+                     System.out.println(revisar);
                     for (Map.Entry<String, String> entryRegex : cadenaCompleta.entrySet()) {
                         
                         if (revisar.contains(entryRegex.getKey())){
@@ -256,14 +263,10 @@ public class CodeGenerator implements RegexConstants{
                         }
                         
                     }
-                   
-                    //System.out.println(revisar);
+                    System.out.println("enmedio");
+                    System.out.println(revisar);
+                    revisar = fixString(revisar);
                     
-                    revisar = revisar.replaceAll("\\{", charAbrirParentesis+"");
-                    revisar = revisar.replaceAll("\\}", charCerrarParentesis+""+charKleene);
-                    revisar = revisar.replaceAll("(\\[)(?=(?:[^\"']|[\"|'][^\"']*\")*)", charAbrirParentesis+"");
-                    revisar = revisar.replaceAll("(\\])(?=(?:[^\"']|[\"|'][^\"']*\")*)",charCerrarParentesis+"" +charInt);
-                    revisar = revisar.replaceAll("\\|",charOr+"");
                     //revisar = revisar.replaceAll("\\((?=(?:[^\"']|[\"|'][^\"']*\")*$)","");
                     
                     /* if (revisar.startsWith("\"")||revisar.startsWith("\\")||revisar.startsWith("\'")){
@@ -294,11 +297,7 @@ public class CodeGenerator implements RegexConstants{
                  //quitar parentesis
                  //quitar doble quotes
                  //quitar simple quotes
-                    System.out.println("antes");
-                    System.out.println(revisar);
-                    System.out.println("");
-                    System.out.println("despues");
-                   revisar = formatRegex(revisar);
+                   
                     
                   
                     revisar = revisar.replaceAll("\\s","");
@@ -365,32 +364,28 @@ public class CodeGenerator implements RegexConstants{
         return returnString;
     }
     
-    
-    
-     public String quitar2(String eval){
-       String returnString ="";
-        char[] charArray = eval.toCharArray();
-        for (int i=0;i<charArray.length;i++){
-           
-          
-            if (i>1 && i<eval.length()-3){
-                if (charArray[i]=='\''&&(((charArray[i-1]!='\\')))&&charArray[i+1]!='\'')
-                    continue;
-                
+    public String fixString(String eval){
+        String returnString = "";
+      
+        for (int i=0;i<eval.length();i++){
+             String pos = "";
+            Character ch = eval.charAt(i);
+            if (ch == '\"'){//agregar escape chars en caso de que no lo tenga
+                if (eval.charAt(i-1)!='\\'){
+                    pos="\\";
+                }
             }
-            if (i<=1){
-                if (charArray[i]=='\\'&&charArray[i+1]!='\'')
+            if (i+1<eval.length()){//eliminar dos caracteres or seguidos
+                if (ch==charOr&&eval.charAt(i+1)==charOr)
                     continue;
             }
-            if (i>=charArray.length-3){
-                if (charArray[i]=='\''&&charArray[i-1]!='\\')
-                    continue;
-            }
-            returnString +=charArray[i];
+            returnString += pos +ch;
         }
         
         return returnString;
     }
+    
+    
     public String quitar(String eval){
         String returnString ="";
         char[] charArray = eval.toCharArray();
@@ -402,7 +397,6 @@ public class CodeGenerator implements RegexConstants{
                     continue;
                
             }
-            
             
             if (i<=1){
                 if (charArray[i+1]=='\''&&eval.charAt(i)=='\"')
@@ -435,7 +429,7 @@ public class CodeGenerator implements RegexConstants{
         }
         return returnString;
     }
-       public String poner2(String eval){
+    public String poner2(String eval){
         String returnString ="";
         for (int i =0;i<eval.length();i++){
             Character ch = eval.charAt(i);
@@ -759,7 +753,11 @@ public class CodeGenerator implements RegexConstants{
         
         return charAbrirParentesis+or+charCerrarParentesis;
      }
-    
+    /**
+     * Crea las listas con los caracteres deseados, desde char hasta otro char
+     * @param cadena
+     * @return 
+     */
     public String cadenasOrLista(String cadena){
         String or ="";
        
@@ -864,7 +862,11 @@ public class CodeGenerator implements RegexConstants{
         return res;
         
     }
-    
+    /**
+     * Método para buscar los identificadores de keywords
+     * @param search
+     * @return true si fue encontrado
+     */
     public boolean buscarIdentKey(String search){
        
         for (Map.Entry<String, Boolean> entry : verKeywords.entrySet()) {
@@ -1157,7 +1159,9 @@ public class CodeGenerator implements RegexConstants{
          
         return words;
     }
-    
+    /**
+     * Método para generar Main del analizador
+     */
     public void generarMain(){
         String res = "\n"+
         
