@@ -173,11 +173,10 @@ public class CodeGenerator implements RegexConstants{
                     String revisar  = valor.substring(++index,valor.length()-1);
                     revisar = revisar.trim();
                     revisar = crearCadenasOr(revisar);
-                    System.out.println(ident);
-                    System.out.println(revisar);
+                  //  System.out.println(ident);
+                  //  System.out.println(revisar);
                            
-                    if (ident.trim().equals("char"))
-                        revisar +=charCerrarParentesis;
+                    
                     
                     cadenaCompleta.put(ident.trim(), revisar);
                     
@@ -215,7 +214,7 @@ public class CodeGenerator implements RegexConstants{
             }
 
         }
-        System.out.println(cadenaCompleta);
+        //System.out.println(cadenaCompleta);
         
     }
     
@@ -247,7 +246,8 @@ public class CodeGenerator implements RegexConstants{
                     revisar = revisar.trim();
                     
                     System.out.println("");
-                           
+                      System.out.println(ident);
+                     System.out.println(revisar);      
                     
                     for (Map.Entry<String, String> entryRegex : cadenaCompleta.entrySet()) {
                         
@@ -256,8 +256,7 @@ public class CodeGenerator implements RegexConstants{
                         }
                         
                     }
-                    System.out.println(ident);
-                     System.out.println(revisar);
+                   
                     //System.out.println(revisar);
                     
                     revisar = revisar.replaceAll("\\{", charAbrirParentesis+"");
@@ -267,7 +266,7 @@ public class CodeGenerator implements RegexConstants{
                     revisar = revisar.replaceAll("\\|",charOr+"");
                     //revisar = revisar.replaceAll("\\((?=(?:[^\"']|[\"|'][^\"']*\")*$)","");
                     
-                     if (revisar.startsWith("\"")||revisar.startsWith("\\")||revisar.startsWith("\'")){
+                    /* if (revisar.startsWith("\"")||revisar.startsWith("\\")||revisar.startsWith("\'")){
                         revisar = revisar.replaceAll("\\((?!(?:[^\"]*\"[^\"]*\")*[^\"]*$)", charAbrirParentesis+"");
                         revisar = revisar.replaceAll("\\)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", charCerrarParentesis+"");
                      }
@@ -275,6 +274,7 @@ public class CodeGenerator implements RegexConstants{
                         revisar = revisar.replaceAll("\\((?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charAbrirParentesis+"");
                         revisar = revisar.replaceAll("\\)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charCerrarParentesis+"");
                      }            
+                    */
                     // revisar = revisar.replaceAll("\\)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charCerrarParentesis+"");
                     //revisar = revisar.replaceAll("\\((?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charAbrirParentesis+"");
                     //revisar = revisar.replaceAll("\\)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",charCerrarParentesis+"");
@@ -284,14 +284,22 @@ public class CodeGenerator implements RegexConstants{
                    // revisar = revisar.replaceAll("(\")(?=(?:[^\"']|[\"|'][^\"']*\")*$)","");
                    // revisar = revisar.replaceAll("\'", "");
                     //revisar = revisar.replaceAll("\\\"", "");
-                    System.out.println(revisar);
+                   /* System.out.println(revisar);
                     revisar = poner(revisar);
                     System.out.println(revisar);
                     System.out.println("quitando");
                     revisar = quitar(revisar);
                     revisar = poner2(revisar);
-                    revisar = quitar2(revisar);
-                 
+                    revisar = quitar2(revisar);*/
+                 //quitar parentesis
+                 //quitar doble quotes
+                 //quitar simple quotes
+                    System.out.println("antes");
+                    System.out.println(revisar);
+                    System.out.println("");
+                    System.out.println("despues");
+                   revisar = formatRegex(revisar);
+                    
                   
                     revisar = revisar.replaceAll("\\s","");
                     //System.out.println(ident);
@@ -307,6 +315,58 @@ public class CodeGenerator implements RegexConstants{
          }
        // System.out.println(tokensExpr);
     }
+    
+    /**
+     * quitar parentesis, double quotes, simple quotes
+     * @param eval
+     * @return String con formato para autómatas
+     */
+    public String formatRegex(String eval){
+        String returnString="";
+        
+        for (int i =0;i<eval.length();i++){
+            Character ch = eval.charAt(i);
+            
+            if (i>0){
+                if (ch=='('&&eval.charAt(i-1)!='\"'){
+                    ch = charAbrirParentesis;
+                }
+                if (i>1){
+                    if (ch=='\"'&&(eval.charAt(i-1)!='\\')){
+                        continue;
+                    }
+                    if (ch=='\"'&&eval.charAt(i-2)=='\\'){
+                        continue;
+                    }
+                }
+                if (ch=='\''&&(eval.charAt(i-1)!='\\')&&eval.charAt(i-1)!='\"')
+                    continue;
+                
+            }
+            if (i==0){
+                if (ch=='(')
+                    ch = charAbrirParentesis;
+                if (ch=='\"')
+                    continue;
+            }
+            if (i+1<eval.length()){
+                if (ch==')'&&eval.charAt(i+1)!='\"'){
+                    ch = charCerrarParentesis;
+                }
+            }
+            else{
+                if (ch==')')
+                    ch = charCerrarParentesis;
+            }
+            returnString += ch;   
+        }
+        
+        
+        return returnString;
+    }
+    
+    
+    
      public String quitar2(String eval){
        String returnString ="";
         char[] charArray = eval.toCharArray();
@@ -669,7 +729,9 @@ public class CodeGenerator implements RegexConstants{
                            // or = or.replaceAll(faltante,"");
                            
                         }
+                        System.out.println(or);
                         or = balancear(or);
+                        System.out.println(or);
                     }
                 } 
             }else if (cadena.contains("+")&&cadena.contains("-")){
@@ -848,7 +910,8 @@ public class CodeGenerator implements RegexConstants{
                 if (ch != subcadena.charAt(i+1)){
                     subcadenaBal += ch;
                 }
-            }
+            }else
+                subcadenaBal += ch;
         }
         return subcadenaBal;
     }

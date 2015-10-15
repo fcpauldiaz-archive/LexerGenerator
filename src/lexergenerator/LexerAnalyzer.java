@@ -340,10 +340,10 @@ public class LexerAnalyzer implements RegexConstants{
                 break;
         }
         
-        
+        lineaActual = avanzarLinea(lineaActual);
         //[WHITESPACE DELCARATION]
         if (cadena.get(lineaActual).contains("IGNORE")){
-            lineaActual = avanzarLinea(lineaActual);
+            //lineaActual = avanzarLinea(lineaActual);
             //whitespaceDecl
             while (true){
             boolean space = whiteSpaceDeclaration(lineaActual);

@@ -60,6 +60,7 @@ TOKENS
 
 letter = letter{letter} EXCEPT KEYWORDS.
 ident1 = letter {'_'} '*'.
+hexnumber = hexDigit{hexdigit}"(H)".
 number = digit {digit}
          | digit {digit} '.' {digit} ['E' ['+'|'-'] digit {digit}].
 intLit = 
@@ -76,7 +77,28 @@ charLit =
            )
     ) 
 "'".
+stringLit = 
+    "\"" { stringChar
+         | "\\" ( "b" | "t" | "n" | "f" | "r" | "\"" | "\'" | "\\"
+                | "u" { "u" } hexDigit hexDigit hexDigit hexDigit
+                | zeroToThree [ octalDigit ] [ octalDigit ]
+                | octalDigit [ octalDigit ]
+                )
+         } 
+    "\"" EXCEPT KEYWORDS.
 
+ floatLit =
+    "." digit {digit} 
+    [("e" | "E") ["+" | "-"] digit {digit}] 
+    [ "F" | "f" | "D" | "d" ]
+  | digit {digit} 
+    ( "." {digit} 
+      [("e" | "E" ) ["+" | "-"] digit {digit} ] 
+      [ "F" | "f" | "D" | "d" ]
+    | ("e" | "E") ["+" | "-"] digit {digit}
+      [ "F" | "f" | "D" | "d" ]
+    | "F" | "f" | "D" | "d"
+    ).  
 
 
 IGNORE " ".

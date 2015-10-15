@@ -47,18 +47,22 @@ public class ReadFile {
                HashMap<Integer,String> detailString = new HashMap();
                while ((sCurrentLine = br.readLine()) != null) {
                    
-                    
+                    sCurrentLine = sCurrentLine.replaceAll("\\.(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", "π");
                     
                     
                     if (!sCurrentLine.equals("")){
-                        if (!sCurrentLine.contains(".")&&!(sCurrentLine.contains("COMPILER")
+                        if ((!sCurrentLine.contains("π"))&&!(sCurrentLine.contains("COMPILER")
                                 ||sCurrentLine.contains("CHARACTERS")
                                 ||sCurrentLine.contains("KEYWORDS")
                                 ||sCurrentLine.contains("TOKENS")
                                 ||sCurrentLine.contains("IGNORE"))
-                            )
-                            input +=sCurrentLine;
+                            ){
+                           
+                                input +=sCurrentLine;
+                            
+                        }
                         else{
+                            sCurrentLine = sCurrentLine.replaceAll("π", ".");
                             input+=sCurrentLine;
                             
                             detailString.put(cantidadLineas, input);
