@@ -27,7 +27,7 @@ public class LexerGenerator implements RegexConstants{
     private final Stack pilaConcatenacion;
     private final Stack pilaAvanzada;
     private String ignoreSets = " ";
-    private final String ANY = "[!-#]"+charOr+"[%-&]"+charOr+"[(-.]"+charOr+"[@-Z]"+charOr+"[^-z]";
+    private final String ANY = "[!-#]"+charOr+"[%-.]"+charOr+"[@-Z]"+charOr+"[^-z]";
     private final HashMap<String, Boolean> verKeywords;
    
     
@@ -63,6 +63,7 @@ public class LexerGenerator implements RegexConstants{
         }
     
     }
+    
    /**
     * Genera la  estructura de la clase analizadora
     */
@@ -151,7 +152,7 @@ public class LexerGenerator implements RegexConstants{
         System.out.println(ignoreSets);
     }
     
-    /*
+    /**
     * Método para pasara character y keywords a expresiones regulares
     */
     public void generarCharactersYKeywords(){
@@ -254,7 +255,7 @@ public class LexerGenerator implements RegexConstants{
                     revisar = revisar.replaceAll("(\\[)(?=(?:[^\"']|[\"|'][^\"']*\")*)", charAbrirParentesis+"");
                     revisar = revisar.replaceAll("(\\])(?=(?:[^\"']|[\"|'][^\"']*\")*)",charCerrarParentesis+"" +charInt);
                     revisar = revisar.replaceAll("\\|",charOr+"");
-                     revisar = formatRegex(revisar);
+                    revisar = formatRegex(revisar);
                      System.out.println(revisar);
                     for (Map.Entry<String, String> entryRegex : cadenaCompleta.entrySet()) {
                         
@@ -364,6 +365,11 @@ public class LexerGenerator implements RegexConstants{
         return returnString;
     }
     
+    /**
+     * Método para agregar los caracteres de escape que lo necesiten
+     * @param eval
+     * @return String modificado con las correciones necesarias
+     */
     public String fixString(String eval){
         String returnString = "";
       
@@ -379,6 +385,7 @@ public class LexerGenerator implements RegexConstants{
                 if (ch==charOr&&eval.charAt(i+1)==charOr)
                     continue;
             }
+           
             returnString += pos +ch;
         }
         
@@ -463,6 +470,7 @@ public class LexerGenerator implements RegexConstants{
         return returnString;
         
     }
+    
     /**
      * Crea una cadena con operaciones or en cada caracter
      * En caso de haber concatenaciones calcula si tiene que
@@ -511,6 +519,9 @@ public class LexerGenerator implements RegexConstants{
                             or += cadena.charAt(i+1);
                             i++;
                            
+                        }
+                         if (c == '$'){
+                            or += "\\" + c;
                         }
                         else if (i<=cadena.length()-2){
                             or += c;
@@ -753,6 +764,7 @@ public class LexerGenerator implements RegexConstants{
         
         return charAbrirParentesis+or+charCerrarParentesis;
      }
+    
     /**
      * Crea las listas con los caracteres deseados, desde char hasta otro char
      * @param cadena
@@ -781,7 +793,8 @@ public class LexerGenerator implements RegexConstants{
             }
         return or;
     }
-        public String concatenacionIdent(String anterior, String actual){
+    
+    public String concatenacionIdent(String anterior, String actual){
         return anterior + charOr + buscarExpr(actual);
     }
     
@@ -810,6 +823,7 @@ public class LexerGenerator implements RegexConstants{
             }
         return resultado;
      }
+    
     /**
      * Método para avanzar de línea, busca la línea que actual
      * @param lineaActual
@@ -839,6 +853,7 @@ public class LexerGenerator implements RegexConstants{
         
         return posicion;
     }
+    
     /**
      * Método para buscar un identificador en el archivo
      * @param search identificador a buscar
@@ -862,6 +877,7 @@ public class LexerGenerator implements RegexConstants{
         return res;
         
     }
+    
     /**
      * Método para buscar los identificadores de keywords
      * @param search
@@ -917,8 +933,7 @@ public class LexerGenerator implements RegexConstants{
         }
         return subcadenaBal;
     }
-    
-    
+ 
     /**
      * Método para calcular el número de ocurrencias de un character
      * @param s string completo 
@@ -984,6 +999,7 @@ public class LexerGenerator implements RegexConstants{
        
        return afn;
    }
+    
     /**
      * Métodos auxiliares para revisar autómatas
      * @return string con los métodos
@@ -1001,7 +1017,7 @@ public class LexerGenerator implements RegexConstants{
             "\t"+"\t"+"ArrayList<Boolean> resultado = new ArrayList();"+"\n"+
                
             "\t"+"\t"+"ArrayList tks = tokenMasLargo(regex, conjunto, lineaActual);"+"\n"+
-            "\t"+"\t"+"if (!(Boolean)tks.get(0)){"+"\n"+
+            "\t"+"\t"+"if (!(Boolean)tks.get(0)&&!((String)tks.get(1)).isEmpty()){"+"\n"+
                 "\t"+"\t"+"\t"+"errores.LexErr(lineaActual,regex.indexOf((String)tks.get(1)),regex,(String)tks.get(1));"+"\n"+
             "\t"+"\t"+"}"+"\n"+
               
@@ -1148,7 +1164,6 @@ public class LexerGenerator implements RegexConstants{
 	"\t"+"}";
         return res;
     }
-    
     
     public String ignoreWords(){
         String words = "\n"+
@@ -1476,8 +1491,8 @@ public class LexerGenerator implements RegexConstants{
             token+="\t"+"}"+"\n";
             token+="\t"+"@Override"+"\n"+
             "\t"+"public String toString() {"+"\n"+
-                  "\t"+"\t"+"return \"<\" +id +\">\";"+"\n"+
-                /*"\t"+"\t"+"return \"<\" + id + \", \\\"\" + lexema + \"\\\">\";"+"\n"+*/
+                //  "\t"+"\t"+"return \"<\" +id +\">\";"+"\n"+
+                "\t"+"\t"+"return \"<\" + id + \", \\\"\" + lexema + \"\\\">\";"+"\n"+
            "\t"+ "}"+"\n"+
 
             "\t"+"@Override"+"\n"+

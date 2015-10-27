@@ -51,7 +51,7 @@ public class LexerSyntax implements RegexConstants{
         this.cadena=cadena;
     }
     
-      /**
+    /**
      * Método para definir los mini autómatas para comparar
      * las expresiones regulares
      */
@@ -196,12 +196,12 @@ public class LexerSyntax implements RegexConstants{
 
     }
     
-   /**
+    /**
     * Revisar segundo archivo de input
     * puede ser todo en una línea o diferentes líneas
     * @param cadena 
     */
-   public  void check(HashMap<Integer,String> cadena){
+    public  void check(HashMap<Integer,String> cadena){
        
        for (Map.Entry<Integer, String> entry : cadena.entrySet()) {
         Integer key = entry.getKey();
@@ -216,8 +216,6 @@ public class LexerSyntax implements RegexConstants{
        
    }
    
-   
- 
     /**
      * Revisar formato de la primera línea
      * ScannerSpecification
@@ -273,6 +271,7 @@ public class LexerSyntax implements RegexConstants{
         
         
     }
+    
     /**
      * Método para revisar el ScannerSpecification
      * @param lineaActual línea actual del archivo leído
@@ -414,6 +413,7 @@ public class LexerSyntax implements RegexConstants{
          }
         return false;
     }
+    
     /**
      * Se verifica la sintaxis de los tokens mediantes expresiones regulares
      * Se modifican los simbolos ingresados a los símbolos de los 
@@ -445,13 +445,13 @@ public class LexerSyntax implements RegexConstants{
          
      return true;   
     }
+    
     /**
      *  TokenTerm { '|' TokenTerm }.
      * @param lineaActual
      * @param cadenaRevisar
      * @return 
      */
-    
     public boolean tokenExpr2(int lineaActual, String cadenaRevisar){
         boolean tknExpr = false;
         String subcadena = cadenaRevisar;
@@ -654,7 +654,8 @@ public class LexerSyntax implements RegexConstants{
      */
     public boolean keywordDeclaration(int lineaActual){
         
-        if (this.cadena.get(lineaActual).contains("TOKENS") ||this.cadena.get(lineaActual).contains("IGNORE")){
+        if (this.cadena.get(lineaActual).contains("TOKENS") ||this.cadena.get(lineaActual).contains("IGNORE")||
+                this.cadena.get(lineaActual).contains("END")){
             return false;
         }
         
@@ -704,7 +705,8 @@ public class LexerSyntax implements RegexConstants{
      */
     public boolean setDeclaration(int lineaActual){
         
-        if (this.cadena.get(lineaActual).contains("\"END\"")||this.cadena.get(lineaActual).contains("KEYWORDS"))
+        if (this.cadena.get(lineaActual).contains("END")||this.cadena.get(lineaActual).contains("KEYWORDS")||
+                this.cadena.get(lineaActual).contains("TOKENS"))
             return false;
         //revisar identificador
         //ArrayList res1 = checkExpression(this.ident,lineaActual,0);
@@ -772,6 +774,7 @@ public class LexerSyntax implements RegexConstants{
         
         return true;
     }
+    
     /**
      * Método para revisar el Set
      * @param regex string a revisar
@@ -892,7 +895,6 @@ public class LexerSyntax implements RegexConstants{
         return false;
     }
     
-    
     public boolean basicChar(int lineaActual, String regex){
          String letterChar = "abcdefghlmnopqrstuvgwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!\".$%&/()=?¿+-[]-´Ç-., ";
          if (regex.startsWith("\'"))
@@ -903,6 +905,7 @@ public class LexerSyntax implements RegexConstants{
              return true;
         return false;
     }
+    
     /**
      * Método para revisar si un character
      * @param lineaActual
@@ -1014,6 +1017,7 @@ public class LexerSyntax implements RegexConstants{
     public boolean checkAutomata(Automata param, String regex){
         return sim.simular(regex, param);
     }
+    
     /**
      * Método auxiliar para generar autómatas dependiendo de lo que se ingrese.
      * @param cadena 
@@ -1074,7 +1078,6 @@ public class LexerSyntax implements RegexConstants{
         }
         return -1;
     }
-    
     
     /**
      * Método para avanzar de línea, busca la línea que actual
@@ -1174,7 +1177,7 @@ public class LexerSyntax implements RegexConstants{
         return generador;
     }
     
-      /**
+    /**
      * Método para calcular el número de ocurrencias de un character
      * @param s string completo 
      * @param c character a calcular ocurrencias
@@ -1192,6 +1195,7 @@ public class LexerSyntax implements RegexConstants{
         }
         return count;
     }
+    
     /**
      * Método para remplazar la última ocurrencia de un caracter
      * @param string

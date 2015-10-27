@@ -88,7 +88,7 @@ public class Token<T> {
 	}
 	@Override
 	public String toString() {
-		return "<" +id +">";
+		return "<" + id + ", \"" + lexema + "\">";
 	}
 	@Override
 	public int hashCode() {

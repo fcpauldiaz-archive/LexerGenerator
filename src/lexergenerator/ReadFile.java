@@ -64,7 +64,8 @@ public class ReadFile {
                         else{
                             sCurrentLine = sCurrentLine.replaceAll("π", ".");
                             input+=sCurrentLine;
-                            
+                            while (input.startsWith(" "))
+                                input = input.substring(1);
                             detailString.put(cantidadLineas, input);
                             input = "";
                         }
